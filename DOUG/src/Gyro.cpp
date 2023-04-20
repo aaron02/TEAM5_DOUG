@@ -40,7 +40,6 @@ void Gyro::Update(uint64_t difftime)
     if (timer < 0)
     {
         sLogger.info("Pitch: %f Roll: %f Yaw: %f", mpu.getAngleX(), mpu.getAngleY(), mpu.getAngleZ());
-
         timer = 2 * TimeVar::Seconds;
     }
     else
@@ -54,13 +53,13 @@ float Gyro::getGyroAngle(GYRO_AXIS iAxis)
     switch (iAxis)
     {
         case PITCH:
-            mpu.getAngleX();
+            angle = mpu.getAngleX();
         break;
         case ROLL:
-            mpu.getAngleY();
+            angle = mpu.getAngleY();
         break;
         case YAW:
-            mpu.getAngleZ();
+            angle = mpu.getAngleZ();
         break;
     }
 

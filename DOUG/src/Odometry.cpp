@@ -35,7 +35,8 @@ void Odometry::Update(uint64_t difftime)
     // Update Sensor evry 10 ms
     if (sensorUpdate <= 0)
     {
-        CalculatePosition();
+        CalculatePosition(adnsController->getXDistance(), adnsController->getYDistance());
+        adnsController->ResetXYDistance();
         sensorUpdate = 10 * TimeVar::Millis;;
     }
     else
@@ -44,27 +45,35 @@ void Odometry::Update(uint64_t difftime)
     // Output Info evry 1 s
     if (timer < 0)
     {
-        sLogger.info("PositionX: %f PositionY: %f ", position[0], position[1]);
-        timer = 1 * TimeVar::Seconds;
+        //sLogger.info("%f",gyro->getGyroAngle(GYRO_AXIS::YAW));
+        //sLogger.info("PositionX: %f PositionY: %f Heading = %f", position->getX(), position->getY(), 0);
+
+        timer = 2 * TimeVar::Seconds;
     }
     else
         timer = timer - difftime;
 }
 
-void Odometry::CalculatePosition()
+void Odometry::CalculatePosition(double x, double y)
 {
-    dDeltax = adnsController->getX();
-    dDeltay = adnsController->getY();
+    dDeltax = x / 8200 * 254;
+    dDeltay = y / 8200 * 254;
     double dGyroAngle = gyro->getGyroAngle(GYRO_AXIS::YAW);
 
     dHeading = normalizeRadians(dGyroAngle + dStartHeading + dHeadingCorrection);
 
-    robotCentricDelta = new Vector2D((dDeltax), ( dDeltay));
-    fieldCentricDelta = new Vector2D((dDeltay), (-dDeltax));
+    Vector2D temp = Vector2D(dDeltax, dDeltay);
+    //temp.rotate(dHeading);
+
+    position->add(&temp);
+
+    //robotCentricDelta = new Vector2D((dDeltax), ( dDeltay));
+    //fieldCentricDelta = new Vector2D((dDeltay), (-dDeltax));
 
     // Rotate our Vector by the Gyro Angle
-    fieldCentricDelta->rotate(dHeading);
-    position->add(*fieldCentricDelta);
+    //fieldCentricDelta->rotate(dHeading);
+    //sLogger.info("%f", position->getX());
+    //position->add(fieldCentricDelta);
 }
 
 double Odometry::normalizeRadians(double angle)

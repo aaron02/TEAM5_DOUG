@@ -3,6 +3,7 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 */
 
 #include "DriveTrain.h"
+#undef abs
 
 DriveTrain::DriveTrain(Antrieb &frontLeftMotor, Antrieb &rearLeftMotor, Antrieb &frontRightMotor, Antrieb &rearRightMotor) : m_frontLeftMotor(&frontLeftMotor),
                                                                                                                              m_rearLeftMotor(&rearLeftMotor),
@@ -15,21 +16,21 @@ DriveTrain::~DriveTrain()
 {
 }
 
-double DriveTrain::ApplyDeadband(double value, double deadband, double maxMagnitude = double{1.0})
+double DriveTrain::ApplyDeadband(double value, double deadband, double maxMagnitude = double(1.0))
 {
   double magnitude = std::abs(value);
 
   if (magnitude > deadband)
   {
     if (maxMagnitude / deadband > 1.0E12)
-      return value > double{0.0} ? value - deadband : value + deadband;
-    if (value > double{0.0})
+      return value > double(0.0) ? value - deadband : value + deadband;
+    if (value > double(0.0))
       return maxMagnitude * (value - deadband) / (maxMagnitude - deadband);
     else
       return maxMagnitude * (value + deadband) / (maxMagnitude - deadband);
   }
   else
-    return double{0.0};
+    return double(0.0);
 }
 
 void DriveTrain::SetDeadband(double deadband)
@@ -76,7 +77,7 @@ void DriveTrain::Drive(double xSpeed, double ySpeed, double zRotation, double gy
   m_rearRightMotor->setSpeed(speeds.rearRight * m_maxOutput);
 }
 
-DriveTrain::WheelSpeeds DriveTrain::DriveIK(double xSpeed, double ySpeed, double zRotation, double gyroAngle)
+WheelSpeeds DriveTrain::DriveIK(double xSpeed, double ySpeed, double zRotation, double gyroAngle)
 {
   xSpeed = constrain(xSpeed, -1.0, 1.0);
   ySpeed = constrain(ySpeed, -1.0, 1.0);

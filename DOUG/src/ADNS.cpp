@@ -171,19 +171,19 @@ void ADNSInterface::perform_startup()
     // 0x01 = 50, minimum
     // 0x44 = 3400, default
     // 0x8e = 7100
-    // 0xA4 = 8200, maximum
-    write_reg(REG_Configuration_I, 0x29);
-    write_reg(REG_Configuration_V, 0x29);
+    // 0xA4 = 8200, maximum -> counts per inch ( 1 inch -> 2.54cm )
+    write_reg(REG_Configuration_I, 0xA4);
+    write_reg(REG_Configuration_V, 0xA4);
 
     // Disable rest mode, 0x08 = fixed frame rate, disable AGC
     //write_reg(REG_Configuration_II, 0x08 + 0x10);
 
-    uint16_t shutterMaxBound = 0x100;  // default value = 0x4e20, 0x100 allows 11748 fps tracking but requires better surface quality
+    uint16_t shutterMaxBound = 0x4e20;  // default value = 0x4e20, 0x100 allows 11748 fps tracking but requires better surface quality
     write_reg(REG_Shutter_Max_Bound_Upper, shutterMaxBound);
-    //write_reg(REG_Frame_Period_Min_Bound_Upper, 0x0fa0); // 0x0fa0 is the minimal allowed value
+    write_reg(REG_Frame_Period_Min_Bound_Upper, 0x0fa0); // 0x0fa0 is the minimal allowed value
     // Set upper frame bound (default 0x5dc0 = 0x4e20 + 0x0fa0)
     // This register must be written last. This write also activates Shutter_Max_Bound and Frame_Period_Min_Bound sett
-    //write_reg(REG_Frame_Period_Max_Bound_Upper, 0x0fa0 + shutterMaxBound);
+    write_reg(REG_Frame_Period_Max_Bound_Upper, 0x0fa0 + shutterMaxBound);
     // Must seriously wait after setting this register
     delay(2);
 
@@ -324,7 +324,7 @@ void ADNSInterface::copy_data()
     xT = join_byte(_data[Delta_X_L], _data[Delta_X_H]);
     yT = join_byte(_data[Delta_Y_L], _data[Delta_Y_H]);
 
-    sLogger.debug("Moved X:%u and Y:%u at COPY DATA", xT, yT);
+    //sLogger.debug("Moved X:%i and Y:%i at COPY DATA", xT, yT);
 
     _ux_dist += _ux;
     _uy_dist += _uy;
@@ -385,7 +385,7 @@ void ADNS_CTRL::get_xy(int16_t x, int16_t y)
     _x = x;
     _y = y;
 
-    sLogger.debug("X:%u and Y:%u at GetXY()", _x, _y);
+    //sLogger.debug("X:%i and Y:%i at GetXY()", _x, _y);
 }
 
 void ADNS_CTRL::get_xy_dist(int16_t x_dist, int16_t y_dist)
@@ -393,7 +393,7 @@ void ADNS_CTRL::get_xy_dist(int16_t x_dist, int16_t y_dist)
     _x_dist = x_dist;
     _y_dist = y_dist;
 
-    sLogger.debug("Moved X:%u and Y:%u at GetXYDistance()", _x_dist, _y_dist);
+    //sLogger.debug("Moved X:%i and Y:%i at GetXYDistance()", _x_dist, _y_dist);
 }
 
 void ADNS_CTRL::get_squal(uint16_t s)

@@ -21,9 +21,9 @@ public:
     double normalizeRadians(double angle);
 
     void Update(uint64_t difftime);
-    void CalculatePosition();
+    void CalculatePosition(double x, double y);
 
-    Vector2D* GetPosition() { return position;}
+    Vector2D* GetPosition() { return position; }
 
     // Aktuelle Richtung
     double dHeading = 0;
@@ -39,12 +39,12 @@ public:
     double dHeadingCorrection = 0;
 
     // Aktuelle Position
-    Vector2D* position; // this has to be in inches
+    Vector2D* position;
     Vector2D* fieldCentricDelta;
     Vector2D* robotCentricDelta;
 
 private:
-    int32_t sensorUpdate = 10 * TimeVar::Millis;
+    int32_t sensorUpdate = 100 * TimeVar::Millis;
     int32_t timer = 1 * TimeVar::Seconds;
 
 protected:

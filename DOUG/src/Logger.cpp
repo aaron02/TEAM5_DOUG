@@ -74,7 +74,8 @@ void Logger::log(Severity severity, MessageType messageType, const char* message
     char logMessage[254];
     createLogMessage(logMessage, severity, messageType, message, arguments);
 
-    std::cout << logMessage << "\r\n";
+    //std::cout << logMessage << "\r\n";    // not working on Teensy
+    Serial.println(logMessage);
 }
 
 void Logger::createLogMessage(char* result, Severity severity, MessageType messageType, const char* message, va_list arguments)

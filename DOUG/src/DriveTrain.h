@@ -8,6 +8,14 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 
 class Antrieb;
 
+struct WheelSpeeds 
+{
+    double frontLeft    = 0.0;
+    double frontRight   = 0.0;
+    double rearLeft     = 0.0;
+    double rearRight    = 0.0;
+};
+
 enum MotorType 
 {
     kFrontLeft          = 0,
@@ -19,14 +27,6 @@ enum MotorType
 class DriveTrain
 {
     public:
-    struct WheelSpeeds 
-    {
-        double frontLeft = 0.0;
-        double frontRight = 0.0;
-        double rearLeft = 0.0;
-        double rearRight = 0.0;
-    };
-
     DriveTrain(Antrieb& frontLeftMotor, Antrieb& rearLeftMotor, Antrieb& frontRightMotor, Antrieb& rearRightMotor);
     ~DriveTrain();
 

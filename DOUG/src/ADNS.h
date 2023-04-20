@@ -58,7 +58,7 @@ namespace adns
 #define REG_SROM_Load_Burst                      0x62
 #define REG_Pixel_Burst                          0x64
 
-#define ENABLE_MOTION_BURST                      1
+#define ENABLE_MOTION_BURST                      0
 }
 
 enum MotionBurst 
@@ -122,6 +122,11 @@ class ADNS_CTRL : public ADNSInterface
 public:
     int getX() { return _x; }
     int getY() { return _y; }
+    int getXDistance() { return _x_dist; }
+    int getYDistance() { return _y_dist; }
+
+    void ResetXYDistance() { _x_dist = 0; _y_dist = 0; reset_xy_dist(); }
+
 private:
     void get_xy(int16_t x, int16_t y);
     void get_xy_dist(int16_t x_sum, int16_t y_sum);
@@ -130,9 +135,9 @@ private:
     void clear();
 
 private:
-    int16_t _x;
-    int16_t _y;
-    int16_t _x_dist;
-    int16_t _y_dist;
-    uint16_t _squal;
+    int16_t _x = 0;
+    int16_t _y = 0;
+    int16_t _x_dist = 0;
+    int16_t _y_dist = 0;
+    uint16_t _squal = 0;
 };
