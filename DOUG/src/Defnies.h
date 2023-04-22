@@ -48,3 +48,4 @@ enum Status
 #include "Vector2D.h"
 #include "ADNS.h"
 #include "Gyro.h"
+#include "PowerDistributionBoard.h"

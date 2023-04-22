@@ -21,7 +21,8 @@ Navigation* nav = nullptr;
 DriveTrain* driveTrain = nullptr;
 Odometry* odometry = nullptr;
 Gyro* gyro = nullptr;
-ADNS_CTRL*   adnsController = nullptr;
+ADNS_CTRL* adnsController = nullptr;
+PDB* pdb = nullptr;
 
 void motorThread()
 {
@@ -69,6 +70,7 @@ void setup()
     // Sensors
     adnsController = new ADNS_CTRL();
     gyro = new Gyro();
+    pdb = new PDB();
     //
 
     // Odometry + Navigation
@@ -100,6 +102,9 @@ void loop()
     if (gyro)
         gyro->Update(difftime);
 
+    if (pdb)
+        pdb->Update(difftime);
+
     // Odometry
     if(odometry)
         odometry->Update(difftime);
@@ -113,7 +118,7 @@ void loop()
     // Test Timer 1 second
     if (timer < 0)
     {
-        sLogger.info("Controller Loop Time = %u µs", difftime);
+        sLogger.info("Controller Loop Time = %u µs Battery Voltage = %f", difftime, pdb->GetVoltage());
         timer = 10 * TimeVar::Seconds;
     }
     else
