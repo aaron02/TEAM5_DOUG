@@ -1,7 +1,15 @@
 #include "Defnies.h"
+#include <TeensyThreads.h>
 
+// Main Loop
 long new_time = 0;
 long old_time = 0;
+
+// Thread 1
+long new_time1 = 0;
+long old_time1 = 0;
+
+
 int32_t timer = 1 * TimeVar::Seconds;
 uint8_t status = Status::Startup;
 
@@ -14,6 +22,24 @@ DriveTrain* driveTrain = nullptr;
 Odometry* odometry = nullptr;
 Gyro* gyro = nullptr;
 ADNS_CTRL*   adnsController = nullptr;
+
+void motorThread()
+{
+    while (1)
+    {
+        new_time1 = micros();
+        uint32_t difftime = new_time1 - old_time1;
+
+        // Programm Cycle
+        frontLeft->Update(difftime);
+        frontRight->Update(difftime);
+        backLeft->Update(difftime);
+        backRight->Update(difftime);
+
+        // End Loop
+        old_time1 = new_time1;
+    }
+}
 
 void setup()
 {
@@ -33,11 +59,11 @@ void setup()
     // Initialize Interfaces
     sLogger.info("Controller Initialize Interfaces....");
     // Motor Interface
-    //frontLeft = new Antrieb("Front Left", 13, 12, 14);
-    //frontRight = new Antrieb("Front Right", 27, 26, 14);
-    //backLeft = new Antrieb("Back Left", 32, 33, 14);
-    //backRight = new Antrieb("Back Right", 23, 25, 14);
-    //driveTrain = new DriveTrain(*frontLeft, *backLeft, *frontRight, *backRight);
+    frontLeft = new Antrieb("Front Left", 2, 3, 15);
+    frontRight = new Antrieb("Front Right", 4, 5, 15);
+    backLeft = new Antrieb("Back Left", 6, 7, 15);
+    backRight = new Antrieb("Back Right", 8, 9, 15);
+    driveTrain = new DriveTrain(*frontLeft, *backLeft, *frontRight, *backRight);
     //
 
     // Sensors
@@ -49,6 +75,9 @@ void setup()
     odometry = new Odometry(gyro, adnsController);
     //nav = new Navigation(driveTrain, odometry);
     //
+
+    // Multithreading
+    threads.addThread(motorThread);
 
     status = Status::Started;
     // Notice Our Logs we are Running :)
@@ -62,12 +91,6 @@ void loop()
 
     new_time = micros();
     uint32_t difftime = new_time - old_time;
-
-    // Programm Cycle
-    //frontLeft->Update(difftime);
-    //frontRight->Update(difftime);
-    //backLeft->Update(difftime);
-    //backRight->Update(difftime);
 
     // Mouse Sensor
     if (adnsController)
@@ -85,7 +108,7 @@ void loop()
     //nav->Update(difftime);
 
     // Drivetrain test
-    // driveTrain->Drive(0.0, 1.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
+    driveTrain->Drive(1.0, 0.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
 
     // Test Timer 1 second
     if (timer < 0)

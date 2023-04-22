@@ -39,7 +39,8 @@ void Gyro::Update(uint64_t difftime)
     // Output Info evry 2 s
     if (timer < 0)
     {
-        sLogger.info("Pitch: %f Roll: %f Yaw: %f", mpu.getAngleX(), mpu.getAngleY(), mpu.getAngleZ());
+        //sLogger.info("Pitch: %f Roll: %f Yaw: %f", mpu.getAngleX(), mpu.getAngleY(), mpu.getAngleZ());
+        sLogger.info("Pitch: %f Roll: %f Yaw: %f", getGyroAngle(PITCH), getGyroAngle(ROLL), getGyroAngle(YAW));
         timer = 2 * TimeVar::Seconds;
     }
     else

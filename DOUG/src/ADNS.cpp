@@ -6,7 +6,7 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 #include "ADNS_Firmeware.h"
 
 const int _motPin = 2;
-const int _ncs = 3; // The SS pin
+const int _ncs = 10; // The SS pin (3)
 byte _boot_complete = 0;
 
 volatile byte _data[MotionBurst::EndData];
