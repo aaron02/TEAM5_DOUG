@@ -75,10 +75,10 @@ Nächsten Waypoint senden (mit Fehler):
 
 ## Befehle
 
-| Befehl            | Parameter | Antwort             | Beschreibung |
-| ----------------- | --------- | ------------------- | ------------ |
-| `GetBatteryState` |           |                     |              |
-| `GetGripperState` |           |                     |              |
-| `GetState`        |           | `Ready`<br>`Stored` |              |
-| `SetArmState`     |           |                     |              |
-|                   |           |                     |              |
+| Befehl            | Parameter           | Antwort                                                                   | Beschreibung |
+| ----------------- | ------------------- | ------------------------------------------------------------------------- | ------------ |
+| `GetBatteryState` |                     |                                                                           |              |
+| `GetArmState`     |                     |                                                                           |              |
+| `GetState`        |                     |                                                                           |              |
+| `SetArmState`     | `Ready`<br>`Stored` | `Ready`: Arm bereit zum auflesen<br>`Stored`: Arm verstaut (Platz sparen) |              |
+|                   |                     |                                                                           |              |
