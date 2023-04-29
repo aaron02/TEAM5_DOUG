@@ -45,8 +45,9 @@ void Odometry::Update(uint64_t difftime)
     // Output Info evry 1 s
     if (timer < 0)
     {
+        //CalculatePosition(32.283464566929133858267716535433, 64.566929133858267716535433070866);
         //sLogger.info("%f",gyro->getGyroAngle(GYRO_AXIS::YAW));
-        //sLogger.info("PositionX: %f PositionY: %f Heading = %f", position->getX(), position->getY(), 0);
+        sLogger.info("PositionX: %f PositionY: %f Heading = %f", position->getX(), position->getY(), 0);
 
         timer = 2 * TimeVar::Seconds;
     }
@@ -56,24 +57,17 @@ void Odometry::Update(uint64_t difftime)
 
 void Odometry::CalculatePosition(double x, double y)
 {
+    // counts per inch -> 1 inch = 2.54 cm
     dDeltax = x / 8200 * 254;
     dDeltay = y / 8200 * 254;
-    double dGyroAngle = gyro->getGyroAngle(GYRO_AXIS::YAW);
+    double dGyroAngle = radians(gyro->getGyroAngle(GYRO_AXIS::YAW) + dStartHeading + dHeadingCorrection);
 
-    dHeading = normalizeRadians(dGyroAngle + dStartHeading + dHeadingCorrection);
+    dHeading = normalizeRadians(dGyroAngle);
 
     Vector2D temp = Vector2D(dDeltax, dDeltay);
-    //temp.rotate(dHeading);
+    temp.rotate(dHeading);
 
     position->add(&temp);
-
-    //robotCentricDelta = new Vector2D((dDeltax), ( dDeltay));
-    //fieldCentricDelta = new Vector2D((dDeltay), (-dDeltax));
-
-    // Rotate our Vector by the Gyro Angle
-    //fieldCentricDelta->rotate(dHeading);
-    //sLogger.info("%f", position->getX());
-    //position->add(fieldCentricDelta);
 }
 
 double Odometry::normalizeRadians(double angle)

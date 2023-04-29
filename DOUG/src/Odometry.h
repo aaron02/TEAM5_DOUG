@@ -29,14 +29,14 @@ public:
     double dHeading = 0;
 
     // Richtung zum Start der Messung
-    double dStartHeading = 0;
+    double dStartHeading = 0.0f;
 
     // Deltas
     double dDeltax;
     double dDeltay;
 
     // Korrekturfaktor
-    double dHeadingCorrection = 0;
+    double dHeadingCorrection = 0.0f;
 
     // Aktuelle Position
     Vector2D* position;

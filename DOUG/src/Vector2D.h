@@ -10,7 +10,11 @@ class Vector2D
 {
 public:
     // Constructors
-    Vector2D(double X, double Y) : x(X), y(Y) {}
+    Vector2D(double X, double Y) : x(X), y(Y) 
+    {
+        genAngles();
+    }
+
     Vector2D() = default;
 
     void genComplimentary() 
