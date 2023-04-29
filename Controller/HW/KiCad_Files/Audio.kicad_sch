@@ -507,9 +507,6 @@
     )
   )
 
-  (junction (at 92.71 134.62) (diameter 0) (color 0 0 0 0)
-    (uuid 12e718e1-e287-4089-93a7-ec50cdcf03bd)
-  )
   (junction (at 135.89 81.28) (diameter 0) (color 0 0 0 0)
     (uuid 3e3166ac-c214-408e-bb94-84d7be488a71)
   )
@@ -525,6 +522,9 @@
   (junction (at 207.01 110.49) (diameter 0) (color 0 0 0 0)
     (uuid e5eb89b9-de56-4105-8536-1d0e48069b5e)
   )
+  (junction (at 92.71 134.62) (diameter 0) (color 0 0 0 0)
+    (uuid f6129c12-d656-46ae-b794-244b57ffece7)
+  )
   (junction (at 207.01 113.03) (diameter 0) (color 0 0 0 0)
     (uuid fa7bb823-a1de-4468-9bcd-03cabcce94f9)
   )
@@ -534,10 +534,6 @@
 
   (no_connect (at 93.98 81.28) (uuid edcf7541-bf90-4c89-9d4a-e029cbd9a08c))
 
-  (wire (pts (xy 92.71 134.62) (xy 92.71 135.89))
-    (stroke (width 0) (type default))
-    (uuid 0322d6d2-686a-4f7e-ba32-55a7e1126ba8)
-  )
   (wire (pts (xy 83.82 140.97) (xy 85.09 140.97))
     (stroke (width 0) (type default))
     (uuid 08dd15c6-3d0d-427b-b628-a10223187c4c)
@@ -685,6 +681,10 @@
   (wire (pts (xy 93.98 83.82) (xy 114.3 83.82))
     (stroke (width 0) (type default))
     (uuid b83f08e1-11c8-4f6b-88d3-a5aece77af49)
+  )
+  (wire (pts (xy 92.71 134.62) (xy 92.71 135.89))
+    (stroke (width 0) (type default))
+    (uuid b99d6c85-1dae-42b7-b419-033d3f25bd67)
   )
   (polyline (pts (xy 107.95 106.68) (xy 107.95 71.12))
     (stroke (width 0.25) (type dash))
@@ -869,7 +869,7 @@
           (reference "C1") (unit 1)
         )
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/81dfb249-9615-49da-a051-a409169e6382"
-          (reference "C7") (unit 1)
+          (reference "C9") (unit 1)
         )
       )
     )
@@ -878,7 +878,7 @@
   (symbol (lib_id "power:+5V") (at 95.25 77.47 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1f5c90bb-be3a-4926-8315-c7da92b96c43)
-    (property "Reference" "#PWR045" (at 95.25 81.28 0)
+    (property "Reference" "#PWR049" (at 95.25 81.28 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 95.25 73.66 0)
@@ -894,7 +894,7 @@
     (instances
       (project "Controller"
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/81dfb249-9615-49da-a051-a409169e6382"
-          (reference "#PWR045") (unit 1)
+          (reference "#PWR049") (unit 1)
         )
       )
     )
@@ -922,7 +922,7 @@
           (reference "#PWR019") (unit 1)
         )
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/81dfb249-9615-49da-a051-a409169e6382"
-          (reference "#PWR039") (unit 1)
+          (reference "#PWR048") (unit 1)
         )
       )
     )
@@ -931,7 +931,7 @@
   (symbol (lib_id "power:+5V") (at 135.89 80.01 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 30371bb6-2fe7-4bf9-b53f-666fe73ec030)
-    (property "Reference" "#PWR034" (at 135.89 83.82 0)
+    (property "Reference" "#PWR052" (at 135.89 83.82 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 135.89 76.2 0)
@@ -947,7 +947,7 @@
     (instances
       (project "Controller"
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/81dfb249-9615-49da-a051-a409169e6382"
-          (reference "#PWR034") (unit 1)
+          (reference "#PWR052") (unit 1)
         )
       )
     )
@@ -975,7 +975,7 @@
           (reference "#PWR019") (unit 1)
         )
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/81dfb249-9615-49da-a051-a409169e6382"
-          (reference "#PWR038") (unit 1)
+          (reference "#PWR056") (unit 1)
         )
       )
     )
@@ -984,7 +984,7 @@
   (symbol (lib_id "power:+3.3V") (at 92.71 124.46 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3e04a155-bdf2-437a-aee0-0eb1b01a604b)
-    (property "Reference" "#PWR040" (at 92.71 128.27 0)
+    (property "Reference" "#PWR047" (at 92.71 128.27 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 92.71 120.65 0)
@@ -1000,7 +1000,7 @@
     (instances
       (project "Controller"
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/81dfb249-9615-49da-a051-a409169e6382"
-          (reference "#PWR040") (unit 1)
+          (reference "#PWR047") (unit 1)
         )
       )
     )
@@ -1009,7 +1009,7 @@
   (symbol (lib_id "Device:R") (at 95.25 93.98 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5cb40257-9015-4dd6-92f1-05ef900f78c9)
-    (property "Reference" "R24" (at 97.79 93.345 0)
+    (property "Reference" "R23" (at 97.79 93.345 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100k" (at 97.79 95.885 0)
@@ -1026,7 +1026,7 @@
     (instances
       (project "Controller"
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/81dfb249-9615-49da-a051-a409169e6382"
-          (reference "R24") (unit 1)
+          (reference "R23") (unit 1)
         )
       )
     )
@@ -1054,7 +1054,7 @@
           (reference "#PWR019") (unit 1)
         )
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/81dfb249-9615-49da-a051-a409169e6382"
-          (reference "#PWR037") (unit 1)
+          (reference "#PWR055") (unit 1)
         )
       )
     )
@@ -1082,7 +1082,7 @@
           (reference "#PWR019") (unit 1)
         )
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/81dfb249-9615-49da-a051-a409169e6382"
-          (reference "#PWR036") (unit 1)
+          (reference "#PWR054") (unit 1)
         )
       )
     )
@@ -1111,7 +1111,7 @@
           (reference "C3") (unit 1)
         )
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/81dfb249-9615-49da-a051-a409169e6382"
-          (reference "C5") (unit 1)
+          (reference "C7") (unit 1)
         )
       )
     )
@@ -1139,7 +1139,7 @@
           (reference "#PWR019") (unit 1)
         )
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/81dfb249-9615-49da-a051-a409169e6382"
-          (reference "#PWR046") (unit 1)
+          (reference "#PWR051") (unit 1)
         )
       )
     )
@@ -1148,7 +1148,7 @@
   (symbol (lib_id "MAX98357:MAX98357") (at 180.34 99.06 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid aa781c05-7138-4b47-871c-782ecf29a9ca)
-    (property "Reference" "U4" (at 185.42 77.47 0)
+    (property "Reference" "U5" (at 185.42 77.47 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "MAX98357A" (at 186.69 119.38 0)
@@ -1161,6 +1161,9 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "MPN" "MAX98357AETE+T" (at 180.34 99.06 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "DigiKey" "MAX98357AETE+TCT-ND" (at 180.34 99.06 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 5dce83a1-9c53-4e69-9e07-4ebb1cdfb559))
@@ -1179,7 +1182,7 @@
     (instances
       (project "Controller"
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/81dfb249-9615-49da-a051-a409169e6382"
-          (reference "U4") (unit 1)
+          (reference "U5") (unit 1)
         )
       )
     )
@@ -1207,7 +1210,7 @@
           (reference "#PWR019") (unit 1)
         )
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/81dfb249-9615-49da-a051-a409169e6382"
-          (reference "#PWR035") (unit 1)
+          (reference "#PWR053") (unit 1)
         )
       )
     )
@@ -1235,28 +1238,31 @@
           (reference "#PWR019") (unit 1)
         )
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/81dfb249-9615-49da-a051-a409169e6382"
-          (reference "#PWR047") (unit 1)
+          (reference "#PWR050") (unit 1)
         )
       )
     )
   )
 
-  (symbol (lib_id "Connector_Generic:Conn_01x02") (at 213.36 95.25 0) (unit 1)
+  (symbol (lib_id "Connector_Generic:Conn_01x02") (at 213.36 97.79 0) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid b1e28685-5f82-4a97-a757-46c2e43ee20b)
-    (property "Reference" "J4" (at 212.09 92.71 0)
+    (property "Reference" "J3" (at 212.09 92.71 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Speaker" (at 209.55 100.33 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "Connector_JST:JST_PH_B2B-PH-SM4-TB_1x02-1MP_P2.00mm_Vertical" (at 213.36 95.25 0)
+    (property "Footprint" "Connector_JST:JST_PH_B2B-PH-SM4-TB_1x02-1MP_P2.00mm_Vertical" (at 213.36 97.79 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "~" (at 213.36 95.25 0)
+    (property "Datasheet" "~" (at 213.36 97.79 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "MPN" "B2B-PH-SM4-TB(LF)(SN)" (at 213.36 95.25 0)
+    (property "MPN" "B2B-PH-SM4-TBT(LF)(SN)" (at 213.36 97.79 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "DigiKey" "455-2872-1-ND" (at 213.36 97.79 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid ba9ba281-fee1-46e2-ba1b-cab0d758a714))
@@ -1264,7 +1270,7 @@
     (instances
       (project "Controller"
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/81dfb249-9615-49da-a051-a409169e6382"
-          (reference "J4") (unit 1)
+          (reference "J3") (unit 1)
         )
       )
     )
@@ -1288,11 +1294,11 @@
     (property "DigiKey" "563-1217-1-ND" (at 77.47 85.09 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "C" (uuid 6c6956ae-57ef-48d1-b176-8af38bbd9650))
     (pin "0" (uuid daf41010-3c97-44bd-880d-5525719d7a8b))
     (pin "1" (uuid 0fee47ba-fedb-4f1a-90aa-ec8a992677e0))
     (pin "2" (uuid c4d37676-b1d8-403b-a71a-5a3eb37ad890))
     (pin "3" (uuid 63527c5b-5215-403a-bb21-0b3b1ec1d7a3))
+    (pin "C" (uuid 6c6956ae-57ef-48d1-b176-8af38bbd9650))
     (instances
       (project "Controller"
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/d5c8c423-eca1-48bd-858a-e07992250bc0"
@@ -1331,7 +1337,7 @@
           (reference "C1") (unit 1)
         )
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/81dfb249-9615-49da-a051-a409169e6382"
-          (reference "C6") (unit 1)
+          (reference "C8") (unit 1)
         )
       )
     )
@@ -1343,13 +1349,16 @@
     (property "Reference" "Q1" (at 95.25 140.335 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "Q_NPN_BEC" (at 95.25 142.875 0)
+    (property "Value" "MMBT3904" (at 95.25 142.875 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 95.25 138.43 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (at 90.17 140.97 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "DigiKey" "1727-4044-1-ND" (at 90.17 140.97 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid a471383d-20c9-41ab-a93a-86617f379719))
@@ -1396,7 +1405,7 @@
           (reference "R9") (unit 1)
         )
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/81dfb249-9615-49da-a051-a409169e6382"
-          (reference "R20") (unit 1)
+          (reference "R21") (unit 1)
         )
       )
     )
