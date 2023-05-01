@@ -74,13 +74,13 @@ Nächsten Waypoint senden (mit Fehler):
 
 ## Befehle
 
-| Befehl               | Parameter                                     | Antwort                                                        | Beschreibung |
-| -------------------- | --------------------------------------------- | -------------------------------------------------------------- | ------------ |
-| `SetDrivingWaypoint` | X und Y-Koordinaten in mm                     | `Ok`                                                           |              |
-| `AbortDriving`       |                                               | `Ok`                                                           |              |
-| `GetDrivingState`    |                                               | `Busy`: Unterwegs<br>`Finished`: Angekommen<br>`Error`: Fehler |              |
-| `SetArmState`        | `Ready`: Arm beriet<br>`Stored`: Arm verstaut | `Ok`                                                           |              |
-| `GetArmState`        |                                               | `Ready`: Arm beriet<br>`Stored`: Arm verstaut                  |              |
-| `PickPackage`        | Lagerindex                                    | `Ok`                                                           |              |
-| `PlacePackage`       | Lagerindex                                    | `Ok`                                                           |              |
-| `GetBatteryState`    |                                               | Batteriestatus in %                                            |              |
+| Befehl               | Parameter                                           | Antwort                                                        |
+| -------------------- | --------------------------------------------------- | -------------------------------------------------------------- |
+| `SetDrivingWaypoint` | X und Y-Koordinaten in mm                           | `Ok`                                                           |
+| `AbortDriving`       |                                                     | `Ok`                                                           |
+| `GetDrivingState`    |                                                     | `Busy`: Unterwegs<br>`Finished`: Angekommen<br>`Error`: Fehler |
+| `SetArmState`        | `Ready`: Arm vorbereiten<br>`Stored`: Arm verstauen | `Ok`                                                           |
+| `GetArmState`        |                                                     | `Ready`: Arm beriet<br>`Stored`: Arm verstaut                  |
+| `PickPackage`        | Lagerindex                                          | `Ok`                                                           |
+| `PlacePackage`       | Lagerindex                                          | `Ok`                                                           |
+| `GetBatteryState`    |                                                     | Batteriestatus in %                                            |
