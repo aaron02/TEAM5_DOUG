@@ -30,7 +30,6 @@ Batteriestatus abfragen:
 
 ```json
 {
-    "Response":"Ok",
     "Data":{
         "BatteryState":"85"
     }
@@ -75,15 +74,13 @@ Nächsten Waypoint senden (mit Fehler):
 
 ## Befehle
 
-| Befehl               | Parameter           | Antwort                                                                   | Beschreibung |
-| -------------------- | ------------------- | ------------------------------------------------------------------------- | ------------ |
-| `SetDrivingWaypoint` |                     |                                                                           |              |
-| `AbortDriving`       |                     | Ok                                                                        |              |
-| `GetDrivingState`    |                     | - `Busy`: Unterwegs<br>- `Finished`: Angekommen                           |              |
-|                      |                     |                                                                           |              |
-|                      |                     |                                                                           |              |
-| `GetBatteryState`    |                     |                                                                           |              |
-| `GetArmState`        |                     |                                                                           |              |
-| `GetState`           |                     |                                                                           |              |
-| `SetArmState`        | `Ready`<br>`Stored` | `Ready`: Arm bereit zum auflesen<br>`Stored`: Arm verstaut (Platz sparen) |              |
-|                      |                     |                                                                           |              |
+| Befehl               | Parameter                                     | Antwort                                                        | Beschreibung |
+| -------------------- | --------------------------------------------- | -------------------------------------------------------------- | ------------ |
+| `SetDrivingWaypoint` | X-Koordinate, Y-Koordinate                    | `Ok`                                                           |              |
+| `AbortDriving`       |                                               | `Ok`                                                           |              |
+| `GetDrivingState`    |                                               | `Busy`: Unterwegs<br>`Finished`: Angekommen<br>`Error`: Fehler |              |
+| `SetArmState`        | `Ready`: Arm beriet<br>`Stored`: Arm verstaut | `Ok`                                                           |              |
+| `GetArmState`        |                                               | `Ready`: Arm beriet<br>`Stored`: Arm verstaut                  |              |
+| `PickPackage`        | Lagerindex                                    | `Ok`                                                           |              |
+| `PlacePackage`       | Lagerindex                                    | `Ok`                                                           |              |
+| `GetBatteryState`    |                                               | Batteriestatus in %                                            |              |
