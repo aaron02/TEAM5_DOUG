@@ -75,10 +75,15 @@ Nächsten Waypoint senden (mit Fehler):
 
 ## Befehle
 
-| Befehl            | Parameter           | Antwort                                                                   | Beschreibung |
-| ----------------- | ------------------- | ------------------------------------------------------------------------- | ------------ |
-| `GetBatteryState` |                     |                                                                           |              |
-| `GetArmState`     |                     |                                                                           |              |
-| `GetState`        |                     |                                                                           |              |
-| `SetArmState`     | `Ready`<br>`Stored` | `Ready`: Arm bereit zum auflesen<br>`Stored`: Arm verstaut (Platz sparen) |              |
-|                   |                     |                                                                           |              |
+| Befehl               | Parameter           | Antwort                                                                   | Beschreibung |
+| -------------------- | ------------------- | ------------------------------------------------------------------------- | ------------ |
+| `SetDrivingWaypoint` |                     |                                                                           |              |
+| `AbortDriving`       |                     | Ok                                                                        |              |
+| `GetDrivingState`    |                     | - `Busy`: Unterwegs<br>- `Finished`: Angekommen                           |              |
+|                      |                     |                                                                           |              |
+|                      |                     |                                                                           |              |
+| `GetBatteryState`    |                     |                                                                           |              |
+| `GetArmState`        |                     |                                                                           |              |
+| `GetState`           |                     |                                                                           |              |
+| `SetArmState`        | `Ready`<br>`Stored` | `Ready`: Arm bereit zum auflesen<br>`Stored`: Arm verstaut (Platz sparen) |              |
+|                      |                     |                                                                           |              |
