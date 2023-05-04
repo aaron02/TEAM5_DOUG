@@ -76,6 +76,7 @@ Nächsten Waypoint senden (mit Fehler):
 
 | Befehl               | Parameter                                           | Antwort                                                        |
 | -------------------- | --------------------------------------------------- | -------------------------------------------------------------- |
+| `GetCurrentPosition` |                                                     |                                                                |
 | `SetDrivingWaypoint` | X und Y-Koordinaten in mm                           | `Ok`                                                           |
 | `AbortDriving`       |                                                     | `Ok`                                                           |
 | `GetDrivingState`    |                                                     | `Busy`: Unterwegs<br>`Finished`: Angekommen<br>`Error`: Fehler |
