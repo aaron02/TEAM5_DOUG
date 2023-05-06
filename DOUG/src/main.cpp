@@ -118,7 +118,7 @@ void loop()
     // Test Timer 1 second
     if (timer < 0)
     {
-        sLogger.info("Controller Loop Time = %u µs Battery Voltage = %f", difftime, pdb->GetVoltage());
+        sLogger.info("Controller Loop Time = %u µs", difftime);
         timer = 10 * TimeVar::Seconds;
     }
     else

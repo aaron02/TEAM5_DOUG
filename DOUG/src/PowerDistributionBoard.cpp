@@ -32,7 +32,7 @@ void PDB::Update(uint64_t difftime)
     // Output Info evry 1 s
     if (timer < 0)
     {
-        //sLogger.info("%f",gyro->getGyroAngle(GYRO_AXIS::YAW));
+        sLogger.info("Current Voltage = %f used %f Amps",GetVoltage(), GetCurrentDrawn());
 
         timer = 2 * TimeVar::Seconds;
     }
@@ -50,6 +50,8 @@ void PDB::ReadSensor()
     fCurrent = map(fAnalogCurrent, 0, 1023, fMinCurrent, fMaxCurrent);
 
     // Used Voltage and Current
-    fCurrentDrawn += fCurrent;
+    fCurrentDrawn += (fCurrent / 1000.0f);
     fVoltageDrawn -= fBatteryStartVoltage - fVoltage;
+
+    //sLogger.info("Current Voltage = %f Currentdraw = %f used %f Amps",GetVoltage(), GetCurrent(), GetCurrentDrawn());
 }
