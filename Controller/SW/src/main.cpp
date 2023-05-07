@@ -1,9 +1,14 @@
 #include <Arduino.h>
 
-void setup() {
-  // put your setup code here, to run once:
+void setup()
+{
+    pinMode(1, OUTPUT);
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
+void loop()
+{
+    digitalWrite(1, HIGH);
+    delay(500);
+    digitalWrite(1, LOW);
+    delay(500);
 }
