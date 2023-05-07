@@ -42,4 +42,6 @@ protected:
 
     float fMinCurrent = 0.0f;
     float fMaxCurrent = 440.0f;
+
+    bool debug = false;
 };

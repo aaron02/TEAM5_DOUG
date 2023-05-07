@@ -43,16 +43,19 @@ void Odometry::Update(uint64_t difftime)
         sensorUpdate = sensorUpdate - difftime;
 
     // Output Info evry 1 s
-    if (timer < 0)
+    if (debug)
     {
-        //CalculatePosition(32.283464566929133858267716535433, 64.566929133858267716535433070866);
-        //sLogger.info("%f",gyro->getGyroAngle(GYRO_AXIS::YAW));
-        sLogger.info("PositionX: %f PositionY: %f Heading = %f", position->getX(), position->getY(), 0.0f);
+        if (timer < 0)
+        {
+            //CalculatePosition(32.283464566929133858267716535433, 64.566929133858267716535433070866);
+            //sLogger.info("%f",gyro->getGyroAngle(GYRO_AXIS::YAW));
+            sLogger.info("PositionX: %f PositionY: %f Heading = %f", position->getX(), position->getY(), 0.0f);
 
-        timer = 2 * TimeVar::Seconds;
+            timer = 2 * TimeVar::Seconds;
+        }
+        else
+            timer = timer - difftime;
     }
-    else
-        timer = timer - difftime;
 }
 
 void Odometry::CalculatePosition(double x, double y)

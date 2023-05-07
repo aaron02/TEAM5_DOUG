@@ -16,8 +16,6 @@ Navigation::~Navigation()
 
 void Navigation::Update(uint64_t difftime)
 {
-    Vector2D* position = m_Odometry->GetPosition();
-
     // Test Movement Quadratic Move.
     if (moveTimer < 0)
     {
@@ -37,24 +35,24 @@ void Navigation::Update(uint64_t difftime)
         {
             case 1:
             {
-                // driveTrain->Drive(1.0, 0.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
+                 m_Drive->Drive(1.0, 0.0, 0.0, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
             }
             break;
             case 2:
             {
-                // driveTrain->Drive(0.0, 1.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
+                 m_Drive->Drive(0.0, 1.0, 0.0, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
             }
             break;
             case 3:
             {
-                // driveTrain->Drive(-1.0, 0.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
+                 m_Drive->Drive(-1.0, 0.0, 0.0, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
             }
             break;
             case 4:
             {
-                // driveTrain->Drive(0.0, -1.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
+                 m_Drive->Drive(0.0, -1.0, 0.0, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
             }
             break;
-            }
+        }
     }
 }
