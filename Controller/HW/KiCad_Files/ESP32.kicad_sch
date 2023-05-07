@@ -4,6 +4,13 @@
 
   (paper "A4")
 
+  (title_block
+    (title "Controller")
+    (date "2023-05-07")
+    (rev "1")
+    (company "High5Dynamics")
+  )
+
   (lib_symbols
     (symbol "Connector_Generic:Conn_02x05_Odd_Even" (pin_names (offset 1.016) hide) (in_bom yes) (on_board yes)
       (property "Reference" "J" (at 1.27 7.62 0)

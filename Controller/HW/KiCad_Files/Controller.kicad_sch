@@ -4,6 +4,13 @@
 
   (paper "A4")
 
+  (title_block
+    (title "Controller")
+    (date "2023-05-07")
+    (rev "1")
+    (company "High5Dynamics")
+  )
+
   (lib_symbols
     (symbol "Device:C" (pin_numbers hide) (pin_names (offset 0.254)) (in_bom yes) (on_board yes)
       (property "Reference" "C" (at 0.635 2.54 0)

@@ -4,6 +4,13 @@
 
   (paper "A4")
 
+  (title_block
+    (title "Controller")
+    (date "2023-05-07")
+    (rev "1")
+    (company "High5Dynamics")
+  )
+
   (lib_symbols
     (symbol "Connector_Generic:Conn_01x02" (pin_names (offset 1.016) hide) (in_bom yes) (on_board yes)
       (property "Reference" "J3" (at -1.27 5.08 0)
@@ -1248,8 +1255,8 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid ba9ba281-fee1-46e2-ba1b-cab0d758a714))
-    (pin "MP" (uuid bf998dcc-24ab-4eba-84ae-8267a1a470ab))
     (pin "2" (uuid 0117f948-193b-49e7-8a82-7d9819b731af))
+    (pin "MP" (uuid bf998dcc-24ab-4eba-84ae-8267a1a470ab))
     (instances
       (project "Controller"
         (path "/c2d0d901-25b4-4493-8a69-1784ff7f312b/81dfb249-9615-49da-a051-a409169e6382"
