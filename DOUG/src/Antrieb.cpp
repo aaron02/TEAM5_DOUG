@@ -19,8 +19,8 @@ Antrieb::Antrieb(std::string sName, uint32_t iStep,uint32_t iDir,uint32_t iEn)
     
     // Default Speeds
     stepper->setMaxSpeed(1000.0f);
-    stepper->setSpeed(200.0f);
-    stepper->setAcceleration(50.0f);
+    stepper->setSpeed(1000.0f);
+    stepper->setAcceleration(100.0f);
 
     // DEBUG INFO
     sLogger.debug("Pins used For %s: %s", sAntriebName.c_str(), getPinsNameString().c_str());

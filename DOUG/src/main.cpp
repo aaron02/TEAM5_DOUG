@@ -105,7 +105,7 @@ void loop()
     if (timer < 0)
     {
         // Drivetrain test
-        //driveTrain->Drive(1.0, 0.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
+        driveTrain->Drive(1.0, 0.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
 
         sLogger.info("Controller Loop Time = %u µs", difftime);
         timer = 10 * TimeVar::Seconds;
