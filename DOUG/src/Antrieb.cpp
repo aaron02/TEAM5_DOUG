@@ -18,9 +18,9 @@ Antrieb::Antrieb(std::string sName, uint32_t iStep,uint32_t iDir,uint32_t iEn)
     iEnablePin = iEn;
     
     // Default Speeds
-    stepper->setMaxSpeed(6400);
-    stepper->setSpeed(6400);
-    stepper->setAcceleration(6400);
+    stepper->setMaxSpeed(1000.0f);
+    stepper->setSpeed(200.0f);
+    stepper->setAcceleration(50.0f);
 
     // DEBUG INFO
     sLogger.debug("Pins used For %s: %s", sAntriebName.c_str(), getPinsNameString().c_str());
@@ -51,7 +51,8 @@ void Antrieb::setSpeed(float fSpeed)
     // Only for Debug use, activating this Line Stops the Motors from Working, this extends the Program Cycle.
     //sLogger.info("Antrieb %s set to Speed %f (%f)", sAntriebName.c_str(), fSpeed, fDemandedSpeed);
 
-    stepper->setSpeed(fDemandedSpeed);
+    if (stepper->speed() < fDemandedSpeed || stepper->speed() > fDemandedSpeed)
+        stepper->setSpeed(fDemandedSpeed);
 }
 
 float Antrieb::getSpeed()

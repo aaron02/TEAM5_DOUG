@@ -5,11 +5,6 @@
 long new_time = 0;
 long old_time = 0;
 
-// Thread 1
-long new_time1 = 0;
-long old_time1 = 0;
-
-
 int32_t timer = 1 * TimeVar::Seconds;
 uint8_t status = Status::Startup;
 
@@ -28,17 +23,11 @@ void motorThread()
 {
     while (1)
     {
-        new_time1 = micros();
-        uint32_t difftime = new_time1 - old_time1;
-
         // Programm Cycle
-        frontLeft->Update(difftime);
-        frontRight->Update(difftime);
-        backLeft->Update(difftime);
-        backRight->Update(difftime);
-
-        // End Loop
-        old_time1 = new_time1;
+        frontLeft->Update(0);
+        frontRight->Update(0);
+        backLeft->Update(0);
+        backRight->Update(0);
     }
 }
 
@@ -75,7 +64,7 @@ void setup()
 
     // Odometry + Navigation
     odometry = new Odometry(gyro, adnsController);
-    //nav = new Navigation(driveTrain, odometry);
+    nav = new Navigation(driveTrain, odometry);
     //
 
     // Multithreading
@@ -112,12 +101,12 @@ void loop()
     // Navigation
     //nav->Update(difftime);
 
-    // Drivetrain test
-    driveTrain->Drive(1.0, 0.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
-
     // Test Timer 1 second
     if (timer < 0)
     {
+        // Drivetrain test
+        //driveTrain->Drive(1.0, 0.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
+
         sLogger.info("Controller Loop Time = %u µs", difftime);
         timer = 10 * TimeVar::Seconds;
     }

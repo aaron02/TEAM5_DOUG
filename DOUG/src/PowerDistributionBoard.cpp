@@ -30,14 +30,17 @@ void PDB::Update(uint64_t difftime)
         sensorUpdate = sensorUpdate - difftime;
 
     // Output Info evry 1 s
-    if (timer < 0)
+    if (debug)
     {
-        sLogger.info("Current Voltage = %f used %f Amps",GetVoltage(), GetCurrentDrawn());
+        if (timer < 0)
+        {
+            sLogger.info("Current Voltage = %f used %f Amps",GetVoltage(), GetCurrentDrawn());
 
-        timer = 2 * TimeVar::Seconds;
+            timer = 2 * TimeVar::Seconds;
+        }
+        else
+            timer = timer - difftime;
     }
-    else
-        timer = timer - difftime;
 }
 
 void PDB::ReadSensor()

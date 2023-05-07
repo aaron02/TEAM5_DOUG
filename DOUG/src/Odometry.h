@@ -25,6 +25,8 @@ public:
 
     Vector2D* GetPosition() { return position; }
 
+    Gyro* getGyro() { return gyro; }
+
     // Aktuelle Richtung
     double dHeading = 0;
 
@@ -50,4 +52,6 @@ private:
 protected:
     Gyro* gyro;
     ADNS_CTRL* adnsController;
+
+    bool debug = false;
 };
