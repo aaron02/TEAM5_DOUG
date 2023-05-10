@@ -16,7 +16,7 @@ enum Status
 // Libaries
 #include <AccelStepper.h>
 #include <MultiStepper.h>
-#include <MPU6050_light.h>
+#include <Adafruit_BNO08x.h>
 #include <Wire.h>
 #include "SPI.h"
 

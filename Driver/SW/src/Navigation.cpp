@@ -17,42 +17,52 @@ Navigation::~Navigation()
 void Navigation::Update(uint64_t difftime)
 {
     // Test Movement Quadratic Move.
-    if (moveTimer < 0)
+    if (moveTimer <= 0)
     {
         if (moveStep < 4)
         {
-            moveTimer = 5 * TimeVar::Seconds;
+            moveTimer = 15 * TimeVar::Seconds;
             moveStep = moveStep + 1;
+
+            switch (moveStep)
+            {
+                case 1:
+                {
+                    fSpeedX = 1.0f;
+                    fSpeedY = 0.0f;
+                }
+                break;
+                case 2:
+                {
+                    fSpeedX = 0.0f;
+                    fSpeedY = 1.0f;
+                }
+                break;
+                case 3:
+                {
+                    fSpeedX = -1.0f;
+                    fSpeedY = 0.0f;
+                }
+                break;
+                case 4:
+                {
+                    fSpeedX = 0.0f;
+                    fSpeedY = -1.0f;
+                }
+                break;
+            }
+
         }
         else
+        {
             m_Drive->Drive(0.0, 0.0, 0.0, 0.0f);
+            return;
+        }
     }
     else
     {
         moveTimer = moveTimer - difftime;
-
-        switch (moveStep)
-        {
-            case 1:
-            {
-                 m_Drive->Drive(1.0, 0.0, 0.0, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
-            }
-            break;
-            case 2:
-            {
-                 m_Drive->Drive(0.0, 1.0, 0.0, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
-            }
-            break;
-            case 3:
-            {
-                 m_Drive->Drive(-1.0, 0.0, 0.0, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
-            }
-            break;
-            case 4:
-            {
-                 m_Drive->Drive(0.0, -1.0, 0.0, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
-            }
-            break;
-        }
     }
+
+    m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
 }

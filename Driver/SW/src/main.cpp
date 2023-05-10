@@ -91,6 +91,7 @@ void loop()
     if (gyro)
         gyro->Update(difftime);
 
+    // Power Ditribution Board
     if (pdb)
         pdb->Update(difftime);
 
@@ -99,21 +100,24 @@ void loop()
         odometry->Update(difftime);
 
     // Navigation
-    //nav->Update(difftime);
+    /*if (nav)
+        nav->Update(difftime);*/
 
     // Test Timer 1 second
-    if (timer < 0)
+    if (0)
     {
-        // Drivetrain test
-        driveTrain->Drive(1.0, 0.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
+        if (timer < 0)
+        {
+            // Drivetrain test
+            //driveTrain->Drive(1.0, 0.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
 
-        sLogger.info("Controller Loop Time = %u µs", difftime);
-        timer = 10 * TimeVar::Seconds;
+            sLogger.info("Controller Loop Time = %u µs", difftime);
+            timer = 10 * TimeVar::Seconds;
+        }
+        else
+            timer = timer - difftime;
     }
-    else
-        timer = timer - difftime;
 
     // End Loop
     old_time = new_time;
-    // delay(1);
 }

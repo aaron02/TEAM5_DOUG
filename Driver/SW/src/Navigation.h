@@ -24,4 +24,9 @@ private:
 protected:
     DriveTrain* m_Drive;
     Odometry* m_Odometry;
+
+    float fSpeedX = 0.0f;
+    float fSpeedY = 0.0f;
+
+    bool debug = false;
 };

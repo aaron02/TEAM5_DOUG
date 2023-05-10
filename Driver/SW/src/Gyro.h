@@ -15,15 +15,32 @@ enum GYRO_AXIS : uint8_t
 
 class Gyro
 {
-    public:
+    struct euler
+    {
+    float yaw;
+    float pitch;
+    float roll;
+    } ypr;
+
+public:
     Gyro();
     ~Gyro();
+
+    void setReports(sh2_SensorId_t reportType, long report_interval);
+    void quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector, euler* ypr, bool degrees) ;
+    void quaternionToEuler(float qr, float qi, float qj, float qk, euler* ypr, bool degrees);
 
     void Update(uint64_t difftime);
 
     float getGyroAngle(GYRO_AXIS iAxis);
 
-    private:
+private:
     int32_t sensorUpdate = 10 * TimeVar::Millis;
     int32_t timer = 1 * TimeVar::Seconds;
+
+protected:
+    long reportIntervalUs = 5000;
+    sh2_SensorId_t reportType = SH2_ARVR_STABILIZED_RV;
+
+    bool debug = false;
 };

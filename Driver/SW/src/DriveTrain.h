@@ -65,6 +65,8 @@ class DriveTrain
     double m_deadband = 0.02;
     double m_maxOutput = 1.0;
 
+    bool debug = false;
+
     private:
     Antrieb* m_frontLeftMotor;
     Antrieb* m_rearLeftMotor;
