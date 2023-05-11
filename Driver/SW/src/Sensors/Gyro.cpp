@@ -13,14 +13,12 @@ sh2_SensorValue_t sensorValue;
 Gyro::Gyro()
 {
     // Try to initialize!
-    if (!bno08x.begin_I2C()) 
+    while (!bno08x.begin_I2C()) 
     {
         sLogger.debug("Gyro:: Failed to find BNO08x chip");
-        while (1) 
-        { 
-            delay(10); 
-        }
+        delay(10); 
     }
+
     sLogger.debug("Gyro:: BNO08x Found!");
 
     setReports(reportType, reportIntervalUs);

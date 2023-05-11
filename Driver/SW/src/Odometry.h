@@ -4,7 +4,7 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 
 #pragma once
 
-#include "Defnies.h"
+#include "Lib/Defnies.h"
 
 class Vector2D;
 class Gyro;
@@ -38,7 +38,7 @@ public:
     double dDeltay;
 
     // Korrekturfaktor
-    double dHeadingCorrection = 0.0f;
+    double dHeadingCorrection = 90.0f;
 
     // Aktuelle Position
     Vector2D* position;
@@ -53,5 +53,5 @@ protected:
     Gyro* gyro;
     ADNS_CTRL* adnsController;
 
-    bool debug = false;
+    bool debug = true;
 };

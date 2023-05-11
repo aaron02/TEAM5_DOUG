@@ -4,7 +4,7 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 
 #pragma once
 
-#include "Defnies.h"
+#include "Lib/Defnies.h"
 
 enum GYRO_AXIS : uint8_t
 {

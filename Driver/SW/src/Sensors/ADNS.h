@@ -4,7 +4,7 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 
 #pragma once
 
-#include "Defnies.h"
+#include "Lib/Defnies.h"
 
 extern const unsigned short firmware_length;
 extern prog_uchar firmware_data[];

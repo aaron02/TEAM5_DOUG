@@ -1,10 +1,11 @@
-#include "Defnies.h"
+#include "Lib/Defnies.h"
 #include <TeensyThreads.h>
 
 // Main Loop
 long new_time = 0;
 long old_time = 0;
 
+int32_t initTimer = 5 * TimeVar::Seconds;
 int32_t timer = 1 * TimeVar::Seconds;
 uint8_t status = Status::Startup;
 
@@ -19,6 +20,60 @@ Gyro* gyro = nullptr;
 ADNS_CTRL* adnsController = nullptr;
 PDB* pdb = nullptr;
 
+void MainThread(uint32_t difftime)
+{
+    // Mouse Sensor
+    if (adnsController)
+        adnsController->Update(difftime);
+
+    // Gyro
+    if (gyro)
+        gyro->Update(difftime);
+
+    // Power Ditribution Board
+    if (pdb)
+        pdb->Update(difftime);
+
+    if (status == Status::Initialization)
+    {
+        if (initTimer < 0)
+        {
+            // Start Location
+            adnsController->reset_xy_dist();
+            odometry->setStartLocation(Vector2D(0, 0), gyro->getGyroAngle(YAW));
+            status = Status::Started;
+            sLogger.debug("Controller Started and Ready");
+        }
+        else
+            initTimer = initTimer - difftime;
+    }
+    else if (status == Status::Started)
+    {
+        // Odometry
+        if(odometry)
+            odometry->Update(difftime);
+
+        // Navigation
+        /*if (nav)
+            nav->Update(difftime);*/
+    }
+
+    // Test Timer 1 second
+    if (0)
+    {
+        if (timer < 0)
+        {
+            // Drivetrain test
+            //driveTrain->Drive(1.0, 0.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
+
+            sLogger.info("Controller Loop Time = %u µs (%f ms)", difftime, float(difftime / Millis));
+            timer = 10 * TimeVar::Seconds;
+        }
+        else
+            timer = timer - difftime;
+    }
+}
+
 void motorThread()
 {
     while (1)
@@ -28,6 +83,9 @@ void motorThread()
         frontRight->Update(0);
         backLeft->Update(0);
         backRight->Update(0);
+
+        // 5 ms Sleeping
+        threads.sleep(5);
     }
 }
 
@@ -70,7 +128,7 @@ void setup()
     // Multithreading
     threads.addThread(motorThread);
 
-    status = Status::Started;
+    status = Status::Initialization;
     // Notice Our Logs we are Running :)
     sLogger.info("Controller Running....");
 }
@@ -83,40 +141,7 @@ void loop()
     new_time = micros();
     uint32_t difftime = new_time - old_time;
 
-    // Mouse Sensor
-    if (adnsController)
-        adnsController->Update(difftime);
-
-    // Gyro
-    if (gyro)
-        gyro->Update(difftime);
-
-    // Power Ditribution Board
-    if (pdb)
-        pdb->Update(difftime);
-
-    // Odometry
-    if(odometry)
-        odometry->Update(difftime);
-
-    // Navigation
-    /*if (nav)
-        nav->Update(difftime);*/
-
-    // Test Timer 1 second
-    if (0)
-    {
-        if (timer < 0)
-        {
-            // Drivetrain test
-            //driveTrain->Drive(1.0, 0.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
-
-            sLogger.info("Controller Loop Time = %u µs", difftime);
-            timer = 10 * TimeVar::Seconds;
-        }
-        else
-            timer = timer - difftime;
-    }
+    MainThread(difftime);
 
     // End Loop
     old_time = new_time;

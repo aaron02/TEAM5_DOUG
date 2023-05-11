@@ -7,6 +7,7 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 enum Status
 {
     Startup = 0,
+    Initialization,
     Started
 };
 
@@ -41,11 +42,11 @@ enum Status
 // User Created
 #include "Logger.h"
 #include "TimeVar.h"
-#include "Antrieb.h"
+#include "Antrieb/Antrieb.h"
 #include "Navigation.h"
-#include "DriveTrain.h"
+#include "Antrieb/DriveTrain.h"
 #include "Odometry.h"
 #include "Vector2D.h"
-#include "ADNS.h"
-#include "Gyro.h"
-#include "PowerDistributionBoard.h"
+#include "Sensors/ADNS.h"
+#include "Sensors/Gyro.h"
+#include "Sensors/PowerDistributionBoard.h"

@@ -3,7 +3,6 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 */
 
 #include "Odometry.h"
-#include "ADNS.h"
 
 Odometry::Odometry(Gyro* nav, ADNS_CTRL* ctrl) : gyro(nav), adnsController(ctrl)
 {
@@ -25,7 +24,7 @@ void Odometry::Initialize()
 void Odometry::setStartLocation(Vector2D startPosition, double startHeading)
 { 
     position = new Vector2D(startPosition);
-    dStartHeading = DEG_TO_RAD * startHeading;
+    dStartHeading = radians(startHeading * -1);
     dHeading = normalizeRadians(dHeading + dStartHeading);
 }
 
@@ -48,8 +47,7 @@ void Odometry::Update(uint64_t difftime)
         if (timer < 0)
         {
             //CalculatePosition(32.283464566929133858267716535433, 64.566929133858267716535433070866);
-            //sLogger.info("%f",gyro->getGyroAngle(GYRO_AXIS::YAW));
-            sLogger.info("PositionX: %f PositionY: %f Heading = %f", position->getX(), position->getY(), 0.0f);
+            sLogger.info("PositionX: %f PositionY: %f Heading = %f", position->getX(), position->getY(), degrees(dHeading));
 
             timer = 2 * TimeVar::Seconds;
         }
@@ -63,7 +61,8 @@ void Odometry::CalculatePosition(double x, double y)
     // counts per inch -> 1 inch = 2.54 cm
     dDeltax = x / 8200 * 254;
     dDeltay = y / 8200 * 254;
-    double dGyroAngle = radians(gyro->getGyroAngle(GYRO_AXIS::YAW) + dStartHeading + dHeadingCorrection);
+
+    double dGyroAngle = radians(gyro->getGyroAngle(GYRO_AXIS::YAW) + degrees(dStartHeading) + dHeadingCorrection);
 
     dHeading = normalizeRadians(dGyroAngle);
 
