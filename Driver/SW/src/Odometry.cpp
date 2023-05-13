@@ -46,9 +46,11 @@ void Odometry::Update(uint64_t difftime)
     {
         if (timer < 0)
         {
+            // Constant Speed Test
             //CalculatePosition(32.283464566929133858267716535433, 64.566929133858267716535433070866);
             sLogger.info("PositionX: %f PositionY: %f Heading = %f", position->getX(), position->getY(), degrees(dHeading));
-
+            // Distance traveled Test
+            //setStartLocation(Vector2D(0, 0), 0);
             timer = 2 * TimeVar::Seconds;
         }
         else
@@ -58,9 +60,9 @@ void Odometry::Update(uint64_t difftime)
 
 void Odometry::CalculatePosition(double x, double y)
 {
-    // counts per inch -> 1 inch = 2.54 cm
-    dDeltax = x / 8200 * 254;
-    dDeltay = y / 8200 * 254;
+    // counts per inch -> 1 inch = 2.54 cm / 2540
+    dDeltax = x / 8200 * 2.54;
+    dDeltay = y / 8200 * 2.54;
 
     double dGyroAngle = radians(gyro->getGyroAngle(GYRO_AXIS::YAW) + degrees(dStartHeading) + dHeadingCorrection);
 
