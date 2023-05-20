@@ -16,6 +16,7 @@ Gyro::Gyro()
     while (!bno08x.begin_I2C()) 
     {
         sLogger.debug("Gyro:: Failed to find BNO08x chip");
+        bno08x.begin_I2C();
         delay(10); 
     }
 

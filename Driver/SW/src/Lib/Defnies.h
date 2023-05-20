@@ -11,6 +11,13 @@ enum Status
     Started
 };
 
+enum HomingStatus
+{
+    HOMING_NOT_DONE         = 0,
+    HOMING_IN_PROGRESS      = 1,
+    HOMING_DONE             = 2
+};
+
 // Arduino
 #include <Arduino.h>
 
@@ -43,6 +50,7 @@ enum Status
 #include "Logger.h"
 #include "TimeVar.h"
 #include "Antrieb/Antrieb.h"
+#include "Antrieb/PosAntrieb.h"
 #include "Navigation.h"
 #include "Antrieb/DriveTrain.h"
 #include "Odometry.h"
