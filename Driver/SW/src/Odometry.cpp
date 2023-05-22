@@ -51,7 +51,7 @@ void Odometry::Update(uint64_t difftime)
             sLogger.info("PositionX: %f PositionY: %f Heading = %f", position->getX(), position->getY(), degrees(dHeading));
             // Distance traveled Test
             //setStartLocation(Vector2D(0, 0), 0);
-            timer = 2 * TimeVar::Seconds;
+            timer = 5 * TimeVar::Seconds;
         }
         else
             timer = timer - difftime;

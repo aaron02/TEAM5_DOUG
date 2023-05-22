@@ -64,5 +64,6 @@ void Navigation::Update(uint64_t difftime)
         moveTimer = moveTimer - difftime;
     }
 
+    //sLogger.debug("Speed Demanded %f and %f", fSpeedX, fSpeedY);
     m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
 }

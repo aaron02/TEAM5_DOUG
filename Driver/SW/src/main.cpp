@@ -7,12 +7,16 @@ long old_time = 0;
 
 int32_t initTimer = 5 * TimeVar::Seconds;
 int32_t timer = 1 * TimeVar::Seconds;
+
+int32_t ADNStimer = 5 * TimeVar::Millis;
+
 uint8_t status = Status::Startup;
 
 Antrieb* frontLeft = nullptr;
 Antrieb* frontRight = nullptr;
 Antrieb* backLeft = nullptr;
 Antrieb* backRight = nullptr;
+PosAntrieb* gripperBase = nullptr;
 Navigation* nav = nullptr;
 DriveTrain* driveTrain = nullptr;
 Odometry* odometry = nullptr;
@@ -23,8 +27,15 @@ PDB* pdb = nullptr;
 void MainThread(uint32_t difftime)
 {
     // Mouse Sensor
-    if (adnsController)
-        adnsController->Update(difftime);
+    if (ADNStimer <= 0)
+    {
+        ADNStimer = 1 * TimeVar::Millis;
+
+        if (adnsController)
+            adnsController->Update(difftime);
+    }
+    else
+        ADNStimer -= difftime;
 
     // Gyro
     if (gyro)
@@ -36,7 +47,7 @@ void MainThread(uint32_t difftime)
 
     if (status == Status::Initialization)
     {
-        if (initTimer < 0)
+        if (initTimer <= 0)
         {
             // Start Location
             adnsController->reset_xy_dist();
@@ -54,19 +65,20 @@ void MainThread(uint32_t difftime)
             odometry->Update(difftime);
 
         // Navigation
-        /*if (nav)
-            nav->Update(difftime);*/
+        //if (nav)
+        //    nav->Update(difftime);
     }
 
     // Test Timer 1 second
-    if (0)
+    if (1)
     {
         if (timer < 0)
         {
             // Drivetrain test
-            //driveTrain->Drive(1.0, 0.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
+            driveTrain->Drive(1.0, 0.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
+            //gripperBase->moveAbsolutAngle(360);
 
-            sLogger.info("Controller Loop Time = %u µs (%f ms)", difftime, float(difftime / Millis));
+            //sLogger.info("Controller Loop Time = %u µs (%f ms)", difftime, float(difftime / Millis));
             timer = 10 * TimeVar::Seconds;
         }
         else
@@ -83,9 +95,7 @@ void motorThread()
         frontRight->Update(0);
         backLeft->Update(0);
         backRight->Update(0);
-
-        // 5 ms Sleeping
-        threads.sleep(5);
+        gripperBase->Update(0);
     }
 }
 
@@ -112,6 +122,8 @@ void setup()
     backLeft = new Antrieb("Back Left", 6, 7, 15);
     backRight = new Antrieb("Back Right", 8, 9, 15);
     driveTrain = new DriveTrain(*frontLeft, *backLeft, *frontRight, *backRight);
+
+    gripperBase = new PosAntrieb("Gripper Base", 25, 24, 14, 32);
     //
 
     // Sensors
