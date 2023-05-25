@@ -1,9 +1,28 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include <ArduinoJson.h>
+#include <PubSubClient.h>
+#include <WiFi.h>
 
-HardwareSerial mySerial(1);
+// ------------------------- Constants -------------------------
+const String SSID = "McDonalds";
+const String PASSWORD = "burgerking";
+const String TEST_SERVER_URL = "test.mosquitto.org";
+const String MQTT_DEVICE_ID = "Dough";
+const int MQTT_PORT = 1883;
+const unsigned long SERIAL_BAUD_DEBUG = 115200;
+const unsigned long SERIAL_BAUD_DRIVER = 115200;
 
+// ------------------------- Objects -------------------------
+WiFiClient WifiClient;
+PubSubClient MqttClient(WifiClient);
+HardwareSerial SerialDebug(0);
+HardwareSerial SerialDriver(1);
+
+// ------------------------- Variables -------------------------
+String LastErrorMessage = "";
+
+// ------------------------- Enums -------------------------
 enum RobotState
 {
     RobotStateError,
@@ -11,308 +30,138 @@ enum RobotState
     RobotStateFinished
 };
 
-bool getRobotState(RobotState *state)
+// ------------------------- Functions -------------------------
+bool InitDebugUart(String &errorMessage)
 {
-    DynamicJsonDocument sendDoc(1024);
-    DynamicJsonDocument recieveDoc(1024);
+    // Reset error message
+    errorMessage = "";
 
-    *state = RobotStateError;
+    // Init port
+    SerialDebug.begin(SERIAL_BAUD_DEBUG);
 
-    sendDoc["Command"] = "GetDrivingState";
-    serializeJson(sendDoc, mySerial);
-    mySerial.println();
-
-    deserializeJson(recieveDoc, mySerial);
-
-    String returnedstate = recieveDoc["Data"]["State"];
-
-    if (returnedstate == "Finished")
+    // Check if port is ready
+    if (!SerialDebug)
     {
-        *state = RobotState::RobotStateFinished;
-    }
-    else if (returnedstate == "Busy")
-    {
-        *state = RobotState::RobotStateBusy;
+        errorMessage = "Could not open Port for debug UART";
+        return false;
     }
 
     return true;
 }
 
-bool SetNextWaypoint(int x, int y)
+bool InitDriverUart(String &errorMessage)
 {
-    DynamicJsonDocument sendDoc(1024);
-    sendDoc["Command"] = "SetNextWaypoint";
-    sendDoc["Data"]["x"] = x;
-    sendDoc["Data"]["y"] = y;
+    // Reset error message
+    errorMessage = "";
 
-    serializeJson(sendDoc, mySerial);
-    mySerial.println();
+    // Init port
+    SerialDriver.begin(SERIAL_BAUD_DEBUG);
 
-    return true;
-}
-
-bool GoToWaypoint(int x, int y)
-{
-    SetNextWaypoint(x, y);
-
-    delay(100);
-    RobotState currentRobotState;
-
-    do
+    // Check if port is ready
+    if (!SerialDriver)
     {
-        getRobotState(&currentRobotState);
-    } while (currentRobotState != RobotState::RobotStateFinished);
+        errorMessage = "Could not open Port for debug UART";
+        return false;
+    }
 
     return true;
 }
 
+bool InitWifi(unsigned int connectionTimeout_ms, String &errorMessage)
+{
+    // Reset error message
+    errorMessage = "";
+
+    // Connect to Wifi
+    WiFi.begin(SSID.c_str(), PASSWORD.c_str());
+
+    // Wait for connection with timeout
+    unsigned long startMillis = millis();
+    bool finished = false;
+    while ((millis() - startMillis) < connectionTimeout_ms && WiFi.status() != WL_CONNECTED)
+    {
+    }
+
+    // Check Connection
+    if (WiFi.status() != WL_CONNECTED)
+    {
+        errorMessage = "Could not connect to Wifi";
+        return false;
+    }
+
+    return true;
+}
+
+bool InitMqtt(String &errorMessage)
+{
+    // Reset error message
+    errorMessage = "";
+
+    // Resolve MQTT server URL to IP address
+    IPAddress mqttServerIP;
+    WiFi.hostByName(TEST_SERVER_URL.c_str(), mqttServerIP);
+    MqttClient.setServer(mqttServerIP, MQTT_PORT);
+
+    // Connect to MQTT server
+    if (!MqttClient.connect(MQTT_DEVICE_ID.c_str()))
+    {
+        errorMessage = "Could not connect to MQTT broker: " + MqttClient.state();
+        return false;
+    }
+
+    return true;
+}
+
+
+// ------------------------- Setup -------------------------
 void setup()
 {
-    Serial.begin(115200);
-    mySerial.begin(115200, SERIAL_8N1, 18, 17);
+    if (!InitDebugUart(LastErrorMessage))
+    {
+        while (true)
+        {
+        }
+    }
 
-    delay(2000);
-    Serial.println("Hello:");
+    if (!InitDriverUart(LastErrorMessage))
+    {
+        // Print error message
+        SerialDebug.println("Error: " + LastErrorMessage);
 
+        // Loop forever
+        while (true)
+        {
+        }
+    }
 
+    if (!InitWifi(10000, LastErrorMessage))
+    {
+        // Print error message
+        SerialDebug.println("Error: " + LastErrorMessage);
 
-GoToWaypoint(50,300);
-delay(4000);
+        // Loop forever
+        while (true)
+        {
+        }
+    }
 
-GoToWaypoint(150,300);
-GoToWaypoint(150,200);
-GoToWaypoint(50,200);
-GoToWaypoint(150,200);
-GoToWaypoint(250,150);
-GoToWaypoint(250,50);
-GoToWaypoint(250,150);
+    if (!InitMqtt(LastErrorMessage))
+    {
+        // Print error message
+        SerialDebug.println("Error: " + LastErrorMessage);
 
+        // Loop forever
+        while (true)
+        {
+        }
+    }
+    
+    
+    MqttClient.publish("Robots", "Gooooo");
 
-
-
-
-
-   
 }
 
-void loop()
-{
-    // mySerial.println("{\"Command\":\"GetDrivingState\"}");
-    // while (mySerial.available())
-    // {
-    //     char receivedChar = mySerial.read();
-    //     Serial.write(receivedChar);
-    // }
-
-    // Serial.println();
-
-    // mySerial.println("{\"Command\":\"GetCurrentPosition\"}");
-    // while (mySerial.available())
-    // {
-    //     char receivedChar = mySerial.read();
-    //     Serial.write(receivedChar);
-    // }
-
-    // Serial.println();
-
-    // mySerial.println("{\"Command\":\"GetBatteryState\"}");
-    // while (mySerial.available())
-    // {
-    //     char receivedChar = mySerial.read();
-    //     Serial.write(receivedChar);
-    // }
-
-    // Serial.println("--------------------------------------------");
-
-    // delay(1000);
+// ------------------------- Loop -------------------------
+void loop(){
+    MqttClient.loop();
 }
-
-// #include <Arduino.h>
-
-// #define LED_PIN 1
-
-// void blink(void *pvParameter)
-// {
-//     while (true)
-//     {
-//         digitalWrite(LED_PIN, HIGH);
-//         delay(500);
-//         digitalWrite(LED_PIN, LOW);
-//         delay(500);
-//     }
-// }
-
-// bool isPrime(int n)
-// {
-//     if (n <= 1)
-//     {
-//         return false;
-//     }
-
-//     for (int i = 2; i <= n / 2; ++i)
-//     {
-//         if (n % i == 0)
-//         {
-//             return false;
-//         }
-//     }
-
-//     return true;
-// }
-
-// void prime(void *pvParameter)
-// {
-//     while (true)
-//     {
-//         for (unsigned int i = 0; i < UINT_MAX; i++)
-//         {
-//             if (isPrime(i))
-//             {
-//                 Serial.println(i);
-//             }
-//         }
-//     }
-// }
-
-// void setup()
-// {
-//     Serial.begin(115200);
-
-//     xTaskCreate(&blink, "blink", 2048, NULL, 2, NULL);
-//     xTaskCreate(&prime, "prime", 2048, NULL, 5, NULL);
-
-//     pinMode(LED_PIN, OUTPUT);
-// }
-
-// void loop()
-// {
-// }
-
-// #include <Arduino.h>
-// #include "Audio.h"
-// #include <Wire.h>
-// #include <HardwareSerial.h>
-
-// // I2S Connections
-// #define I2S_DOUT 7
-// #define I2S_BCLK 5
-// #define I2S_LRC 6
-
-// #define SDA_PIN 1
-// #define SCL_PIN 2
-
-// // Create Audio object
-// Audio audio;
-
-// HardwareSerial mySerial(1);
-
-// void setup()
-// {
-//     SPIFFS.begin();
-
-//     Serial.begin(115200);
-//     mySerial.begin(115200, SERIAL_8N1, 18, 17);
-
-//     delay(2000);
-
-//     Wire.begin(SDA_PIN, SCL_PIN); // Initialize the I2C bus with the specified pins
-
-//     while (!Serial)
-//         ; // Wait for serial connection
-//     Serial.println("I2C Address Check");
-
-//     byte address = 0x28; // Replace with the desired address to check
-//     Wire.beginTransmission(address);
-//     byte error = Wire.endTransmission();
-
-//     if (error == 0)
-//     {
-//         Serial.print("Device found at address 0x");
-//         if (address < 16)
-//         {
-//             Serial.print("0");
-//         }
-//         Serial.println(address, HEX);
-//     }
-//     else
-//     {
-//         Serial.print("No device found at address 0x");
-//         if (address < 16)
-//         {
-//             Serial.print("0");
-//         }
-//         Serial.println(address, HEX);
-//     }
-
-//     mySerial.println("Hello World");
-
-//     // Setup I2S
-//     audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
-
-//     // Set Volume
-//     audio.setVolume(0xFF);
-
-//     // Open music file
-//     audio.connecttoFS(SPIFFS, "/hallo.mp3");
-// }
-
-// void loop()
-// {
-//     audio.loop();
-
-//     if (mySerial.available())
-//     {
-//         char receivedChar = mySerial.read();
-//         Serial.write(receivedChar);
-//     }
-// }
-
-// lib_deps = esphome/ESP32-audioI2S@^2.0.6
-
-// HardwareSerial mySerial(1);
-
-// void setup()
-// {
-//     Serial.begin(115200);
-//     mySerial.begin(115200, SERIAL_8N1, 18, 17);
-
-//     delay(2000);
-//     Serial.println("Hello:");
-
-//     String jsonString = ;
-//     mySerial.println("{\"Command\":\"SetNextWaypoint\",\"Data\":{\"x\":\"450\",\"y\":\"200\"}}");
-
-//     delay(500);
-// }
-
-// void loop()
-// {
-//     mySerial.println("{\"Command\":\"GetDrivingState\"}");
-//     while (mySerial.available())
-//     {
-//         char receivedChar = mySerial.read();
-//         Serial.write(receivedChar);
-//     }
-
-//     Serial.println();
-
-//     mySerial.println("{\"Command\":\"GetCurrentPosition\"}");
-//     while (mySerial.available())
-//     {
-//         char receivedChar = mySerial.read();
-//         Serial.write(receivedChar);
-//     }
-
-//     Serial.println();
-
-//     mySerial.println("{\"Command\":\"GetBatteryState\"}");
-//     while (mySerial.available())
-//     {
-//         char receivedChar = mySerial.read();
-//         Serial.write(receivedChar);
-//     }
-
-//     Serial.println("--------------------------------------------");
-
-//     delay(1000);
-// }
