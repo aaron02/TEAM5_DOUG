@@ -27,15 +27,8 @@ PDB* pdb = nullptr;
 void MainThread(uint32_t difftime)
 {
     // Mouse Sensor
-    if (ADNStimer <= 0)
-    {
-        ADNStimer = 1 * TimeVar::Millis;
-
-        if (adnsController)
-            adnsController->Update(difftime);
-    }
-    else
-        ADNStimer -= difftime;
+    if (adnsController)
+        adnsController->Update(difftime);
 
     // Gyro
     if (gyro)
@@ -91,10 +84,10 @@ void motorThread()
     while (1)
     {
         // Programm Cycle
-        frontLeft->Update(0);
-        frontRight->Update(0);
-        backLeft->Update(0);
-        backRight->Update(0);
+        //frontLeft->Update(0);
+        //frontRight->Update(0);
+        //backLeft->Update(0);
+        //backRight->Update(0);
         gripperBase->Update(0);
     }
 }
