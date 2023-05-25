@@ -12,6 +12,10 @@ const String MQTT_DEVICE_ID = "Dough";
 const int MQTT_PORT = 1883;
 const unsigned long SERIAL_BAUD_DEBUG = 115200;
 const unsigned long SERIAL_BAUD_DRIVER = 115200;
+const String MQTT_SUBSCRIPTION_TOPICS[] = {
+    "topic1",
+    "topic2",
+    "topic3"};
 
 // ------------------------- Objects -------------------------
 WiFiClient WifiClient;
@@ -31,6 +35,32 @@ enum RobotState
 };
 
 // ------------------------- Functions -------------------------
+
+void MqttCallback(char *topic, byte *payload, unsigned int length)
+{
+    SerialDebug.print("Neue Nachricht empfangen auf Thema: ");
+    SerialDebug.println(topic);
+
+    // Parse the payload using ArduinoJSON
+    DynamicJsonDocument doc(1024);
+    DeserializationError error = deserializeJson(doc, payload, length);
+
+    if (error)
+    {
+        SerialDebug.print("Fehler beim Analysieren der JSON-Nachricht: ");
+        SerialDebug.println(error.c_str());
+        return;
+    }
+
+    // Format the parsed JSON document for pretty printing
+    String formattedJson;
+    serializeJsonPretty(doc, formattedJson);
+
+    // Print the formatted JSON to the SerialDebug output
+    SerialDebug.print("Inhalt:\n");
+    SerialDebug.println(formattedJson);
+}
+
 bool InitDebugUart(String &errorMessage)
 {
     // Reset error message
@@ -109,9 +139,11 @@ bool InitMqtt(String &errorMessage)
         return false;
     }
 
+    // Set callback function
+    MqttClient.setCallback(MqttCallback);
+
     return true;
 }
-
 
 // ------------------------- Setup -------------------------
 void setup()
@@ -155,13 +187,13 @@ void setup()
         {
         }
     }
-    
-    
-    MqttClient.publish("Robots", "Gooooo");
 
+    MqttClient.publish("Robots", "Gooooo");
+    MqttClient.subscribe("Robots");
 }
 
 // ------------------------- Loop -------------------------
-void loop(){
+void loop()
+{
     MqttClient.loop();
 }
