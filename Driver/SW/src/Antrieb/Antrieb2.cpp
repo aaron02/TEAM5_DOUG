@@ -35,10 +35,22 @@ Antrieb2::~Antrieb2()
 
 void Antrieb2::Update(uint64_t difftime)
 {
-    if (getSpeed() < 0.0 || getSpeed() > 0.0)
+    if (!_stepInterval)
+	    return;
+
+    unsigned long time = micros();   
+    if (time - _lastStepTime >= _stepInterval)
     {
-        // Pulse Here
+        step();
+        _lastStepTime = time;
     }
+}
+
+void Antrieb2::step()
+{
+    digitalWrite(iStepPin, HIGH); // step HIGH
+    delayNanoseconds(100);
+    digitalWrite(iStepPin, LOW); // step LOW
 }
 
 double Antrieb2::mapDouble(double x, double in_min, double in_max, double out_min, double out_max)
@@ -85,6 +97,11 @@ void Antrieb2::setSpeed(MotorType iMotor, float fSpeed)
 
         } break;
     }
+
+    if (fDemandedSpeed[0] == 0.0)
+        _stepInterval = 0;
+    else
+        _stepInterval = fabs(1000000.0 / fDemandedSpeed[0]);
 
     // Only for Debug use, activating this Line Stops the Motors from Working, this extends the Program Cycle.
     //sLogger.info("Antrieb %s set to Speed %f (%f)", sAntriebName.c_str(), fSpeed, fDemandedSpeed);

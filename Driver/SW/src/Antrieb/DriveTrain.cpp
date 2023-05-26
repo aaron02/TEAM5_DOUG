@@ -12,6 +12,11 @@ DriveTrain::DriveTrain(Antrieb &frontLeftMotor, Antrieb &rearLeftMotor, Antrieb 
 {
 }
 
+DriveTrain::DriveTrain(Antrieb2& mecanumDrive) : m_mecanumDrive(&mecanumDrive)
+{
+
+}
+
 DriveTrain::~DriveTrain()
 {
 }
@@ -70,11 +75,19 @@ void DriveTrain::Drive(double xSpeed, double ySpeed, double zRotation, double gy
   ySpeed = ApplyDeadband(ySpeed, m_deadband);
 
   WheelSpeeds speeds = DriveIK(xSpeed, ySpeed, zRotation, gyroAngle);
-
+  
+/*
   m_frontLeftMotor->setSpeed(speeds.frontLeft * m_maxOutput);
   m_frontRightMotor->setSpeed(speeds.frontRight * m_maxOutput);
   m_rearLeftMotor->setSpeed(speeds.rearLeft * m_maxOutput);
   m_rearRightMotor->setSpeed(speeds.rearRight * m_maxOutput);
+*/
+
+  // New Drive Functions
+  m_mecanumDrive->setSpeed(MotorType::kFrontLeft, speeds.frontLeft * m_maxOutput);
+  m_mecanumDrive->setSpeed(MotorType::kFrontRight, speeds.frontRight * m_maxOutput);
+  m_mecanumDrive->setSpeed(MotorType::kRearLeft, speeds.rearLeft * m_maxOutput);
+  m_mecanumDrive->setSpeed(MotorType::kRearRight, speeds.rearRight * m_maxOutput);
 }
 
 WheelSpeeds DriveTrain::DriveIK(double xSpeed, double ySpeed, double zRotation, double gyroAngle)

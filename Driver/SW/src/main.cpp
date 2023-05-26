@@ -12,6 +12,7 @@ int32_t ADNStimer = 5 * TimeVar::Millis;
 
 uint8_t status = Status::Startup;
 
+Antrieb2* mecanumDrive = nullptr;
 Antrieb* frontLeft = nullptr;
 Antrieb* frontRight = nullptr;
 Antrieb* backLeft = nullptr;
@@ -88,6 +89,7 @@ void motorThread()
         //frontRight->Update(0);
         //backLeft->Update(0);
         //backRight->Update(0);
+        mecanumDrive->Update(0);
         gripperBase->Update(0);
     }
 }
@@ -110,11 +112,13 @@ void setup()
     // Initialize Interfaces
     sLogger.info("Controller Initialize Interfaces....");
     // Motor Interface
-    frontLeft = new Antrieb("Front Left", 2, 3, 15);
-    frontRight = new Antrieb("Front Right", 4, 5, 15);
-    backLeft = new Antrieb("Back Left", 6, 7, 15);
-    backRight = new Antrieb("Back Right", 8, 9, 15);
-    driveTrain = new DriveTrain(*frontLeft, *backLeft, *frontRight, *backRight);
+    //frontLeft = new Antrieb("Front Left", 2, 3, 15);
+    //frontRight = new Antrieb("Front Right", 4, 5, 15);
+    //backLeft = new Antrieb("Back Left", 6, 7, 15);
+    //backRight = new Antrieb("Back Right", 8, 9, 15);
+    //driveTrain = new DriveTrain(*frontLeft, *backLeft, *frontRight, *backRight);
+    mecanumDrive = new Antrieb2("Mecanum Drive", 2, 3, 5, 7, 9, 15);
+    driveTrain = new DriveTrain(*mecanumDrive);
 
     gripperBase = new PosAntrieb("Gripper Base", 25, 24, 14, 32);
     //

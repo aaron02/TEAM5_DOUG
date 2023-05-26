@@ -7,6 +7,7 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 #include "Lib/Defnies.h"
 
 class Antrieb;
+class Antrieb2;
 
 struct WheelSpeeds 
 {
@@ -16,17 +17,10 @@ struct WheelSpeeds
     double rearRight    = 0.0;
 };
 
-enum MotorType 
-{
-    kFrontLeft          = 0,
-    kFrontRight         = 1,
-    kRearLeft           = 2,
-    kRearRight          = 3
-};
-
 class DriveTrain
 {
     public:
+    DriveTrain(Antrieb2& mecanumDrive);
     DriveTrain(Antrieb& frontLeftMotor, Antrieb& rearLeftMotor, Antrieb& frontRightMotor, Antrieb& rearRightMotor);
     ~DriveTrain();
 
@@ -72,4 +66,5 @@ class DriveTrain
     Antrieb* m_rearLeftMotor;
     Antrieb* m_frontRightMotor;
     Antrieb* m_rearRightMotor;
+    Antrieb2* m_mecanumDrive;
 };

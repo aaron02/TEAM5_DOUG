@@ -18,6 +18,8 @@ public:
     void setSpeed(MotorType iMotor, float fSpeed);
     float getSpeed();
 
+    void step();
+
     void disableOutputs();
     void enableOutputs();
 
@@ -28,6 +30,11 @@ private:
 
     // Speed to Run the Motors
     std::vector<float> fDemandedSpeed = {0, 0, 0, 0};
+
+    // Step Interval Pulses per microseconds
+    unsigned long _stepInterval = 0;
+    // The last step time in microseconds
+    unsigned long  _lastStepTime;
 
     std::string sAntriebName = "";
     uint32_t iStepPin = 0;

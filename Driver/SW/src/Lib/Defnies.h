@@ -18,6 +18,14 @@ enum HomingStatus
     HOMING_DONE             = 2
 };
 
+enum MotorType 
+{
+    kFrontLeft              = 0,
+    kFrontRight             = 1,
+    kRearLeft               = 2,
+    kRearRight              = 3
+};
+
 // Arduino
 #include <Arduino.h>
 
@@ -49,6 +57,7 @@ enum HomingStatus
 // User Created
 #include "Logger.h"
 #include "TimeVar.h"
+#include "Antrieb/Antrieb2.h"
 #include "Antrieb/Antrieb.h"
 #include "Antrieb/PosAntrieb.h"
 #include "Navigation.h"
