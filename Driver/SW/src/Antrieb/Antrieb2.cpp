@@ -48,6 +48,7 @@ void Antrieb2::Update(uint64_t difftime)
 
 void Antrieb2::step()
 {
+    // Test
     digitalWrite(iStepPin, HIGH); // step HIGH
     delayNanoseconds(100);
     digitalWrite(iStepPin, LOW); // step LOW
