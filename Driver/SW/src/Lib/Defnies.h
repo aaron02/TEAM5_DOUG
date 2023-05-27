@@ -35,6 +35,8 @@ enum MotorType
 #include <Adafruit_BNO08x.h>
 #include <Wire.h>
 #include "SPI.h"
+#include <ArduinoJson.h>
+#include <SD.h>
 
 // STD LIBS
 #include <stdio.h>
@@ -67,3 +69,4 @@ enum MotorType
 #include "Sensors/ADNS.h"
 #include "Sensors/Gyro.h"
 #include "Sensors/PowerDistributionBoard.h"
+#include "Com.h"
