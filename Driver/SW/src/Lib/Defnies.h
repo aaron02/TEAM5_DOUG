@@ -37,6 +37,7 @@ enum MotorType
 #include "SPI.h"
 #include <ArduinoJson.h>
 #include <SD.h>
+#include <PWMServo.h>
 
 // STD LIBS
 #include <stdio.h>
@@ -69,4 +70,5 @@ enum MotorType
 #include "Sensors/ADNS.h"
 #include "Sensors/Gyro.h"
 #include "Sensors/PowerDistributionBoard.h"
+#include "Greifer/Greifer.h"
 #include "Com.h"

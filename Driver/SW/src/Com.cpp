@@ -4,11 +4,11 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 
 #include "Com.h"
 
-Communication::Communication()
+Communication::Communication(Navigation* mNav ,Greifer* mGrip, PDB* mPwr) : mNavigation(mNav), mGreifer(mGrip), mPower(mPwr)
 {
     // Populate our Functions Map
     functionHandle.insert(std::pair<std::string, Functions>("GetCurrentPosition", GetCurrentPosition));
-    functionHandle.insert(std::pair<std::string, Functions>("SetDrivingWaypoint", SetDrivingWaypoint));
+    functionHandle.insert(std::pair<std::string, Functions>("SetNextWaypoint", SetDrivingWaypoint));
     functionHandle.insert(std::pair<std::string, Functions>("AbortDriving", AbortDriving));
     functionHandle.insert(std::pair<std::string, Functions>("GetDrivingState", GetDrivingState));
     functionHandle.insert(std::pair<std::string, Functions>("SetArmState", SetArmState));
@@ -38,13 +38,58 @@ void Communication::Update(uint64_t difftime)
 
         switch(functionIndex)
         {
+            // Receive
             case SetDrivingWaypoint:
             {
-                uint32_t x = doc["Data"][0];
-                uint32_t y = doc["Data"][1];
-
-                sLogger.debug("Data:: X=%u Y=%u", x, y);
+                uint32_t x = doc["Data"]["x"];
+                uint32_t y = doc["Data"]["y"];
+                response("OK");
             } break;
+
+            case AbortDriving:
+            {
+                // Stop Movement
+                response("OK");
+            } break;
+
+            case GetDrivingState:
+            {
+                // Respond with Movement State
+                response("Busy");
+                response("Finished");
+                response("Error");
+            } break;
+
+            case SetArmState:
+            {
+                uint8_t armState = doc["Data"];
+            } break;
+
+            case GetArmState:
+            {
+                // Response with Arm State
+                response("Ready");
+                response("Stored");
+            } break;
+
+            case PickPackage:
+            {
+                uint32_t lagerIndex = doc["Data"]["Lagerindex"];
+            } break;
+
+            case PlacePackage:
+            {
+                uint32_t lagerIndex = doc["Data"]["Lagerindex"];
+            } break;
+
+            case GetBatteryState:
+            {
+                // Response with Battery in %
+                responseData("BatteryState", std::to_string(mPower->GetVoltagePct()));
+            } break;
+
+            default:
+                break;
         }
     }
 }
@@ -57,4 +102,21 @@ uint8_t Communication::getFunctionIndex(std::string command)
         return functionHandle.find(command)->second;
 
     return Functions::Unk;
+}
+
+void Communication::response(std::string response, std::string message)
+{
+    DynamicJsonDocument doc(1024);
+    doc["Response"] = response;
+        if (message.size())
+            doc["ErrorMessage"] = message;
+
+    serializeJson(doc, Serial1);
+}
+
+void Communication::responseData(std::string response, std::string message)
+{
+     DynamicJsonDocument doc(1024);
+    doc["Data"][response] = message;
+    serializeJson(doc, Serial1);
 }

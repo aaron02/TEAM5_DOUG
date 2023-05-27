@@ -6,9 +6,8 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 
 #include "Lib/Defnies.h"
 
-#include <PWMServo.h>
-
 class PosAntrieb;
+class Navigation;
 
 enum ServoMapping
 {
@@ -28,8 +27,6 @@ enum PackStatus
     FAILED = 0,
     OK
 };
-
-PWMServo servo[2];
 
 class Greifer
 {
@@ -56,6 +53,8 @@ private:
     std::vector<int32_t> updateTimer = { 500, 500 };
 
 protected:
+    PWMServo servo[2];
+
     PosAntrieb* mAntrieb = nullptr;
     Navigation* mNavigation = nullptr;
     uint8_t servo1PositionToGo = 0;

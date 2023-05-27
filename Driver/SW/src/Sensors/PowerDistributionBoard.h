@@ -18,6 +18,7 @@ public:
     float GetCurrent() { return fCurrent; }
     float GetCurrentDrawn() { return fCurrentDrawn; }
     float GetVoltage() { return fVoltage; }
+    float GetVoltagePct() { return ((fVoltage / fBatteryStartVoltage) * 100); }
     float GetVoltageDrawn() { return fVoltageDrawn; }
 
 private:
