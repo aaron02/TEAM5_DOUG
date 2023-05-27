@@ -86,7 +86,7 @@ void Gyro::Update(uint64_t difftime)
             }
         }
 
-        sensorUpdate = 10 * TimeVar::Millis;;
+        sensorUpdate = 5 * TimeVar::Millis;;
     }
     else
         sensorUpdate = sensorUpdate - difftime;

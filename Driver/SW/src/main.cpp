@@ -27,6 +27,9 @@ PDB* pdb = nullptr;
 
 void MainThread(uint32_t difftime)
 {
+    mecanumDrive->Update(0);
+    gripperBase->Update(0);
+
     // Mouse Sensor
     if (adnsController)
         adnsController->Update(difftime);
@@ -69,10 +72,10 @@ void MainThread(uint32_t difftime)
         if (timer < 0)
         {
             // Drivetrain test
-            driveTrain->Drive(1.0, 0.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
+            driveTrain->Drive(0.5, 0.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
             //gripperBase->moveAbsolutAngle(360);
 
-            //sLogger.info("Controller Loop Time = %u µs (%f ms)", difftime, float(difftime / Millis));
+            sLogger.info("Controller Loop Time = %u µs (%f ms)", difftime, float(difftime / Millis));
             timer = 10 * TimeVar::Seconds;
         }
         else
@@ -135,7 +138,7 @@ void setup()
     //
 
     // Multithreading
-    threads.addThread(motorThread);
+    //threads.addThread(motorThread);
 
     status = Status::Initialization;
     // Notice Our Logs we are Running :)
