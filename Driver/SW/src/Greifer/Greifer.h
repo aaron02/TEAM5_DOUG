@@ -29,6 +29,39 @@ enum PackStatus
     OK
 };
 
+enum Grundstellung
+{
+    Running = 0,
+    OK
+};
+
+enum SERVO_Positionen
+{
+    //SERVO_BASE
+    BASE_GS = 130, //GS=Grundstellung
+    BASE_OBEN = 160,
+    BASE_GEIFERPOSITION = 60,
+    BASE_PARKPOSITION = 90,
+    BASE_HOVEROVERLAGER = 120,
+    BASE_LAGERPOSITION = 110,
+    //SERVO_GRIPP
+    GRIPP_OFFEN = 160,
+    GRIPP_GESCHLOSSEN = 60,
+    GRIPP_PARKPOSITION = 90,
+};
+
+enum Drehtisch_Position
+{
+    DT_Lager_PS1 =1,
+    DT_Lager_PS2,
+    DT_Lager_PS3,
+    DT_Lager_PS4,
+    DT_Parkposition = 45, // Soll in der mitte vom Robo sein
+    DT_Greifposition = 270,
+    DT_Bewegung_Freigegeben = 180, //Greifer-Arm hat sich bis zu dieser Position bewegt wo er nicht mehr im Vorderen
+                                   //Teil des Roboters ist. Damit könnte man ein Signal ausgeben das sich der Roboter bewegen darf. 
+};
+
 PWMServo servo[2];
 
 class Greifer
@@ -41,9 +74,11 @@ public:
 
     uint8_t getPosition(ServoMapping servo);
     uint8_t getSollPosition(ServoMapping servo);
-    void setSollPosition(ServoMapping servo, uint8_t degree);
+    void setSollPosition(ServoMapping servo, SERVO_Positionen degree); // uint8_t degree
 
     // Drive Befehle
+    
+    Grundstellung Grundstellung();
     void setArmStatus();
     ArmStatus getArmStatus();
     PackStatus PickPackage(uint8_t lagerIndex);
@@ -56,14 +91,14 @@ private:
     std::vector<int32_t> updateTimer = { 500, 500 };
 
 protected:
+    /*
+        Schrittmotor 1 Step = 1.8° -> 200 Steps = 360°
+        Driver -> Set to 1/8 Steps  -> 200*8 = 1600 steps = 360°
+
+    mAntrieb->setSpeeds(300, 360);
+    */
     PosAntrieb* mAntrieb = nullptr;
     Navigation* mNavigation = nullptr;
     uint8_t servo1PositionToGo = 0;
     uint8_t servo2PositionToGo = 0;
-
-    // Lagerkonstanten
-    const uint8_t iPlace1 = 25;
-    const uint8_t iPlace2 = 50;
-    const uint8_t iPlace3 = 75;
-    const uint8_t iPlace4 = 100;
 };

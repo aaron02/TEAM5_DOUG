@@ -8,6 +8,7 @@ Greifer::Greifer(uint8_t servoPin1, uint8_t servoPin2, PosAntrieb& dreh, Navigat
 {
     servo[SERVO_BASE].attach(servoPin1);
     servo[SERVO_GRIPP].attach(servoPin2);
+    Grundstellung();
 }
 
 Greifer::~Greifer()
@@ -23,6 +24,7 @@ void Greifer::Update(uint64_t difftime)
 
     // Servo 2
     runServo(SERVO_GRIPP, difftime);
+
 }
 
 void Greifer::runServo(ServoMapping servoIndex, uint64_t difftime)
@@ -87,7 +89,7 @@ uint8_t Greifer::getSollPosition(ServoMapping servo)
     return mPosition;
 }
 
-void Greifer::setSollPosition(ServoMapping servo, uint8_t degree)
+void Greifer::setSollPosition(ServoMapping servo, SERVO_Positionen degree) //uint8_t degree 
 {
     switch (servo)
     {
@@ -115,6 +117,72 @@ void Greifer::setTimer(ServoMapping servo, int32_t timer)
 
      updateTimer[servo] = timer;
 }
+//Grundstellungsfahrt Greifer, Arm und referenzierung des Drehtisches. Soll Kollisionen vermeiden.
+Grundstellung Greifer::Grundstellung()
+{
+    int step = 1;
+
+        switch (step)
+    {
+        case 1:
+        {
+            /*
+            Base und Gripp werden in einen Sicheren Bereich gefahren. Weiterschaltung nur über Base Zeilposition
+            weil nur er eine Kollision erfahren kann. IF-Bedingung soll den nächsten Case Starten wenn Position erreicht ist.
+            */
+            setSollPosition(SERVO_BASE, BASE_GS);
+            setSollPosition(SERVO_GRIPP, GRIPP_OFFEN);
+            runServo(SERVO_BASE, 1000);
+            runServo(SERVO_GRIPP, 1000);
+
+            //Weiterschaltbedingung
+            if ((getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE))){
+                step++; };
+
+            return Running;
+        }
+        break;
+        case 2:
+        {
+            // Drehtisch wird referenziert. Nächster Schritt wenn Done.
+
+            if(mAntrieb->isHomed()==false){
+                mAntrieb->setHoming();
+            };
+
+            //Weiterschaltbedingung
+            if (mAntrieb->isHomed()==true){   // #try hoffe das geht so
+                step++; };
+
+            return Running;
+        }
+        break;
+        case 3:
+        {
+            // Drehtisch und SERVO_BASE gehen in die Parkposition.
+
+            
+            mAntrieb->moveAbsolutAngle(DT_Parkposition);
+            setSollPosition(SERVO_BASE, BASE_HOVEROVERLAGER);
+            runServo(SERVO_BASE, 1000);
+
+            //Weiterschaltbedingung
+            if (!(mAntrieb->isMoving()) && (getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE))){
+                step++; };
+
+            return Running;
+        }
+        break;
+        case 4:
+        {
+            // Grundstellung abgeschlossen
+
+            return OK;
+        }
+        break;
+    }
+
+}
 
 void Greifer::setArmStatus()
 {
@@ -128,6 +196,15 @@ ArmStatus Greifer::getArmStatus()
 
 PackStatus Greifer::PickPackage(uint8_t lagerIndex)
 {
+    // Arm Rauf
+    // Drehen
+    // Arm Runter
+    // Greiffen
+    // Arm Hoch
+    // Drehen
+    // Arm Runter
+    // Greiffer öffnen
+    // Home
     return PackStatus::OK;
 }
 
@@ -135,3 +212,42 @@ PackStatus Greifer::PlacePackage(uint8_t lagerIndex)
 {
     return PackStatus::OK;
 }
+
+/*
+    switch (moveStep)
+    {
+        case 1:
+        {
+            // Hier Funktion
+
+            if (Weiterschaltbedingung)
+            moveStep++;
+        }
+        break;
+        case 2:
+        {
+            // Hier Funktion
+
+            if (Weiterschaltbedingung)
+            moveStep++;
+        }
+        break;
+        case 3:
+        {
+            // Hier Funktion
+
+            if (Weiterschaltbedingung)
+            moveStep++;
+        }
+        break;
+        case 4:
+        {
+            // Hier Funktion
+
+            if (Weiterschaltbedingung)
+            moveStep++;
+        }
+        break;
+    }
+*/
+
