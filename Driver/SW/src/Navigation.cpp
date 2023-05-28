@@ -6,7 +6,7 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 
 Navigation::Navigation(DriveTrain* drives, Odometry* odo) : m_Drive(drives), m_Odometry(odo)
 {
-    
+    mSollPosition = new Vector2D(0, 0);
 }
 
 Navigation::~Navigation()
@@ -16,54 +16,99 @@ Navigation::~Navigation()
 
 void Navigation::Update(uint64_t difftime)
 {
-    // Test Movement Quadratic Move.
-    if (moveTimer <= 0)
+    // Check Position Each Second should be enough
+    if (timer <= 0)
     {
-        if (moveStep < 4)
+        timer = 1 * TimeVar::Seconds;
+
+        if (m_Odometry->GetPosition() != getSollPosition())
         {
-            moveTimer = 15 * TimeVar::Seconds;
-            moveStep = moveStep + 1;
+            Vector2D* mPosition = m_Odometry->GetPosition();
 
-            switch (moveStep)
+            float xDifference = mPosition->getX() - mSollPosition->getX();
+            float yDifference = mPosition->getY() - mSollPosition->getY();
+
+            // Distanz Luftline
+            float distance = sqrtf(yDifference * yDifference + xDifference * xDifference);
+
+            //sLogger.debug("xDif %f, yDif %f, Distance %f", xDifference, yDifference, distance);
+
+            // Gleichzeitiges Fahren
+            if (0)
             {
-                case 1:
-                {
-                    fSpeedX = 1.0f;
-                    fSpeedY = 0.0f;
-                }
-                break;
-                case 2:
-                {
-                    fSpeedX = 0.0f;
-                    fSpeedY = 1.0f;
-                }
-                break;
-                case 3:
-                {
-                    fSpeedX = -1.0f;
-                    fSpeedY = 0.0f;
-                }
-                break;
-                case 4:
-                {
-                    fSpeedX = 0.0f;
-                    fSpeedY = -1.0f;
-                }
-                break;
-            }
 
+            fSpeedX = calculateSpeed(xDifference);
+            fSpeedY = calculateSpeed(yDifference);
+
+            sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
+            m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
+            }
+            else
+            {
+                if (yDifference != 0)
+                {
+                    // Fahre zuerst Y Richtung
+                    fSpeedX = 0.0f;
+                    fSpeedY = calculateSpeed(yDifference);
+
+                    sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
+                    m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
+                }
+                else
+                {
+                    if (xDifference != 0)
+                    {
+                    // Fahre X Richtung
+                    fSpeedX = calculateSpeed(xDifference);
+                    fSpeedY = 0.0f;
+
+                    sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
+                    m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
+                    }
+                    else
+                    {
+                        // Position Erreicht
+                        m_Drive->Drive(0.0f, 0.0f, 0.0f);
+                    }
+                }
+            }
         }
         else
-        {
-            m_Drive->Drive(0.0, 0.0, 0.0, 0.0f);
-            return;
-        }
+            m_Drive->Drive(0.0f, 0.0f, 0.0f);
     }
     else
+        timer -= difftime;
+}
+
+void Navigation::setSollPosition(float x, float y)
+{
+     mSollPosition->changeCoords(x, y);
+}
+
+float Navigation::calculateSpeed(int distance) 
+{
+    // Maximale Distanz (entspricht der Entfernung, bei der die Geschwindigkeit 0 erreicht)
+    const float maxDistance = 200.0;
+
+    // Berechnung der Geschwindigkeit
+    float speed = (distance / maxDistance) * maxSpeed;
+
+    // Niemels unter 0.25
+    if (speed != 0 && (speed < 0.25 && speed > 0))
+        speed = 0.25;
+
+    if (speed != 0 && (speed > -0.25 && speed < 0))
+        speed = -0.25;
+
+    // Begrenze die Geschwindigkeit innerhalb des zulässigen Bereichs
+    if (speed > maxSpeed) 
     {
-        moveTimer = moveTimer - difftime;
+        speed = maxSpeed;
+    } 
+    else if (speed < -maxSpeed)
+    {
+        speed = -maxSpeed;
     }
 
-    //sLogger.debug("Speed Demanded %f and %f", fSpeedX, fSpeedY);
-    m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
+    return speed;
 }

@@ -41,8 +41,12 @@ void Communication::Update(uint64_t difftime)
             // Receive
             case SetDrivingWaypoint:
             {
-                uint32_t x = doc["Data"]["x"];
-                uint32_t y = doc["Data"]["y"];
+                int32_t x = doc["Data"]["x"];
+                int32_t y = doc["Data"]["y"];
+
+                if (mNavigation)
+                    mNavigation->setSollPosition(x, y);
+
                 response("OK");
             } break;
 

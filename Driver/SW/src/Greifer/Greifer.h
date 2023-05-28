@@ -24,14 +24,14 @@ enum ArmStatus
 
 enum PackStatus
 {
-    FAILED = 0,
-    OK
+    STATUS_FAILED = 0,
+    STATUS_OK
 };
 
 enum Grundstellung
 {
-    Running = 0,
-    OK
+    GS_Running = 0,
+    GS_OK
 };
 
 enum SERVO_Positionen

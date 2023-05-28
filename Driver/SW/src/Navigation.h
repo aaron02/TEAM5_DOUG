@@ -6,6 +6,7 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 
 #include "Lib/Defnies.h"
 
+class Vector2D;
 class DriveTrain;
 class Odometry;
 
@@ -17,9 +18,14 @@ public:
 
     void Update(uint64_t difftime);
 
+    // Setze Sollposition für Navigation
+    void setSollPosition(float x, float y);
+    Vector2D* getSollPosition() { return mSollPosition; }
+
+    float calculateSpeed(int distance);
+
 private:
-    int32_t moveTimer = 5 * TimeVar::Seconds;
-    uint8_t moveStep = 0;
+    Vector2D* mSollPosition;
 
 protected:
     DriveTrain* m_Drive;
@@ -28,5 +34,10 @@ protected:
     float fSpeedX = 0.0f;
     float fSpeedY = 0.0f;
 
+    int32_t timer = 1 * TimeVar::Seconds;
     bool debug = false;
+
+    // Geschwindigkeitsbereich
+    const float maxSpeed = 1.0;  // Maximale Geschwindigkeit
+    const float minSpeed = -1.0; // Minimale Geschwindigkeit
 };
