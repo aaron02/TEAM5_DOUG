@@ -161,7 +161,7 @@ void Communication::response(std::string response, std::string message)
     DynamicJsonDocument doc(1024);
     doc["Response"] = response;
         if (message.size())
-            doc["ErrorMessage"] = message;
+            doc["Message"] = message;
 
     serializeJson(doc, Serial1);
 }
