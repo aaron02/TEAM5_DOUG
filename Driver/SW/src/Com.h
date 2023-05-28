@@ -12,6 +12,7 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 class Greifer;
 class Navigation;
 class PDB;
+class Odometry;
 
 enum Functions : uint8_t
 {
@@ -33,7 +34,7 @@ typedef std::unordered_map<std::string, Functions> sFunctions;
 class Communication
 {
 public:
-    Communication(Navigation* mNavigation ,Greifer* mGreifer, PDB* mPower);
+    Communication(Navigation* mNavigation ,Greifer* mGreifer, PDB* mPower, Odometry* mOdo);
     ~Communication();
 
     void Update(uint64_t difftime);
@@ -50,6 +51,7 @@ protected:
 
     // Handles
     Navigation* mNavigation = nullptr;
+    Odometry* mOdometry = nullptr;
     Greifer* mGreifer = nullptr;
     PDB* mPower = nullptr;
 };

@@ -4,7 +4,7 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 
 #include "Com.h"
 
-Communication::Communication(Navigation* mNav ,Greifer* mGrip, PDB* mPwr) : mNavigation(mNav), mGreifer(mGrip), mPower(mPwr)
+Communication::Communication(Navigation* mNav ,Greifer* mGrip, PDB* mPwr, Odometry* mOdo) : mNavigation(mNav), mGreifer(mGrip), mPower(mPwr), mOdometry(mOdo)
 {
     // Populate our Functions Map
     functionHandle.insert(std::pair<std::string, Functions>("GetCurrentPosition", GetCurrentPosition));
@@ -38,7 +38,20 @@ void Communication::Update(uint64_t difftime)
 
         switch(functionIndex)
         {
-            // Receive
+            case GetCurrentPosition:
+            {
+                if (mOdometry)
+                {
+                    DynamicJsonDocument doc(1024);
+                    doc["Data"]["x"] = std::to_string(mOdometry->GetPosition()->getX());
+                    doc["Data"]["y"] = std::to_string(mOdometry->GetPosition()->getY());
+                    serializeJson(doc, Serial1);
+                }
+                else
+                {
+                    response("Error");
+                }
+            } break;
             case SetDrivingWaypoint:
             {
                 int32_t x = doc["Data"]["x"];
@@ -149,7 +162,7 @@ void Communication::response(std::string response, std::string message)
 
 void Communication::responseData(std::string response, std::string message)
 {
-     DynamicJsonDocument doc(1024);
+    DynamicJsonDocument doc(1024);
     doc["Data"][response] = message;
     serializeJson(doc, Serial1);
 }
