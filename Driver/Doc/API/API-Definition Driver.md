@@ -68,7 +68,7 @@ Nächsten Waypoint senden (mit Fehler):
 ```json
 {
     "Response":"Error",
-    "ErrorMessage":"ArgumentError"
+    "Message":"ArgumentError"
 }
 ```
 

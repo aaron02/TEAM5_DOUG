@@ -138,7 +138,7 @@ Grundstellung Greifer::Grundstellung()
 {
     int step = 1;
 
-        switch (step)
+    switch (step)
     {
         case 1:
         {
@@ -155,7 +155,7 @@ Grundstellung Greifer::Grundstellung()
             if ((getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE))){
                 step++; };
 
-            return Running;
+            return GS_Running;
         }
         break;
         case 2:
@@ -170,7 +170,7 @@ Grundstellung Greifer::Grundstellung()
             if (mAntrieb->isHomed()==true){   // #try hoffe das geht so
                 step++; };
 
-            return Running;
+            return GS_Running;
         }
         break;
         case 3:
@@ -186,14 +186,14 @@ Grundstellung Greifer::Grundstellung()
             if ((mAntrieb->inPosition()) && (getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE))){
                 step++; };
 
-            return Running;
+            return GS_Running;
         }
         break;
         case 4:
         {
             // Grundstellung abgeschlossen
 
-            return OK;
+            return GS_OK;
         }
         break;
     }
@@ -255,12 +255,12 @@ PackStatus Greifer::PickPackage(Drehtisch_Position lagerIndex)
     // Arm Runter
     // Greiffer öffnen
     // Home
-    return PackStatus::OK;
+    return PackStatus::STATUS_OK;
 }
 
 PackStatus Greifer::PlacePackage(uint8_t lagerIndex)
 {
-    return PackStatus::OK;
+    return PackStatus::STATUS_OK;
 }
 
 /*

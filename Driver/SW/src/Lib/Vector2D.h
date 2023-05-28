@@ -17,6 +17,14 @@ public:
 
     Vector2D() = default;
 
+    void changeCoords(float posX, float posY)
+    {
+        x = posX;
+        y = posY;
+
+        genAngles();
+    }
+
     void genComplimentary() 
     {
         x = 0.0f;

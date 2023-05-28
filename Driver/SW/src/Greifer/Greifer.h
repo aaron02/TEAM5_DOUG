@@ -6,9 +6,9 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 
 #include "Lib/Defnies.h"
 
-#include <PWMServo.h>
-
 class PosAntrieb;
+class Navigation;
+class Updateable;
 
 enum ServoMapping
 {
@@ -25,14 +25,14 @@ enum ArmStatus
 
 enum PackStatus
 {
-    FAILED = 0,
-    OK
+    STATUS_FAILED = 0,
+    STATUS_OK
 };
 
 enum Grundstellung
 {
-    Running = 0,
-    OK,
+    GS_Running = 0,
+    GS_OK
 };
 
 enum inposition
@@ -68,15 +68,13 @@ enum Drehtisch_Position
                                    //Teil des Roboters ist. Damit könnte man ein Signal ausgeben das sich der Roboter bewegen darf. 
 };
 
-PWMServo servo[2];
-
-class Greifer
+class Greifer : public Updateable
 {
 public:
     Greifer(uint8_t servoPin1, uint8_t servoPin2, PosAntrieb& dreh, Navigation& nav);
     ~Greifer();
 
-    void Update(uint64_t difftime);
+    void Update(uint64_t difftime) override;
 
     uint8_t getPosition(ServoMapping servo);
     uint8_t getSollPosition(ServoMapping servo);
@@ -98,6 +96,8 @@ private:
     inposition inposition();
 
 protected:
+    PWMServo servo[2];
+
     /*
         Schrittmotor 1 Step = 1.8° -> 200 Steps = 360°
         Driver -> Set to 1/8 Steps  -> 200*8 = 1600 steps = 360°

@@ -6,13 +6,16 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 
 #include "Lib/Defnies.h"
 
-class PosAntrieb
+class Updateable;
+
+class PosAntrieb : public Updateable
 {
     public:
     PosAntrieb(std::string sName, uint32_t iStep, uint32_t iDir, uint32_t iEn, uint32_t iHome);
     ~PosAntrieb();
 
-    void Update(uint64_t difftime);
+    // Cyclyc Update
+    void Update(uint64_t difftime) override;
 
     // Speed Functions
     float getPosition() { return m_position; }

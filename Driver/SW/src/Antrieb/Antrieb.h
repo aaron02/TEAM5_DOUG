@@ -6,13 +6,16 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 
 #include "Lib/Defnies.h"
 
-class Antrieb
+class Updateable;
+
+class Antrieb : public Updateable
 {
     public:
     Antrieb(std::string sName, uint32_t iStep, uint32_t iDir, uint32_t iEn);
     ~Antrieb();
 
-    void Update(uint64_t difftime);
+    // Cyclyc Update
+    void Update(uint64_t difftime) override;
 
     // Speed Functions
     void setSpeed(float fSpeed);
