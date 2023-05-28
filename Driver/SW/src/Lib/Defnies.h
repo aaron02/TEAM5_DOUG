@@ -56,10 +56,13 @@ enum MotorType
 #include <cassert>
 #include <string_view>
 #include "estd/span.h"
+#include <map>
+#include <unordered_map>
 
 // User Created
 #include "Logger.h"
 #include "TimeVar.h"
+#include "Opcodes.hpp"
 #include "Antrieb/Antrieb2.h"
 #include "Antrieb/Antrieb.h"
 #include "Antrieb/PosAntrieb.h"

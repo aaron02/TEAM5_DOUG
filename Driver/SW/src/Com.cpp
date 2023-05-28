@@ -6,16 +6,7 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 
 Communication::Communication(Navigation* mNav ,Greifer* mGrip, PDB* mPwr, Odometry* mOdo) : mNavigation(mNav), mGreifer(mGrip), mPower(mPwr), mOdometry(mOdo)
 {
-    // Populate our Functions Map
-    functionHandle.insert(std::pair<std::string, Functions>("GetCurrentPosition", GetCurrentPosition));
-    functionHandle.insert(std::pair<std::string, Functions>("SetNextWaypoint", SetDrivingWaypoint));
-    functionHandle.insert(std::pair<std::string, Functions>("AbortDriving", AbortDriving));
-    functionHandle.insert(std::pair<std::string, Functions>("GetDrivingState", GetDrivingState));
-    functionHandle.insert(std::pair<std::string, Functions>("SetArmState", SetArmState));
-    functionHandle.insert(std::pair<std::string, Functions>("GetArmState", GetArmState));
-    functionHandle.insert(std::pair<std::string, Functions>("PickPackage", PickPackage));
-    functionHandle.insert(std::pair<std::string, Functions>("PlacePackage", PlacePackage));
-    functionHandle.insert(std::pair<std::string, Functions>("GetBatteryState", GetBatteryState));
+
 }
 
 Communication::~Communication()
@@ -148,10 +139,10 @@ void Communication::Update(uint64_t difftime)
 
 uint8_t Communication::getFunctionIndex(std::string command)
 {
-    sFunctions::iterator itr = functionHandle.find(command);
+    std::unordered_map<std::string, Functions>::iterator itr = mOpcodes.find(command);
 
-    if (itr != functionHandle.end())
-        return functionHandle.find(command)->second;
+    if (itr != mOpcodes.end())
+        return mOpcodes.find(command)->second;
 
     return Functions::Unk;
 }
