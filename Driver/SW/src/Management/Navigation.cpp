@@ -51,7 +51,7 @@ void Navigation::Update(uint64_t difftime)
                     fSpeedX = 0.0f;
                     fSpeedY = calculateSpeed(yDifference);
 
-                    //sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
+                    sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
                     m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
                 }
                 else
@@ -62,7 +62,7 @@ void Navigation::Update(uint64_t difftime)
                     fSpeedX = calculateSpeed(xDifference);
                     fSpeedY = 0.0f;
 
-                    //sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
+                    sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
                     m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
                     }
                     else
@@ -95,7 +95,7 @@ float Navigation::calculateSpeed(int distance)
     const float maxDistance = 200.0;
 
     // Berechnung der Geschwindigkeit
-    float speed = (distance / maxDistance) * maxSpeed;
+    float speed = (distance / maxDistance) * maxSpeed * -1;
 
     // Niemels unter 0.25
     if (speed != 0 && (speed < 0.25 && speed > 0))
