@@ -12,13 +12,25 @@ public:
     PDB();
     ~PDB();
 
+    // Cyclyc Update
     void Update(uint64_t difftime);
+
+    // ready our Sensordata
     void ReadSensor();
 
+    // returns the current drawn at the moment
     float GetCurrent() { return fCurrent; }
+
+    // returns the current drawn since we startet our Robot
     float GetCurrentDrawn() { return fCurrentDrawn; }
+
+    // returns the current voltage
     float GetVoltage() { return fVoltage; }
+
+    // returns the current voltage in pct in regards to the starting voltage
     float GetVoltagePct() { return ((fVoltage / fBatteryStartVoltage) * 100); }
+
+    // returns our voltage drawn sinse we startet our Robot
     float GetVoltageDrawn() { return fVoltageDrawn; }
 
 private:

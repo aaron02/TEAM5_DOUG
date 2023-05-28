@@ -16,11 +16,19 @@ public:
     Odometry(Gyro* gyro, ADNS_CTRL* adns);
     ~Odometry();
 
+    // Load up all neccesary stuff
     void Initialize();
+    
+    // Set our Start Position
     void setStartLocation(Vector2D startPosition, double startHeading);
+
+    // Normalize Radians
     double normalizeRadians(double angle);
 
+    // Cyclyc Update
     void Update(uint64_t difftime);
+
+    // Calculates Actual Position
     void CalculatePosition(double x, double y);
 
     Vector2D* GetPosition() { return position; }
