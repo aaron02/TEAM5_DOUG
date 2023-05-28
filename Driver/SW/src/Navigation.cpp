@@ -45,7 +45,7 @@ void Navigation::Update(uint64_t difftime)
             }
             else
             {
-                if (yDifference != 0)
+                if (yDifference > -0.5 && yDifference < 0.5)
                 {
                     // Fahre zuerst Y Richtung
                     fSpeedX = 0.0f;
@@ -56,7 +56,7 @@ void Navigation::Update(uint64_t difftime)
                 }
                 else
                 {
-                    if (xDifference != 0)
+                    if (xDifference > -0.5 && xDifference < 0.5)
                     {
                     // Fahre X Richtung
                     fSpeedX = calculateSpeed(xDifference);
