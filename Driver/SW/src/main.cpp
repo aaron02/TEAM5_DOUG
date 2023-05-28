@@ -45,6 +45,9 @@ void MainThread(uint32_t difftime)
     if (pdb)
         pdb->Update(difftime);
 
+    if (greifer)
+        greifer->Update(difftime);
+
     // Communication to Controller
     if (com)
         com->Update(difftime);
