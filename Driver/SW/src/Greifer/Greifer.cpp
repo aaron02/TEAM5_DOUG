@@ -8,7 +8,8 @@ Greifer::Greifer(uint8_t servoPin1, uint8_t servoPin2, PosAntrieb& dreh, Navigat
 {
     servo[SERVO_BASE].attach(servoPin1);
     servo[SERVO_GRIPP].attach(servoPin2);
-    Grundstellung();
+    GS_INIT_FIRST_TIME ++;
+
 }
 
 Greifer::~Greifer()
@@ -19,6 +20,10 @@ Greifer::~Greifer()
 
 void Greifer::Update(uint64_t difftime)
 {
+    if(GS_INIT_FIRST_TIME==1)
+    {
+        Grundstellung();
+    }
     // Servo 1
     runServo(SERVO_BASE, difftime);
 
@@ -191,8 +196,9 @@ Grundstellung Greifer::Grundstellung()
         break;
         case 4:
         {
-            // Grundstellung abgeschlossen
-
+            // Grundstellung abgeschlossen. Rücksetzten von der INIT variable
+            GS_INIT_FIRST_TIME = 0;
+            
             return GS_OK;
         }
         break;
@@ -225,7 +231,7 @@ PackStatus Greifer::PickPackage(Drehtisch_Position lagerIndex)
             runServo(SERVO_BASE,1000);
             if (inposition()==t)
             {
-                /* code */
+                step++;
             }
             
         }

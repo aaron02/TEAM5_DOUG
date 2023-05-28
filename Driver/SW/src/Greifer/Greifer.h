@@ -108,4 +108,5 @@ protected:
     Navigation* mNavigation = nullptr;
     uint8_t servo1PositionToGo = 0;
     uint8_t servo2PositionToGo = 0;
+    bool GS_INIT_FIRST_TIME = 0;
 };
