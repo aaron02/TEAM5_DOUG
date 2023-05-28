@@ -28,7 +28,7 @@ public:
     float GetVoltage() { return fVoltage; }
 
     // returns the current voltage in pct in regards to the starting voltage
-    float GetVoltagePct() { return ((fVoltage / fBatteryStartVoltage) * 100); }
+    float GetVoltagePct() { if (((fVoltage / fBatteryStartVoltage) * 100) >= 100) return 100; return ((fVoltage / fBatteryStartVoltage) * 100); }
 
     // returns our voltage drawn sinse we startet our Robot
     float GetVoltageDrawn() { return fVoltageDrawn; }
