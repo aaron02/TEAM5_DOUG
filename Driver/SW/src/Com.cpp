@@ -53,15 +53,37 @@ void Communication::Update(uint64_t difftime)
             case AbortDriving:
             {
                 // Stop Movement
+                if (mNavigation)
+                    mNavigation->abortDriving();
+
                 response("OK");
             } break;
 
             case GetDrivingState:
             {
                 // Respond with Movement State
-                response("Busy");
-                response("Finished");
-                response("Error");
+                if (mNavigation)
+                {
+                    switch (mNavigation->getDrivingState())
+                    {
+                        case DRIVE_STATE_BUSY:
+                        {
+                            response("Busy");
+                        } break;
+
+                        case DRIVE_STATE_FINISHED:
+                        {
+                            response("Finished");
+                        } break;
+
+                        case DRIVE_STATE_ERROR:
+                        {
+                            response("Error");
+                        } break;
+                    }
+                }
+                else
+                    response("Error");
             } break;
 
             case SetArmState:
@@ -89,7 +111,14 @@ void Communication::Update(uint64_t difftime)
             case GetBatteryState:
             {
                 // Response with Battery in %
-                responseData("BatteryState", std::to_string(mPower->GetVoltagePct()));
+                if (mPower)
+                {
+                    responseData("BatteryState", std::to_string(mPower->GetVoltagePct()));
+                }
+                else
+                {
+                    responseData("BatteryState", "Error");
+                }
             } break;
 
             default:

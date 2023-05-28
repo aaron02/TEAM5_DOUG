@@ -40,42 +40,45 @@ void Navigation::Update(uint64_t difftime)
             fSpeedX = calculateSpeed(xDifference);
             fSpeedY = calculateSpeed(yDifference);
 
-            sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
+            //sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
             m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
             }
             else
             {
-                if (yDifference < -0.5 && yDifference > 0.5)
+                if (yDifference > 0.5 || yDifference < -0.5)
                 {
                     // Fahre zuerst Y Richtung
                     fSpeedX = 0.0f;
                     fSpeedY = calculateSpeed(yDifference);
 
-                    sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
+                    //sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
                     m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
                 }
                 else
                 {
-                    if (xDifference < -0.5 && xDifference > 0.5)
+                    if (xDifference > 0.5 || xDifference < -0.5)
                     {
                     // Fahre X Richtung
                     fSpeedX = calculateSpeed(xDifference);
                     fSpeedY = 0.0f;
 
-                    sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
+                    //sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
                     m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
                     }
                     else
                     {
                         // Position Erreicht
-                        sLogger.debug("Position Erreicht");
+                        //sLogger.debug("Position Erreicht");
                         m_Drive->Drive(0.0f, 0.0f, 0.0f);
                     }
                 }
             }
         }
         else
+        {
+            //sLogger.debug("Position Erreicht");
             m_Drive->Drive(0.0f, 0.0f, 0.0f);
+        }
     }
     else
         timer -= difftime;
@@ -112,4 +115,10 @@ float Navigation::calculateSpeed(int distance)
     }
 
     return speed;
+}
+
+void Navigation::abortDriving()
+{
+    // Soll zu Istposition sollte genügen um die Motoren zu stoppen
+    mSollPosition->changeCoords(m_Odometry->GetPosition()->getX(), m_Odometry->GetPosition()->getY());
 }
