@@ -45,7 +45,7 @@ void Navigation::Update(uint64_t difftime)
             }
             else
             {
-                if (yDifference > -0.5 && yDifference < 0.5)
+                if (yDifference < -0.5 && yDifference > 0.5)
                 {
                     // Fahre zuerst Y Richtung
                     fSpeedX = 0.0f;
@@ -56,7 +56,7 @@ void Navigation::Update(uint64_t difftime)
                 }
                 else
                 {
-                    if (xDifference > -0.5 && xDifference < 0.5)
+                    if (xDifference < -0.5 && xDifference > 0.5)
                     {
                     // Fahre X Richtung
                     fSpeedX = calculateSpeed(xDifference);
@@ -68,6 +68,7 @@ void Navigation::Update(uint64_t difftime)
                     else
                     {
                         // Position Erreicht
+                        sLogger.debug("Position Erreicht");
                         m_Drive->Drive(0.0f, 0.0f, 0.0f);
                     }
                 }
