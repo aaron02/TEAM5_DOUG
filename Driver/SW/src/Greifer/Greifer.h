@@ -18,27 +18,18 @@ enum ServoMapping
 
 enum ArmStatus
 {
-    ERROR = 0,
-    READY,
-    STORED
+    AS_Undefined = 0,
+    AS_Grundstellung,
+    AS_PickPackage,
+    AS_PlacePackage,
+    AS_Ready,
+    AS_Error
 };
 
 enum PackStatus
 {
     STATUS_FAILED = 0,
     STATUS_OK
-};
-
-enum Grundstellung
-{
-    GS_Running = 0,
-    GS_OK
-};
-
-enum inposition
-{
-    f = 0,
-    t
 };
 
 enum SERVO_Positionen
@@ -82,18 +73,21 @@ public:
 
     // Drive Befehle
 
-    Grundstellung Grundstellung();
-    void setArmStatus();
+    void Grundstellung();
+    void setArmStatus(ArmStatus state);
     ArmStatus getArmStatus();
-    PackStatus PickPackage(Drehtisch_Position lagerIndex);
-    PackStatus PlacePackage(uint8_t lagerIndex);
+    PackStatus PickPackage();
+    PackStatus PlacePackage();
+
+    // Index für die Automatikfahr
+    void setLagerIndex(uint8_t index) { iLagerindex = index; }
 
     void setTimer(ServoMapping servo, int32_t timer);
 
 private:
     void runServo(ServoMapping servoIndex, uint64_t difftime);
     std::vector<int32_t> updateTimer = { 500, 500 };
-    inposition inposition();
+    bool inposition();
 
 protected:
     PWMServo servo[2];
@@ -104,9 +98,14 @@ protected:
 
     mAntrieb->setSpeeds(300, 360);
     */
+
+    uint8_t iGrundstellungStep = 0;
+    uint8_t iPickPackageStep = 0;
+    ArmStatus iGripperState = ArmStatus::AS_Undefined;
+    uint8_t iLagerindex = 0;
+
     PosAntrieb* mAntrieb = nullptr;
     Navigation* mNavigation = nullptr;
     uint8_t servo1PositionToGo = 0;
     uint8_t servo2PositionToGo = 0;
-    bool GS_INIT_FIRST_TIME = 0;
 };

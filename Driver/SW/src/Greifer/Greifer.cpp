@@ -8,8 +8,6 @@ Greifer::Greifer(uint8_t servoPin1, uint8_t servoPin2, PosAntrieb& dreh, Navigat
 {
     servo[SERVO_BASE].attach(servoPin1);
     servo[SERVO_GRIPP].attach(servoPin2);
-    GS_INIT_FIRST_TIME ++;
-
 }
 
 Greifer::~Greifer()
@@ -20,10 +18,24 @@ Greifer::~Greifer()
 
 void Greifer::Update(uint64_t difftime)
 {
-    if(GS_INIT_FIRST_TIME==1)
+    switch (getArmStatus())
     {
-        Grundstellung();
-    };
+        case ArmStatus::AS_Undefined:
+        {
+            Grundstellung();
+        } break;
+        case ArmStatus::AS_PickPackage:
+        {
+            PickPackage();
+        } break;
+        case ArmStatus::AS_PlacePackage:
+        {
+            PlacePackage();
+        } break;
+        default:
+            break;
+    }
+
     // Servo 1
     runServo(SERVO_BASE, difftime);
 
@@ -33,15 +45,10 @@ void Greifer::Update(uint64_t difftime)
 }
 
 //Prüft ob alle Aktoren die gewünschte Position erreicht
-//t=ture f=false
-inposition Greifer::inposition(){
-    if((getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE)) && (getPosition(SERVO_GRIPP) == getSollPosition(SERVO_GRIPP)) && (mAntrieb->inPosition())){
-        return t;
-    };
-    if(!((getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE)) && (getPosition(SERVO_GRIPP) == getSollPosition(SERVO_GRIPP)) && (mAntrieb->inPosition()))){
-        return f;
-    };
-};
+bool Greifer::inposition()
+{
+    return (getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE)) && (getPosition(SERVO_GRIPP) == getSollPosition(SERVO_GRIPP)) && (mAntrieb->inPosition());
+}
 
 void Greifer::runServo(ServoMapping servoIndex, uint64_t difftime)
 {
@@ -139,13 +146,11 @@ Grundstellungsfahrt von dem Greifer, Arm und referenzierung des Drehtisches. Sol
 Eine Parkposition wird immer am ende angefahren.
 Drehtisch: Wird nur referenziert wenn er noch nicht referenziert ist
 */
-Grundstellung Greifer::Grundstellung()
+void Greifer::Grundstellung()
 {
-    int step = 1;
-
-    switch (step)
+    switch (iGrundstellungStep)
     {
-        case 1:
+        case 0:
         {
             /*
             Base und Gripp werden in einen Sicheren Bereich gefahren. Weiterschaltung nur über Base Zeilposition
@@ -153,100 +158,77 @@ Grundstellung Greifer::Grundstellung()
             */
             setSollPosition(SERVO_BASE, BASE_GS);
             setSollPosition(SERVO_GRIPP, GRIPP_OFFEN);
-            runServo(SERVO_BASE, 1000);
-            runServo(SERVO_GRIPP, 1000);
 
             //Weiterschaltbedingung
-            if ((getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE))){
-                step++; };
-
-            return GS_Running;
-        }
-        break;
-        case 2:
+            if (getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE))
+                iGrundstellungStep++;
+        } break;
+        case 1:
         {
             // Drehtisch wird referenziert. Nächster Schritt wenn Done.
-
-            if(mAntrieb->isHomed()==false){
+            if(!mAntrieb->isHomed())
                 mAntrieb->setHoming();
-            };
-
-            //Weiterschaltbedingung
-            if (mAntrieb->isHomed()==true){   // #try hoffe das geht so
-                step++; };
-
-            return GS_Running;
-        }
-        break;
-        case 3:
+            else
+                iGrundstellungStep++;
+        } break;
+        case 2:
         {
             // Drehtisch und SERVO_BASE gehen in die Parkposition.
-
-            
             mAntrieb->moveAbsolutAngle(DT_Parkposition);
             setSollPosition(SERVO_BASE, BASE_HOVEROVERLAGER);
-            runServo(SERVO_BASE, 1000);
 
             //Weiterschaltbedingung
-            if ((mAntrieb->inPosition()) && (getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE))){
-                step++; };
-
-            return GS_Running;
-        }
-        break;
-        case 4:
+            if ((mAntrieb->inPosition()) && (getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE)))
+                iGrundstellungStep++;
+        } break;
+        case 3:
         {
             // Grundstellung abgeschlossen. Rücksetzten von der INIT variable
-            GS_INIT_FIRST_TIME = 0;
-            
-            return GS_OK;
-        }
-        break;
+            setArmStatus(ArmStatus::AS_Ready);
+        } break;
     }
-
 }
 
-void Greifer::setArmStatus()
+void Greifer::setArmStatus(ArmStatus state)
 {
-
+    iGripperState = state;
 }
 
 ArmStatus Greifer::getArmStatus()
 {
-    return ArmStatus::READY;
+    return iGripperState;
 }
 
-PackStatus Greifer::PickPackage(Drehtisch_Position lagerIndex)
+PackStatus Greifer::PickPackage()
 {
-        int step = 1;
-
-        switch (step)
+    switch (iPickPackageStep)
     {
-        case 1: // Arm Rauf
+        case 0: // Arm Rauf
         {
-            //Funktion
+            //Arm fährt hoch und Greifer wird geöffnet.
             setSollPosition(SERVO_GRIPP, GRIPP_OFFEN);
-            runServo(SERVO_GRIPP,1000);
             setSollPosition(SERVO_BASE, BASE_OBEN);
-            runServo(SERVO_BASE,1000);
-            if (inposition()==t)
-            {
-                step++;
-            }
-            
+            //Weiterschaltbedingung
+            if (inposition())
+                iPickPackageStep++;
         }
         break; // Drehen
+        case 1:
+        {
+            //Funktion
+            uint32_t iTableAngle = getPositionFromIndex(iLagerindex);
+            mAntrieb->moveAbsolutAngle(iTableAngle);
+        }
+        break;
         case 2:
         {
             //Funktion
+            mNavigation->setSollPosition(3, 0);
+            if (mNavigation->getDrivingState() == DrivingState::DRIVE_STATE_FINISHED)
+                iPickPackageStep++;
         }
         break;
         case 3:
-        {
-            //Funktion
-        }
-        break;
-        case 4:
         {
             //Funktion
         }
@@ -264,7 +246,7 @@ PackStatus Greifer::PickPackage(Drehtisch_Position lagerIndex)
     return PackStatus::STATUS_OK;
 }
 
-PackStatus Greifer::PlacePackage(uint8_t lagerIndex)
+PackStatus Greifer::PlacePackage()
 {
     return PackStatus::STATUS_OK;
 }
@@ -298,3 +280,19 @@ PackStatus Greifer::PlacePackage(uint8_t lagerIndex)
 
 */
 
+Drehtisch_Position getPositionFromIndex(uint8_t index)
+{
+    switch (index)
+    {
+        case 1:
+            return Drehtisch_Position::DT_Lager_PS1;
+        case 2:
+            return Drehtisch_Position::DT_Lager_PS2;
+        case 3:
+            return Drehtisch_Position::DT_Lager_PS3;
+        case 4:
+            return Drehtisch_Position::DT_Lager_PS4;
+    }
+
+    return Drehtisch_Position::DT_Parkposition;
+}

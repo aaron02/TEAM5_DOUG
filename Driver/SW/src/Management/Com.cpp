@@ -99,23 +99,52 @@ void Communication::Update(uint64_t difftime)
             case SetArmState:
             {
                 uint8_t armState = doc["Data"];
+                mGreifer->setArmStatus(ArmStatus(armState));
             } break;
 
             case GetArmState:
             {
                 // Response with Arm State
-                response("Ready");
-                response("Stored");
+                switch (mGreifer->getArmStatus())
+                {
+                    case ArmStatus::AS_Error:
+                    {
+                        response("Error");
+                    } break;
+                    case ArmStatus::AS_Ready:
+                    {
+                        response("Ready");
+                    } break;
+                    case ArmStatus::AS_Grundstellung:
+                    {
+                        response("Stored");
+                    } break;
+                    case ArmStatus::AS_PickPackage:
+                    {
+                        response("PickingPackage");
+                    } break;
+                    case ArmStatus::AS_PlacePackage:
+                    {
+                        response("PlacingPackage");
+                    } break;
+                    default:
+                        response("Undefined");
+                        break;
+                }                
             } break;
 
             case PickPackage:
             {
                 uint32_t lagerIndex = doc["Data"]["Lagerindex"];
+                mGreifer->setLagerIndex(lagerIndex);
+                mGreifer->setArmStatus(AS_PickPackage);
             } break;
 
             case PlacePackage:
             {
                 uint32_t lagerIndex = doc["Data"]["Lagerindex"];
+                mGreifer->setLagerIndex(lagerIndex);
+                mGreifer->setArmStatus(AS_PlacePackage);
             } break;
 
             case GetBatteryState:
