@@ -6,7 +6,9 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 
 #include "Lib/Defnies.h"
 
-class PDB
+class Updateable;
+
+class PDB : public Updateable
 {
 public:
     PDB();

@@ -10,17 +10,16 @@ class Greifer;
 class Navigation;
 class PDB;
 class Odometry;
+class Updateable;
 
-typedef 
-
-class Communication
+class Communication : public Updateable
 {
 public:
     Communication(Navigation* mNavigation ,Greifer* mGreifer, PDB* mPower, Odometry* mOdo);
     ~Communication();
 
     // Cyclyc Update
-    void Update(uint64_t difftime);
+    void Update(uint64_t difftime) override;
 
 private:
 

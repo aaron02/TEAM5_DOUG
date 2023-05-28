@@ -9,6 +9,7 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 class Vector2D;
 class DriveTrain;
 class Odometry;
+class Updateable;
 
 enum DrivingState : uint8_t
 {
@@ -17,14 +18,14 @@ enum DrivingState : uint8_t
     DRIVE_STATE_FINISHED
 };
 
-class Navigation
+class Navigation : public Updateable
 {
 public:
     Navigation(DriveTrain* drives, Odometry* odometry);
     ~Navigation();
 
     // Cyclyc Update
-    void Update(uint64_t difftime);
+    void Update(uint64_t difftime) override;
 
     // Set target Position for Navigation process
     void setSollPosition(float x, float y);

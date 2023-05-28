@@ -26,6 +26,8 @@ enum MotorType
     kRearRight              = 3
 };
 
+#define CALL_UPDATE(obj, func) if (obj) static_cast<Updateable*>(obj)->func
+
 // Arduino
 #include <Arduino.h>
 
@@ -60,6 +62,7 @@ enum MotorType
 #include <unordered_map>
 
 // User Created
+#include "Updateable.h"
 #include "Logger.h"
 #include "TimeVar.h"
 #include "Opcodes.hpp"

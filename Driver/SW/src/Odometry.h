@@ -9,8 +9,9 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 class Vector2D;
 class Gyro;
 class ADNS_CTRL;
+class Updateable;
 
-class Odometry
+class Odometry : public Updateable
 {
 public:
     Odometry(Gyro* gyro, ADNS_CTRL* adns);
@@ -26,7 +27,7 @@ public:
     double normalizeRadians(double angle);
 
     // Cyclyc Update
-    void Update(uint64_t difftime);
+    void Update(uint64_t difftime) override;
 
     // Calculates Actual Position
     void CalculatePosition(double x, double y);

@@ -30,27 +30,18 @@ Communication* com = nullptr;
 void MainThread(uint32_t difftime)
 {
     // Motor Update
-    mecanumDrive->Update(0);
-    gripperBase->Update(0);
-
+    CALL_UPDATE(mecanumDrive, Update(difftime));
+    CALL_UPDATE(gripperBase, Update(difftime));
     // Mouse Sensor
-    if (adnsController)
-        adnsController->Update(difftime);
-
+    CALL_UPDATE(adnsController, Update(difftime));
     // Gyro
-    if (gyro)
-        gyro->Update(difftime);
-
+    CALL_UPDATE(gyro, Update(difftime));
     // Power Ditribution Board
-    if (pdb)
-        pdb->Update(difftime);
-
-    if (greifer)
-        greifer->Update(difftime);
-
+    CALL_UPDATE(pdb, Update(difftime));
+    // Greiffer
+    CALL_UPDATE(greifer, Update(difftime));
     // Communication to Controller
-    if (com)
-        com->Update(difftime);
+    CALL_UPDATE(com, Update(difftime));
 
     // Started but not ready yet
     if (status == Status::Initialization)
