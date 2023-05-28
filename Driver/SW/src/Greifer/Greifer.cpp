@@ -23,7 +23,7 @@ void Greifer::Update(uint64_t difftime)
     if(GS_INIT_FIRST_TIME==1)
     {
         Grundstellung();
-    }
+    };
     // Servo 1
     runServo(SERVO_BASE, difftime);
 
