@@ -54,6 +54,12 @@ void Communication::Update(uint64_t difftime)
             } break;
             case SetDrivingWaypoint:
             {
+                if (doc.size() < 2 || doc["Data"].size() < 2)
+                {
+                    response("Error", "ArgumentError");
+                    return;
+                }
+
                 int32_t x = doc["Data"]["x"];
                 int32_t y = doc["Data"]["y"];
 
