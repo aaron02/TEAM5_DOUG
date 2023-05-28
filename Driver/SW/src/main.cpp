@@ -32,7 +32,7 @@ void MainThread(uint32_t difftime)
     // Motor Update
     CALL_UPDATE(mecanumDrive, Update(difftime));
     CALL_UPDATE(gripperBase, Update(difftime));
-    // Mouse Sensor
+    // Mouse Sensor ( eats alot of resources aprox 129µs )
     CALL_UPDATE(adnsController, Update(difftime));
     // Gyro
     CALL_UPDATE(gyro, Update(difftime));
