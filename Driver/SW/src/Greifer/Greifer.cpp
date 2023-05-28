@@ -27,6 +27,17 @@ void Greifer::Update(uint64_t difftime)
 
 }
 
+//Prüft ob alle Aktoren die gewünschte Position erreicht
+//t=ture f=false
+inposition Greifer::inposition(){
+    if((getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE)) && (getPosition(SERVO_GRIPP) == getSollPosition(SERVO_GRIPP)) && (mAntrieb->inPosition())){
+        return t;
+    };
+    if(!((getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE)) && (getPosition(SERVO_GRIPP) == getSollPosition(SERVO_GRIPP)) && (mAntrieb->inPosition()))){
+        return f;
+    };
+};
+
 void Greifer::runServo(ServoMapping servoIndex, uint64_t difftime)
 {
     if (getPosition(servoIndex) != getSollPosition(servoIndex))
@@ -117,7 +128,12 @@ void Greifer::setTimer(ServoMapping servo, int32_t timer)
 
      updateTimer[servo] = timer;
 }
-//Grundstellungsfahrt Greifer, Arm und referenzierung des Drehtisches. Soll Kollisionen vermeiden.
+
+/*
+Grundstellungsfahrt von dem Greifer, Arm und referenzierung des Drehtisches. Soll Kollisionen vermeiden.
+Eine Parkposition wird immer am ende angefahren.
+Drehtisch: Wird nur referenziert wenn er noch nicht referenziert ist
+*/
 Grundstellung Greifer::Grundstellung()
 {
     int step = 1;
@@ -167,7 +183,7 @@ Grundstellung Greifer::Grundstellung()
             runServo(SERVO_BASE, 1000);
 
             //Weiterschaltbedingung
-            if (!(mAntrieb->isMoving()) && (getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE))){
+            if ((mAntrieb->inPosition()) && (getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE))){
                 step++; };
 
             return Running;
@@ -194,8 +210,42 @@ ArmStatus Greifer::getArmStatus()
     return ArmStatus::READY;
 }
 
-PackStatus Greifer::PickPackage(uint8_t lagerIndex)
+PackStatus Greifer::PickPackage(Drehtisch_Position lagerIndex)
 {
+        int step = 1;
+
+        switch (step)
+    {
+        case 1: // Arm Rauf
+        {
+            //Funktion
+            setSollPosition(SERVO_GRIPP, GRIPP_OFFEN);
+            runServo(SERVO_GRIPP,1000);
+            setSollPosition(SERVO_BASE, BASE_OBEN);
+            runServo(SERVO_BASE,1000);
+            if (inposition()==t)
+            {
+                /* code */
+            }
+            
+        }
+        break; // Drehen
+        case 2:
+        {
+            //Funktion
+        }
+        break;
+        case 3:
+        {
+            //Funktion
+        }
+        break;
+        case 4:
+        {
+            //Funktion
+        }
+        break;
+    } 
     // Arm Rauf
     // Drehen
     // Arm Runter
@@ -214,40 +264,31 @@ PackStatus Greifer::PlacePackage(uint8_t lagerIndex)
 }
 
 /*
-    switch (moveStep)
+    int step = 1;
+
+        switch (step)
     {
         case 1:
         {
-            // Hier Funktion
-
-            if (Weiterschaltbedingung)
-            moveStep++;
+            //Funktion
         }
         break;
         case 2:
         {
-            // Hier Funktion
-
-            if (Weiterschaltbedingung)
-            moveStep++;
+            //Funktion
         }
         break;
         case 3:
         {
-            // Hier Funktion
-
-            if (Weiterschaltbedingung)
-            moveStep++;
+            //Funktion
         }
         break;
         case 4:
         {
-            // Hier Funktion
-
-            if (Weiterschaltbedingung)
-            moveStep++;
+            //Funktion
         }
         break;
     }
+
 */
 

@@ -32,7 +32,13 @@ enum PackStatus
 enum Grundstellung
 {
     Running = 0,
-    OK
+    OK,
+};
+
+enum inposition
+{
+    f = 0,
+    t
 };
 
 enum SERVO_Positionen
@@ -77,11 +83,11 @@ public:
     void setSollPosition(ServoMapping servo, SERVO_Positionen degree); // uint8_t degree
 
     // Drive Befehle
-    
+
     Grundstellung Grundstellung();
     void setArmStatus();
     ArmStatus getArmStatus();
-    PackStatus PickPackage(uint8_t lagerIndex);
+    PackStatus PickPackage(Drehtisch_Position lagerIndex);
     PackStatus PlacePackage(uint8_t lagerIndex);
 
     void setTimer(ServoMapping servo, int32_t timer);
@@ -89,6 +95,7 @@ public:
 private:
     void runServo(ServoMapping servoIndex, uint64_t difftime);
     std::vector<int32_t> updateTimer = { 500, 500 };
+    inposition inposition();
 
 protected:
     /*
