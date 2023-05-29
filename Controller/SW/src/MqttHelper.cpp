@@ -38,9 +38,15 @@ bool MqttHelper::connect()
     // Set callback
     mqttClient.setCallback([this](char *topic, byte *payload, unsigned int length)
                            {
-// Parse the payload into a DynamicJsonDocument
-String mqttMessage= String(topic);
-        messageQueue.enqueue(mqttMessage); });
+                                String payloadString;
+                                for (unsigned int i = 0; i < length; i++) 
+                                {
+                                    payloadString += (char)payload[i];
+                                }
+                                MqttMessage mqttMessage;
+                                mqttMessage.topic = String(topic);
+                                mqttMessage.payload = payloadString;
+                                messageQueue.enqueue(mqttMessage); });
 
     return true;
 }
@@ -78,7 +84,7 @@ bool MqttHelper::hasMessage()
     return !messageQueue.isEmpty();
 }
 
-String MqttHelper::getNextMessage()
+MqttMessage MqttHelper::getNextMessage()
 {
     return messageQueue.dequeue();
 }

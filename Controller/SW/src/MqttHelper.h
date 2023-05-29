@@ -7,6 +7,9 @@
 
 #include "LogHelper.h"
 
+struct MqttMessage{
+    String topic,payload;
+};
 
 class MqttHelper
 {
@@ -16,7 +19,7 @@ public:
     bool subscribe(String topic);
     bool publish(String topic, String message);
     bool hasMessage();
-    String getNextMessage();
+    MqttMessage getNextMessage();
     void loop();
 
 private:
@@ -27,5 +30,5 @@ private:
     LogHelper &logHelper;
     WiFiClient wifiClient;
     PubSubClient mqttClient;
-    ArduinoQueue<String> messageQueue;
+    ArduinoQueue<MqttMessage> messageQueue;
 };

@@ -31,7 +31,7 @@ void loop()
 
     if (mqttHelper.hasMessage())
     {
-        String message = mqttHelper.getNextMessage();
+        MqttMessage message = mqttHelper.getNextMessage();
 
 
     }
