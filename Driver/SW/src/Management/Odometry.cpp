@@ -61,8 +61,8 @@ void Odometry::Update(uint64_t difftime)
 void Odometry::CalculatePosition(double x, double y)
 {
     // counts per inch -> 1 inch = 2.54 cm / 2540
-    dDeltax = x / 8200 * 2.54;
-    dDeltay = y / 8200 * 2.54;
+    dDeltax = x / 8200.0f * 25.4f;
+    dDeltay = y / 8200.0f * 25.4f;
 
     double dGyroAngle = radians(gyro->getGyroAngle(GYRO_AXIS::YAW) + degrees(dStartHeading) + dHeadingCorrection);
 

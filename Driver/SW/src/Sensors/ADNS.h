@@ -118,7 +118,7 @@ private:
     static int16_t convert_twos_compliment(uint16_t u);
     static uint16_t join_byte(byte l, byte h);
 
-    uint64_t timer = 10 * TimeVar::Millis;
+    int32_t timer = 10 * TimeVar::Millis;
 };
 
 class ADNS_CTRL : public ADNSInterface

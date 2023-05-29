@@ -60,7 +60,7 @@ void ADNSInterface::Update(uint64_t difftime)
     // Read Sensor Data Timed
     if (timer <= 0)
     {
-        timer = 10 * TimeVar::Millis;
+        timer = 50 * TimeVar::Millis;
         update_motion_data();
     }
     else

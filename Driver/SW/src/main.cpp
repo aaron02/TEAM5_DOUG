@@ -58,7 +58,7 @@ void MainThread(uint32_t difftime)
             odometry->setStartLocation(Vector2D(0, 0), gyro->getGyroAngle(YAW));
 
             // Drive Absolute Test
-            nav->setSollPosition(10, 0);
+            nav->setSollPosition(100, 0);
 
             sLogger.debug("Controller Started and Ready");
         }

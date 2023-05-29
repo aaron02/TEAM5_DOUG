@@ -75,7 +75,7 @@ void Navigation::Update(uint64_t difftime)
                         // Position Erreicht
                         if (debug)
                             sLogger.debug("Position Erreicht");
-                            
+
                         m_Drive->Drive(0.0f, 0.0f, 0.0f);
                     }
                 }
@@ -99,7 +99,7 @@ void Navigation::setSollPosition(float x, float y)
 float Navigation::calculateSpeed(float distance) 
 {
     // Maximale Distanz (entspricht der Entfernung, bei der die Geschwindigkeit 0 erreicht)
-    const float maxDistance = 10.0;
+    const float maxDistance = 200.0;
 
     // Berechnung der Geschwindigkeit
     float speed = (distance / maxDistance) * maxSpeed * -1;
