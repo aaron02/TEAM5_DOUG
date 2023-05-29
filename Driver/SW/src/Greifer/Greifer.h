@@ -82,6 +82,8 @@ public:
     // Index für die Automatikfahr
     void setLagerIndex(uint8_t index) { iLagerindex = index; }
 
+    Drehtisch_Position getPositionFromIndex(uint8_t index);
+
     void setTimer(ServoMapping servo, int32_t timer);
 
 private:

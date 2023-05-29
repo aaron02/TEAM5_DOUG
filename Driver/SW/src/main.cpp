@@ -50,8 +50,12 @@ void MainThread(uint32_t difftime)
         {
             status = Status::Started;
             // Start Location
-            //adnsController->reset_xy_dist();
-            //odometry->setStartLocation(Vector2D(0, 0), gyro->getGyroAngle(YAW));
+            adnsController->reset_xy_dist();
+            odometry->setStartLocation(Vector2D(0, 0), gyro->getGyroAngle(YAW));
+
+            // Drive Absolute Test
+            nav->setSollPosition(200, 100);
+
             sLogger.debug("Controller Started and Ready");
         }
         else
@@ -62,12 +66,10 @@ void MainThread(uint32_t difftime)
     if (status == Status::Started)
     {
         // Odometry
-        //if(odometry)
-        //    odometry->Update(difftime);
+        CALL_UPDATE(odometry, Update(difftime));
 
         // Navigation
-        if (nav)
-            nav->Update(difftime);
+        CALL_UPDATE(nav, Update(difftime));
     }
 
     // Test Timer 1 second
@@ -75,10 +77,6 @@ void MainThread(uint32_t difftime)
     {
         if (timer < 0)
         {
-            // Drivetrain test
-            //driveTrain->Drive(0.5, 0.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
-            //gripperBase->moveAbsolutAngle(360);
-
             sLogger.info("Controller Loop Time = %u µs (%f ms)", difftime, float(float(difftime) / Millis));
             timer = 10 * TimeVar::Seconds;
         }
