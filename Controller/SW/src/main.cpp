@@ -18,25 +18,22 @@ WiFiClient wifiClient;
 LogHelper logHelper(Serial, 115200);
 WiFiHelper wifiHelper(SSID, PASSWORD, logHelper, wifiClient);
 MqttHelper mqttHelper(IP, MQTT_PORT, MQTT_DEVICE_ID, logHelper, wifiClient, 10000);
-RobotHelper robotHelper(Serial1, 115200);
+
+
+RobotHelper robotHelper(115200);
 
 void setup()
 {
-    HardwareSerial mySerial(1);
+Serial1.begin(115200);
+Serial1.println("jhkjdsh");
 
-    mySerial.begin(115200);
-
-       mySerial.println("hejjk");
 
     logHelper.connect();
     wifiHelper.connect(100000);
     macAddress = wifiHelper.getMacAddress();
     mqttHelper.connect();
-    mqttHelper.subscribe("Robots/" + macAddress + "/To/DeliveryOrder"); 
-       //robotHelper.connect();
-
-       
-
+    mqttHelper.subscribe("Robots/" + macAddress + "/To/DeliveryOrder");
+    robotHelper.connect();
 }
 
 void loop()
@@ -66,6 +63,7 @@ void loop()
                 robotHelper.setNextWaypoint(waypoint);
                 while (!robotHelper.readyForNextWaypoint())
                 {
+                    delay(100);
                 }
             }
         }

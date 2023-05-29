@@ -1,20 +1,20 @@
 #include "RobotHelper.h"
 
-RobotHelper::RobotHelper(HardwareSerial &serial, unsigned long baudRate) : serial(serial), baudRate(baudRate)
+RobotHelper::RobotHelper(unsigned long baudRate) : baudRate(baudRate)
 {
 }
 
 bool RobotHelper::connect()
 {
     // Init port
-    serial.begin(baudRate);
+    Serial1.begin(baudRate, SERIAL_8N1, 18, 17);
 
     // Check if port is ready
-    if (!serial)
+    if (!Serial1)
     {
         return false;
     }
-serial.println("hello");
+    Serial1.println("hello");
     return true;
 }
 
@@ -25,8 +25,8 @@ void RobotHelper::setNextWaypoint(Waypoint waypoint)
     sendDoc["Data"]["x"] = waypoint.GetCoordinates().x;
     sendDoc["Data"]["y"] = waypoint.GetCoordinates().y;
 
-    serializeJson(sendDoc, serial);
-    serial.println();
+    serializeJson(sendDoc, Serial1);
+    Serial1.println();
 }
 
 bool RobotHelper::readyForNextWaypoint()
@@ -37,10 +37,10 @@ bool RobotHelper::readyForNextWaypoint()
     RobotState state = RobotStateError;
 
     sendDoc["Command"] = "GetDrivingState";
-    serializeJson(sendDoc, serial);
-    serial.println();
+    serializeJson(sendDoc, Serial1);
+    Serial1.println();
 
-    deserializeJson(recieveDoc, serial);
+    deserializeJson(recieveDoc, Serial1);
 
     String returnedstate = recieveDoc["Data"]["State"];
 

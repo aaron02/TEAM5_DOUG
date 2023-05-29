@@ -14,12 +14,11 @@ enum RobotState
 class RobotHelper
 {
 public:
-    RobotHelper(HardwareSerial &serial, unsigned long baudRate);
+    RobotHelper(unsigned long baudRate);
     bool connect();
     void setNextWaypoint(Waypoint waypoint);
     bool readyForNextWaypoint();
 
 private:
-    HardwareSerial &serial;
     unsigned long baudRate;
 };
