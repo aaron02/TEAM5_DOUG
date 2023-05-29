@@ -9,21 +9,31 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 class Vector2D;
 class Gyro;
 class ADNS_CTRL;
+class Updateable;
 
-class Odometry
+class Odometry : public Updateable
 {
 public:
     Odometry(Gyro* gyro, ADNS_CTRL* adns);
     ~Odometry();
 
+    // Load up all neccesary stuff
     void Initialize();
+    
+    // Set our Start Position
     void setStartLocation(Vector2D startPosition, double startHeading);
+
+    // Normalize Radians
     double normalizeRadians(double angle);
 
-    void Update(uint64_t difftime);
+    // Cyclyc Update
+    void Update(uint64_t difftime) override;
+
+    // Calculates Actual Position
     void CalculatePosition(double x, double y);
 
     Vector2D* GetPosition() { return position; }
+    float getHeading() { return degrees(dHeading) - dHeadingCorrection; }
 
     Gyro* getGyro() { return gyro; }
 
@@ -38,7 +48,7 @@ public:
     double dDeltay;
 
     // Korrekturfaktor
-    double dHeadingCorrection = 93.57170f;
+    double dHeadingCorrection = 3.57170f; //93.57170f
 
     // Aktuelle Position
     Vector2D* position;

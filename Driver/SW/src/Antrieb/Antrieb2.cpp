@@ -50,8 +50,14 @@ void Antrieb2::step()
 {
     // Test
     digitalWrite(iStepPin, HIGH); // step HIGH
-    delayNanoseconds(100);
+    digitalWrite(iStepPin + 2, HIGH); // step HIGH
+    digitalWrite(iStepPin + 4, HIGH); // step HIGH
+    digitalWrite(iStepPin + 6, HIGH); // step HIGH
+    delayNanoseconds(1000);
     digitalWrite(iStepPin, LOW); // step LOW
+    digitalWrite(iStepPin + 2, LOW); // step LOW
+    digitalWrite(iStepPin + 4, LOW); // step LOW
+    digitalWrite(iStepPin + 6, LOW); // step LOW
 }
 
 double Antrieb2::mapDouble(double x, double in_min, double in_max, double out_min, double out_max)
@@ -61,7 +67,7 @@ double Antrieb2::mapDouble(double x, double in_min, double in_max, double out_mi
 
 void Antrieb2::setSpeed(MotorType iMotor, float fSpeed)
 {
-    fDemandedSpeed[iMotor] = mapDouble(fSpeed, -1.0, 1.0, -50.0, 50.0);
+    fDemandedSpeed[iMotor] = mapDouble(fSpeed, -1.0, 1.0, -500.0, 500.0);
 
     switch (iMotor)
     {

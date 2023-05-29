@@ -68,7 +68,7 @@ Nächsten Waypoint senden (mit Fehler):
 ```json
 {
     "Response":"Error",
-    "ErrorMessage":"ArgumentError"
+    "Message":"ArgumentError"
 }
 ```
 
@@ -81,7 +81,7 @@ Nächsten Waypoint senden (mit Fehler):
 | `AbortDriving`       |                                                     | `Ok`                                                           |
 | `GetDrivingState`    |                                                     | `Busy`: Unterwegs<br>`Finished`: Angekommen<br>`Error`: Fehler |
 | `SetArmState`        | `Ready`: Arm vorbereiten<br>`Stored`: Arm verstauen | `Ok`                                                           |
-| `GetArmState`        |                                                     | `Ready`: Arm beriet<br>`Stored`: Arm verstaut                  |
+| `GetArmState`        |                                                     | `AS_Undefined `: Undefinierter zustand <br>`AS_Grundstellung,`: Arm in Grundstellung <br> `AS_PickPackage` : PickingPackage <br> `AS_PlacePackage` : PlacingPackage <br> `AS_Ready` : Arm Ready <br> `AS_Error`  : ArmStörung          |
 | `PickPackage`        | Lagerindex                                          | `Ok`                                                           |
 | `PlacePackage`       | Lagerindex                                          | `Ok`                                                           |
 | `GetBatteryState`    |                                                     | Batteriestatus in %                                            |

@@ -24,43 +24,56 @@ Odometry* odometry = nullptr;
 Gyro* gyro = nullptr;
 ADNS_CTRL* adnsController = nullptr;
 PDB* pdb = nullptr;
+Greifer* greifer = nullptr;
+Communication* com = nullptr;
 
 void MainThread(uint32_t difftime)
 {
-    // Mouse Sensor
-    if (adnsController)
-        adnsController->Update(difftime);
-
+    // Motor Update
+    CALL_UPDATE(frontLeft, Update(difftime));
+    CALL_UPDATE(frontRight, Update(difftime));
+    CALL_UPDATE(backLeft, Update(difftime));
+    CALL_UPDATE(backRight, Update(difftime));
+    //CALL_UPDATE(mecanumDrive, Update(difftime));
+    CALL_UPDATE(gripperBase, Update(difftime));
+    // Mouse Sensor ( eats alot of resources aprox 129µs )
+    CALL_UPDATE(adnsController, Update(difftime));
     // Gyro
-    if (gyro)
-        gyro->Update(difftime);
-
+    CALL_UPDATE(gyro, Update(difftime));
     // Power Ditribution Board
-    if (pdb)
-        pdb->Update(difftime);
+    CALL_UPDATE(pdb, Update(difftime));
+    // Greiffer
+    CALL_UPDATE(greifer, Update(difftime));
+    // Communication to Controller
+    CALL_UPDATE(com, Update(difftime));
 
+    // Started but not ready yet
     if (status == Status::Initialization)
     {
         if (initTimer <= 0)
         {
+            status = Status::Started;
             // Start Location
             adnsController->reset_xy_dist();
             odometry->setStartLocation(Vector2D(0, 0), gyro->getGyroAngle(YAW));
-            status = Status::Started;
+
+            // Drive Absolute Test
+            nav->setSollPosition(100, 0);
+
             sLogger.debug("Controller Started and Ready");
         }
         else
             initTimer = initTimer - difftime;
     }
-    else if (status == Status::Started)
+
+    // We are Started and Fully Ready
+    if (status == Status::Started)
     {
         // Odometry
-        if(odometry)
-            odometry->Update(difftime);
+        CALL_UPDATE(odometry, Update(difftime));
 
         // Navigation
-        //if (nav)
-        //    nav->Update(difftime);
+        CALL_UPDATE(nav, Update(difftime));
     }
 
     // Test Timer 1 second
@@ -68,11 +81,7 @@ void MainThread(uint32_t difftime)
     {
         if (timer < 0)
         {
-            // Drivetrain test
-            driveTrain->Drive(1.0, 0.0, 0.0, gyro->getGyroAngle(GYRO_AXIS::YAW));
-            //gripperBase->moveAbsolutAngle(360);
-
-            //sLogger.info("Controller Loop Time = %u µs (%f ms)", difftime, float(difftime / Millis));
+            sLogger.info("Controller Loop Time = %u µs (%f ms)", difftime, float(float(difftime) / Millis));
             timer = 10 * TimeVar::Seconds;
         }
         else
@@ -80,24 +89,11 @@ void MainThread(uint32_t difftime)
     }
 }
 
-void motorThread()
-{
-    while (1)
-    {
-        // Programm Cycle
-        //frontLeft->Update(0);
-        //frontRight->Update(0);
-        //backLeft->Update(0);
-        //backRight->Update(0);
-        mecanumDrive->Update(0);
-        gripperBase->Update(0);
-    }
-}
-
 void setup()
 {
     // Serial Interface Initialization
     Serial.begin(9600);
+    Serial1.begin(9600);
     Wire.begin();
     delay(100);
 
@@ -112,13 +108,13 @@ void setup()
     // Initialize Interfaces
     sLogger.info("Controller Initialize Interfaces....");
     // Motor Interface
-    //frontLeft = new Antrieb("Front Left", 2, 3, 15);
-    //frontRight = new Antrieb("Front Right", 4, 5, 15);
-    //backLeft = new Antrieb("Back Left", 6, 7, 15);
-    //backRight = new Antrieb("Back Right", 8, 9, 15);
-    //driveTrain = new DriveTrain(*frontLeft, *backLeft, *frontRight, *backRight);
-    mecanumDrive = new Antrieb2("Mecanum Drive", 2, 3, 5, 7, 9, 15);
-    driveTrain = new DriveTrain(*mecanumDrive);
+    frontLeft = new Antrieb("Front Left", 2, 3, 15);
+    frontRight = new Antrieb("Front Right", 4, 5, 15);
+    backLeft = new Antrieb("Back Left", 6, 7, 15);
+    backRight = new Antrieb("Back Right", 8, 9, 15);
+    driveTrain = new DriveTrain(*frontLeft, *backLeft, *frontRight, *backRight);
+    //mecanumDrive = new Antrieb2("Mecanum Drive", 2, 3, 5, 7, 9, 15);
+    //driveTrain = new DriveTrain(*mecanumDrive);
 
     gripperBase = new PosAntrieb("Gripper Base", 25, 24, 14, 32);
     //
@@ -134,8 +130,10 @@ void setup()
     nav = new Navigation(driveTrain, odometry);
     //
 
-    // Multithreading
-    threads.addThread(motorThread);
+    greifer = new Greifer(29, 28, *gripperBase, *nav);
+
+    // Communication
+    com = new Communication(nav, greifer, pdb, odometry);
 
     status = Status::Initialization;
     // Notice Our Logs we are Running :)

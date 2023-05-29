@@ -6,6 +6,8 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 
 #include "Lib/Defnies.h"
 
+class Updateable;
+
 extern const unsigned short firmware_length;
 extern prog_uchar firmware_data[];
 
@@ -80,14 +82,14 @@ enum MotionBurst
         EndData
     };
 
-class ADNSInterface
+class ADNSInterface : public Updateable
 {
 public:
     ADNSInterface();
     ~ADNSInterface();
 
     void Initialize();
-    void Update(uint64_t difftime);
+    void Update(uint64_t difftime) override;
 
     virtual void get_xy(int16_t x, int16_t y) = 0;
     virtual void get_xy_dist(int16_t x_sum, int16_t y_sum) = 0;
@@ -115,6 +117,8 @@ private:
     static int16_t convert_twos_compliment(byte l, byte h);
     static int16_t convert_twos_compliment(uint16_t u);
     static uint16_t join_byte(byte l, byte h);
+
+    int32_t timer = 10 * TimeVar::Millis;
 };
 
 class ADNS_CTRL : public ADNSInterface

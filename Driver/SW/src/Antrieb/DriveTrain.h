@@ -8,6 +8,7 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 
 class Antrieb;
 class Antrieb2;
+class Vector2D;
 
 struct WheelSpeeds 
 {

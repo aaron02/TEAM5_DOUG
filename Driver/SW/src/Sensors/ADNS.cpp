@@ -5,7 +5,6 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 #include "ADNS.h"
 #include "ADNS_Firmeware.h"
 
-const int _motPin = 2;
 const int _ncs = 10; // The SS pin (3)
 byte _boot_complete = 0;
 
@@ -35,14 +34,7 @@ ADNSInterface::~ADNSInterface()
 
 void ADNSInterface::Initialize()
 {
-    pinMode(_motPin, INPUT);
     pinMode (_ncs, OUTPUT);
-
-#if ENABLE_MOTION_BURST
-    attachInterrupt(_motPin, update_motion_burst_data, FALLING);
-#else
-    attachInterrupt(_motPin, update_motion_data, FALLING);
-#endif
 
     SPI.begin();
 
@@ -54,6 +46,7 @@ void ADNSInterface::Initialize()
 
 void ADNSInterface::Update(uint64_t difftime)
 {
+    /*
     if (read_reg(REG_Motion))
     {
 #if ENABLE_MOTION_BURST
@@ -62,6 +55,16 @@ void ADNSInterface::Update(uint64_t difftime)
         update_motion_data();
 #endif
     }
+    */
+
+    // Read Sensor Data Timed
+    if (timer <= 0)
+    {
+        timer = 50 * TimeVar::Millis;
+        update_motion_data();
+    }
+    else
+        timer -= difftime;
 
     if (! _moved)
         return;

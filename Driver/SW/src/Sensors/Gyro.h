@@ -6,6 +6,8 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 
 #include "Lib/Defnies.h"
 
+class Updateable;
+
 enum GYRO_AXIS : uint8_t
 {
     PITCH,
@@ -13,7 +15,7 @@ enum GYRO_AXIS : uint8_t
     YAW
 };
 
-class Gyro
+class Gyro : public Updateable
 {
     struct euler
     {

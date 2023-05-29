@@ -26,6 +26,8 @@ enum MotorType
     kRearRight              = 3
 };
 
+#define CALL_UPDATE(obj, func) if (obj) static_cast<Updateable*>(obj)->func
+
 // Arduino
 #include <Arduino.h>
 
@@ -35,6 +37,9 @@ enum MotorType
 #include <Adafruit_BNO08x.h>
 #include <Wire.h>
 #include "SPI.h"
+#include <ArduinoJson.h>
+#include <SD.h>
+#include <PWMServo.h>
 
 // STD LIBS
 #include <stdio.h>
@@ -53,17 +58,23 @@ enum MotorType
 #include <cassert>
 #include <string_view>
 #include "estd/span.h"
+#include <map>
+#include <unordered_map>
 
 // User Created
+#include "Updateable.h"
 #include "Logger.h"
 #include "TimeVar.h"
-#include "Antrieb/Antrieb2.h"
-#include "Antrieb/Antrieb.h"
-#include "Antrieb/PosAntrieb.h"
-#include "Navigation.h"
-#include "Antrieb/DriveTrain.h"
-#include "Odometry.h"
 #include "Vector2D.h"
+#include "Opcodes.hpp"
+#include "Antrieb/Antrieb.h"
+#include "Antrieb/Antrieb2.h"
+#include "Antrieb/PosAntrieb.h"
+#include "Antrieb/DriveTrain.h"
+#include "Management/Navigation.h"
+#include "Management/Odometry.h"
+#include "Management/Com.h"
 #include "Sensors/ADNS.h"
 #include "Sensors/Gyro.h"
 #include "Sensors/PowerDistributionBoard.h"
+#include "Greifer/Greifer.h"
