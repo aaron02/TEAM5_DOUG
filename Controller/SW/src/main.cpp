@@ -2,6 +2,9 @@
 #include "WiFiHelper.h"
 #include "MqttHelper.h"
 #include <ArduinoJson.h>
+#include "Waypoint.h"
+#include "RobotHelper.h"
+#include <HardwareSerial.h>
 
 const String IP = "91.121.93.94";
 const String SSID = "McDonalds";
@@ -14,15 +17,26 @@ String macAddress;
 WiFiClient wifiClient;
 LogHelper logHelper(Serial, 115200);
 WiFiHelper wifiHelper(SSID, PASSWORD, logHelper, wifiClient);
-MqttHelper mqttHelper(IP, MQTT_PORT, MQTT_DEVICE_ID, logHelper, wifiClient,10000);
+MqttHelper mqttHelper(IP, MQTT_PORT, MQTT_DEVICE_ID, logHelper, wifiClient, 10000);
+RobotHelper robotHelper(Serial1, 115200);
 
 void setup()
 {
+    HardwareSerial mySerial(1);
+
+    mySerial.begin(115200);
+
+       mySerial.println("hejjk");
+
     logHelper.connect();
     wifiHelper.connect(100000);
     macAddress = wifiHelper.getMacAddress();
     mqttHelper.connect();
-    mqttHelper.subscribe("Robots/"+macAddress+"/To/DeliveryOrder");
+    mqttHelper.subscribe("Robots/" + macAddress + "/To/DeliveryOrder"); 
+       //robotHelper.connect();
+
+       
+
 }
 
 void loop()
@@ -33,6 +47,27 @@ void loop()
     {
         MqttMessage message = mqttHelper.getNextMessage();
 
+        DynamicJsonDocument doc(10000);
+        deserializeJson(doc, message.payload);
 
+        if (doc["deliverySteps"].is<JsonArray>())
+        {
+            JsonArray array = doc["deliverySteps"].as<JsonArray>();
+            size_t size = array.size();
+
+            for (int i = 0; i < size; i++)
+            {
+                Coordinates coordinates;
+                coordinates.x = doc["deliverySteps"][i]["coordinates"]["x"].as<int>();
+                coordinates.y = doc["deliverySteps"][i]["coordinates"]["y"].as<int>();
+                Waypoint waypoint(WAYPOINT, coordinates, doc["deliverySteps"][i]["id"]);
+
+                logHelper.println(LOG_LEVEL_LOG, "Move to x: " + String(coordinates.x) + " y: " + String(coordinates.y));
+                robotHelper.setNextWaypoint(waypoint);
+                while (!robotHelper.readyForNextWaypoint())
+                {
+                }
+            }
+        }
     }
 }

@@ -14,8 +14,8 @@ enum WaypointType
 
 struct Coordinates
 {
-    double x;
-    double y;
+    int x;
+    int y;
 };
 
 class Waypoint
