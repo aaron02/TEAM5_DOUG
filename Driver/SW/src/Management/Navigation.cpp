@@ -19,7 +19,7 @@ void Navigation::Update(uint64_t difftime)
     // Check Position Each Second should be enough
     if (timer <= 0)
     {
-        timer = 1 * TimeVar::Seconds;
+        timer = 50 * TimeVar::Millis;
 
         if (m_Odometry->GetPosition() != getSollPosition())
         {
@@ -31,7 +31,8 @@ void Navigation::Update(uint64_t difftime)
             // Distanz Luftline
             float distance = sqrtf(yDifference * yDifference + xDifference * xDifference);
 
-            //sLogger.debug("xDif %f, yDif %f, Distance %f", xDifference, yDifference, distance);
+            if (debug)
+                sLogger.debug("xDif %f, yDif %f, Distance %f", xDifference, yDifference, distance);
 
             // Gleichzeitiges Fahren
             if (0)
@@ -41,7 +42,7 @@ void Navigation::Update(uint64_t difftime)
             fSpeedY = calculateSpeed(yDifference);
 
             //sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
-            m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
+            m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getHeading());
             }
             else
             {
@@ -51,8 +52,10 @@ void Navigation::Update(uint64_t difftime)
                     fSpeedX = 0.0f;
                     fSpeedY = calculateSpeed(yDifference);
 
-                    sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
-                    m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
+                    if (debug)
+                        sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
+
+                    m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getHeading());
                 }
                 else
                 {
@@ -62,13 +65,17 @@ void Navigation::Update(uint64_t difftime)
                     fSpeedX = calculateSpeed(xDifference);
                     fSpeedY = 0.0f;
 
-                    sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
-                    m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getGyro()->getGyroAngle(GYRO_AXIS::YAW));
+                    if (debug)
+                        sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
+
+                    m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getHeading());
                     }
                     else
                     {
                         // Position Erreicht
-                        //sLogger.debug("Position Erreicht");
+                        if (debug)
+                            sLogger.debug("Position Erreicht");
+                            
                         m_Drive->Drive(0.0f, 0.0f, 0.0f);
                     }
                 }
@@ -89,10 +96,10 @@ void Navigation::setSollPosition(float x, float y)
      mSollPosition->changeCoords(x, y);
 }
 
-float Navigation::calculateSpeed(int distance) 
+float Navigation::calculateSpeed(float distance) 
 {
     // Maximale Distanz (entspricht der Entfernung, bei der die Geschwindigkeit 0 erreicht)
-    const float maxDistance = 200.0;
+    const float maxDistance = 10.0;
 
     // Berechnung der Geschwindigkeit
     float speed = (distance / maxDistance) * maxSpeed * -1;

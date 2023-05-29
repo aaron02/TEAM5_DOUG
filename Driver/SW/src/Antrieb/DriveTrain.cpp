@@ -76,18 +76,18 @@ void DriveTrain::Drive(double xSpeed, double ySpeed, double zRotation, double gy
 
   WheelSpeeds speeds = DriveIK(xSpeed, ySpeed, zRotation, gyroAngle);
   
-/*
+
   m_frontLeftMotor->setSpeed(speeds.frontLeft * m_maxOutput);
   m_frontRightMotor->setSpeed(speeds.frontRight * m_maxOutput);
   m_rearLeftMotor->setSpeed(speeds.rearLeft * m_maxOutput);
   m_rearRightMotor->setSpeed(speeds.rearRight * m_maxOutput);
-*/
+
 
   // New Drive Functions
-  m_mecanumDrive->setSpeed(MotorType::kFrontLeft, speeds.frontLeft * m_maxOutput);
+  /*m_mecanumDrive->setSpeed(MotorType::kFrontLeft, speeds.frontLeft * m_maxOutput);
   m_mecanumDrive->setSpeed(MotorType::kFrontRight, speeds.frontRight * m_maxOutput);
   m_mecanumDrive->setSpeed(MotorType::kRearLeft, speeds.rearLeft * m_maxOutput);
-  m_mecanumDrive->setSpeed(MotorType::kRearRight, speeds.rearRight * m_maxOutput);
+  m_mecanumDrive->setSpeed(MotorType::kRearRight, speeds.rearRight * m_maxOutput);*/
 }
 
 WheelSpeeds DriveTrain::DriveIK(double xSpeed, double ySpeed, double zRotation, double gyroAngle)
@@ -97,13 +97,14 @@ WheelSpeeds DriveTrain::DriveIK(double xSpeed, double ySpeed, double zRotation, 
 
   double wheelSpeeds[4];
 
-  // Compensate for gyro angle.
-  /* Todo Gyro Compensation when needed */
+  // Compensate for gyro angle. so we always drive to x from our home no matter where we face
+  Vector2D speed = Vector2D(xSpeed, ySpeed);
+  speed.rotate(radians(gyroAngle));
 
-  wheelSpeeds[kFrontLeft] = xSpeed + ySpeed + zRotation;
-  wheelSpeeds[kFrontRight] = xSpeed - ySpeed - zRotation;
-  wheelSpeeds[kRearLeft] = xSpeed - ySpeed + zRotation;
-  wheelSpeeds[kRearRight] = xSpeed + ySpeed - zRotation;
+  wheelSpeeds[kFrontLeft] = speed.getX() + speed.getY() + zRotation;
+  wheelSpeeds[kFrontRight] = speed.getX() - speed.getY() - zRotation;
+  wheelSpeeds[kRearLeft] = speed.getX() - speed.getY() + zRotation;
+  wheelSpeeds[kRearRight] = speed.getX() + speed.getY() - zRotation;
 
   Desaturate(wheelSpeeds);
 

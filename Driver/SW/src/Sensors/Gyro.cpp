@@ -13,10 +13,18 @@ sh2_SensorValue_t sensorValue;
 Gyro::Gyro()
 {
     // Try to initialize!
-    while (!bno08x.begin_I2C()) 
+    /*while (!bno08x.begin_I2C()) 
     {
         sLogger.debug("Gyro:: Failed to find BNO08x chip");
         bno08x.begin_I2C();
+        delay(10); 
+    }*/
+    Serial4.begin(115200);
+
+    if (!bno08x.begin_UART(&Serial4))  // Requires a device with > 300 byte UART buffer!
+    {
+        sLogger.debug("Gyro:: Failed to find BNO08x chip");
+        bno08x.begin_UART(&Serial4);
         delay(10); 
     }
 
@@ -70,8 +78,8 @@ void Gyro::quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector, eule
 void Gyro::Update(uint64_t difftime)
 {
     // Update Sensor evry 10 ms
-    if (sensorUpdate < 0)
-    {
+    //if (sensorUpdate < 0)
+    //{
         if (bno08x.wasReset()) 
         {
             sLogger.debug("Gyro:: sensor was reset ");
@@ -87,9 +95,9 @@ void Gyro::Update(uint64_t difftime)
         }
 
         sensorUpdate = 5 * TimeVar::Millis;;
-    }
-    else
-        sensorUpdate = sensorUpdate - difftime;
+    //}
+    //else
+    //    sensorUpdate = sensorUpdate - difftime;
 
     // Output Info evry 2 s
     if (debug)

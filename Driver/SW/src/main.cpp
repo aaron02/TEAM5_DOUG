@@ -30,7 +30,11 @@ Communication* com = nullptr;
 void MainThread(uint32_t difftime)
 {
     // Motor Update
-    CALL_UPDATE(mecanumDrive, Update(difftime));
+    CALL_UPDATE(frontLeft, Update(difftime));
+    CALL_UPDATE(frontRight, Update(difftime));
+    CALL_UPDATE(backLeft, Update(difftime));
+    CALL_UPDATE(backRight, Update(difftime));
+    //CALL_UPDATE(mecanumDrive, Update(difftime));
     CALL_UPDATE(gripperBase, Update(difftime));
     // Mouse Sensor ( eats alot of resources aprox 129µs )
     CALL_UPDATE(adnsController, Update(difftime));
@@ -54,7 +58,7 @@ void MainThread(uint32_t difftime)
             odometry->setStartLocation(Vector2D(0, 0), gyro->getGyroAngle(YAW));
 
             // Drive Absolute Test
-            nav->setSollPosition(200, 100);
+            nav->setSollPosition(10, 0);
 
             sLogger.debug("Controller Started and Ready");
         }
@@ -104,13 +108,13 @@ void setup()
     // Initialize Interfaces
     sLogger.info("Controller Initialize Interfaces....");
     // Motor Interface
-    //frontLeft = new Antrieb("Front Left", 2, 3, 15);
-    //frontRight = new Antrieb("Front Right", 4, 5, 15);
-    //backLeft = new Antrieb("Back Left", 6, 7, 15);
-    //backRight = new Antrieb("Back Right", 8, 9, 15);
-    //driveTrain = new DriveTrain(*frontLeft, *backLeft, *frontRight, *backRight);
-    mecanumDrive = new Antrieb2("Mecanum Drive", 2, 3, 5, 7, 9, 15);
-    driveTrain = new DriveTrain(*mecanumDrive);
+    frontLeft = new Antrieb("Front Left", 2, 3, 15);
+    frontRight = new Antrieb("Front Right", 4, 5, 15);
+    backLeft = new Antrieb("Back Left", 6, 7, 15);
+    backRight = new Antrieb("Back Right", 8, 9, 15);
+    driveTrain = new DriveTrain(*frontLeft, *backLeft, *frontRight, *backRight);
+    //mecanumDrive = new Antrieb2("Mecanum Drive", 2, 3, 5, 7, 9, 15);
+    //driveTrain = new DriveTrain(*mecanumDrive);
 
     gripperBase = new PosAntrieb("Gripper Base", 25, 24, 14, 32);
     //

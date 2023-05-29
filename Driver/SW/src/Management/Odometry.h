@@ -33,6 +33,7 @@ public:
     void CalculatePosition(double x, double y);
 
     Vector2D* GetPosition() { return position; }
+    float getHeading() { return degrees(dHeading) - dHeadingCorrection; }
 
     Gyro* getGyro() { return gyro; }
 
@@ -47,7 +48,7 @@ public:
     double dDeltay;
 
     // Korrekturfaktor
-    double dHeadingCorrection = 93.57170f;
+    double dHeadingCorrection = 3.57170f; //93.57170f
 
     // Aktuelle Position
     Vector2D* position;

@@ -46,7 +46,7 @@ double Antrieb::mapDouble(double x, double in_min, double in_max, double out_min
 
 void Antrieb::setSpeed(float fSpeed)
 {
-    fDemandedSpeed = mapDouble(fSpeed, -1.0, 1.0, -50.0, 50.0);
+    fDemandedSpeed = mapDouble(fSpeed, -1.0, 1.0, -500.0, 500.0);
 
     // Only for Debug use, activating this Line Stops the Motors from Working, this extends the Program Cycle.
     //sLogger.info("Antrieb %s set to Speed %f (%f)", sAntriebName.c_str(), fSpeed, fDemandedSpeed);

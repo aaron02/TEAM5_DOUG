@@ -46,7 +46,7 @@ private:
     Vector2D* mSollPosition;
 
     // calculates wheel speeds for Mecanum Drive dependant on Distance
-    float calculateSpeed(int distance);
+    float calculateSpeed(float distance);
 
 protected:
     DriveTrain* m_Drive;
@@ -57,7 +57,7 @@ protected:
     float fSpeedX = 0.0f;
     float fSpeedY = 0.0f;
 
-    int32_t timer = 1 * TimeVar::Seconds;
+    int32_t timer = 50 * TimeVar::Millis;
     bool debug = false;
 
     // Geschwindigkeitsbereich

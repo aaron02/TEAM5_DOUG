@@ -48,7 +48,7 @@ void Odometry::Update(uint64_t difftime)
         {
             // Constant Speed Test
             //CalculatePosition(32.283464566929133858267716535433, 64.566929133858267716535433070866);
-            sLogger.info("PositionX: %f PositionY: %f Heading = %f", position->getX(), position->getY(), degrees(dHeading));
+            sLogger.info("PositionX: %f PositionY: %f Heading = %f", position->getX(), position->getY(), getHeading());
             // Distance traveled Test
             //setStartLocation(Vector2D(0, 0), 0);
             timer = 5 * TimeVar::Seconds;
