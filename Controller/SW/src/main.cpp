@@ -24,9 +24,6 @@ String topicDeliveryOrder;
 // ===================== SETUP =====================
 void setup()
 {
-    Serial1.begin(115200);
-    Serial1.println("jhkjdsh");
-
     logHelper.connect();
     wifiHelper.connect(100000);
     mqttHelper.connect();
@@ -67,14 +64,16 @@ void loop()
 
             while (robotHelper.hasWaypointInQueue())
             {
-                Waypoint waypoint = robotHelper.popWaypointFromQueue();   
-                             logHelper.println(LOG_LEVEL_LOG, "Send new waypoint: x = " + String(waypoint.GetCoordinates().x) + " y = " + String(waypoint.GetCoordinates().y));
+                Waypoint waypoint = robotHelper.popWaypointFromQueue();
+                logHelper.println(LOG_LEVEL_LOG, "Send new waypoint: x = " + String(waypoint.GetCoordinates().x) + " y = " + String(waypoint.GetCoordinates().y));
                 robotHelper.setNextWaypoint(waypoint);
-                while (!robotHelper.readyForNextWaypoint())
+
+                do
                 {
-                    delay(100);
-                }
-                  logHelper.println(LOG_LEVEL_LOG, "Arrived!");
+                    delay(3000);
+                } while (!robotHelper.readyForNextWaypoint());
+                
+                logHelper.println(LOG_LEVEL_LOG, "Arrived!");
             }
         }
     }

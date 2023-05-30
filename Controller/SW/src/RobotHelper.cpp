@@ -26,7 +26,6 @@ void RobotHelper::setNextWaypoint(Waypoint waypoint)
     sendDoc["Data"]["y"] = waypoint.GetCoordinates().y;
 
     serializeJson(sendDoc, Serial1);
-    Serial1.println();
 }
 
 bool RobotHelper::readyForNextWaypoint()
@@ -37,13 +36,21 @@ bool RobotHelper::readyForNextWaypoint()
     RobotState state = RobotStateError;
 
     sendDoc["Command"] = "GetDrivingState";
+    while (Serial1.available())
+    {
+        Serial1.read();
+    }
+
     serializeJson(sendDoc, Serial1);
-    Serial1.println();
+
+    while (!Serial1.available())
+    {
+    }
 
     deserializeJson(recieveDoc, Serial1);
 
-    String returnedstate = recieveDoc["Data"]["State"];
-
+    String returnedstate = recieveDoc["Response"];
+    Serial.println(returnedstate);
     if (returnedstate == "Finished")
     {
         state = RobotState::RobotStateFinished;
@@ -63,7 +70,7 @@ bool RobotHelper::readyForNextWaypoint()
 
 bool RobotHelper::addWaypointToQueue(Waypoint waypoint)
 {
-    return  waypointQueue.enqueue(waypoint);
+    return waypointQueue.enqueue(waypoint);
 }
 
 Waypoint RobotHelper::popWaypointFromQueue()

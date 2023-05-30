@@ -9,7 +9,7 @@ enum WaypointType
     WAYPOINT_PARK_DISTRIBUTION_CENTER,
     WAYPOINT,
     WAYPOINT_HANDOVER,
-    WAYPOINT_HAND_OVER
+    WAYPOINT_DEPOSIT
 };
 
 struct Coordinates
