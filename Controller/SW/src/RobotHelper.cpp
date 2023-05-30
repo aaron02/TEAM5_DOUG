@@ -60,3 +60,18 @@ bool RobotHelper::readyForNextWaypoint()
 
     return false;
 }
+
+bool RobotHelper::addWaypointToQueue(Waypoint waypoint)
+{
+    return  waypointQueue.enqueue(waypoint);
+}
+
+Waypoint RobotHelper::popWaypointFromQueue()
+{
+    return waypointQueue.dequeue();
+}
+
+bool RobotHelper::hasWaypointInQueue()
+{
+    return !waypointQueue.isEmpty();
+}

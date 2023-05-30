@@ -1,5 +1,9 @@
 #include "Waypoint.h"
 
+Waypoint::Waypoint()
+{
+}
+
 Waypoint::Waypoint(WaypointType waypointType, Coordinates coordinates, int id) : waypointType(waypointType), coordinates(coordinates), id(id)
 {
 }

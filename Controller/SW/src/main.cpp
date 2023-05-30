@@ -6,36 +6,38 @@
 #include "RobotHelper.h"
 #include <HardwareSerial.h>
 
+// ===================== CONSTANTS =====================
 const String IP = "91.121.93.94";
 const String SSID = "McDonalds";
 const String PASSWORD = "burgerking";
 const String MQTT_DEVICE_ID = "Dough";
 const int MQTT_PORT = 1883;
 
-String macAddress;
-
+// ===================== OBJECTS =====================
 WiFiClient wifiClient;
 LogHelper logHelper(Serial, 115200);
 WiFiHelper wifiHelper(SSID, PASSWORD, logHelper, wifiClient);
 MqttHelper mqttHelper(IP, MQTT_PORT, MQTT_DEVICE_ID, logHelper, wifiClient, 10000);
-
-
 RobotHelper robotHelper(115200);
+String topicDeliveryOrder;
 
+// ===================== SETUP =====================
 void setup()
 {
-Serial1.begin(115200);
-Serial1.println("jhkjdsh");
-
+    Serial1.begin(115200);
+    Serial1.println("jhkjdsh");
 
     logHelper.connect();
     wifiHelper.connect(100000);
-    macAddress = wifiHelper.getMacAddress();
     mqttHelper.connect();
-    mqttHelper.subscribe("Robots/" + macAddress + "/To/DeliveryOrder");
+
+    topicDeliveryOrder = "Robots/" + wifiHelper.getMacAddress() + "/To/DeliveryOrder";
+
+    mqttHelper.subscribe(topicDeliveryOrder);
     robotHelper.connect();
 }
 
+// ===================== LOOP =====================
 void loop()
 {
     mqttHelper.loop();
@@ -57,14 +59,22 @@ void loop()
                 Coordinates coordinates;
                 coordinates.x = doc["deliverySteps"][i]["coordinates"]["x"].as<int>();
                 coordinates.y = doc["deliverySteps"][i]["coordinates"]["y"].as<int>();
+
                 Waypoint waypoint(WAYPOINT, coordinates, doc["deliverySteps"][i]["id"]);
 
-                logHelper.println(LOG_LEVEL_LOG, "Move to x: " + String(coordinates.x) + " y: " + String(coordinates.y));
+                robotHelper.addWaypointToQueue(waypoint);
+            }
+
+            while (robotHelper.hasWaypointInQueue())
+            {
+                Waypoint waypoint = robotHelper.popWaypointFromQueue();   
+                             logHelper.println(LOG_LEVEL_LOG, "Send new waypoint: x = " + String(waypoint.GetCoordinates().x) + " y = " + String(waypoint.GetCoordinates().y));
                 robotHelper.setNextWaypoint(waypoint);
                 while (!robotHelper.readyForNextWaypoint())
                 {
                     delay(100);
                 }
+                  logHelper.println(LOG_LEVEL_LOG, "Arrived!");
             }
         }
     }

@@ -21,6 +21,7 @@ struct Coordinates
 class Waypoint
 {
 public:
+ Waypoint();
     Waypoint(WaypointType waypointType, Coordinates coordinates, int id);
     Waypoint(WaypointType waypointType, Coordinates coordinates, int id, String productId);
     Waypoint(WaypointType waypointType, Coordinates coordinates, int id, String productId, String authorizationKey);
