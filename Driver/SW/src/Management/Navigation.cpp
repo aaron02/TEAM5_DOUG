@@ -48,6 +48,8 @@ void Navigation::Update(uint64_t difftime)
             {
                 if (yDifference > 0.5 || yDifference < -0.5)
                 {
+                    setDrivingState(DRIVE_STATE_BUSY);
+
                     // Fahre zuerst Y Richtung
                     fSpeedX = 0.0f;
                     fSpeedY = calculateSpeed(yDifference);
@@ -61,29 +63,33 @@ void Navigation::Update(uint64_t difftime)
                 {
                     if (xDifference > 0.5 || xDifference < -0.5)
                     {
-                    // Fahre X Richtung
-                    fSpeedX = calculateSpeed(xDifference);
-                    fSpeedY = 0.0f;
+                        setDrivingState(DRIVE_STATE_BUSY);
 
-                    if (debug)
-                        sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
+                        // Fahre X Richtung
+                        fSpeedX = calculateSpeed(xDifference);
+                        fSpeedY = 0.0f;
 
-                    m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getHeading());
-                    }
-                    else
-                    {
-                        // Position Erreicht
                         if (debug)
-                            sLogger.debug("Position Erreicht");
+                            sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
 
-                        m_Drive->Drive(0.0f, 0.0f, 0.0f);
-                    }
+                        m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getHeading());
+                        }
+                        else
+                        {
+                            // Position Erreicht
+                            if (debug)
+                                sLogger.debug("Position Erreicht");
+
+                            setDrivingState(DRIVE_STATE_FINISHED);
+                            m_Drive->Drive(0.0f, 0.0f, 0.0f);
+                        }
                 }
             }
         }
         else
         {
             //sLogger.debug("Position Erreicht");
+            setDrivingState(DRIVE_STATE_FINISHED);
             m_Drive->Drive(0.0f, 0.0f, 0.0f);
         }
     }
@@ -93,7 +99,8 @@ void Navigation::Update(uint64_t difftime)
 
 void Navigation::setSollPosition(float x, float y)
 {
-     mSollPosition->changeCoords(x, y);
+    mSollPosition->changeCoords(x, y);
+    setDrivingState(DRIVE_STATE_BUSY);
 }
 
 float Navigation::calculateSpeed(float distance) 

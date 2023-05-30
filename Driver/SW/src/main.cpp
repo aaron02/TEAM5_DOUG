@@ -58,7 +58,7 @@ void MainThread(uint32_t difftime)
             odometry->setStartLocation(Vector2D(0, 0), gyro->getGyroAngle(YAW));
 
             // Drive Absolute Test
-            nav->setSollPosition(100, 0);
+            //nav->setSollPosition(100, 0);
 
             sLogger.debug("Controller Started and Ready");
         }
@@ -93,7 +93,7 @@ void setup()
 {
     // Serial Interface Initialization
     Serial.begin(9600);
-    Serial1.begin(9600);
+    Serial1.begin(115200);
     Wire.begin();
     delay(100);
 

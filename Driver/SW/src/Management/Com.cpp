@@ -71,6 +71,8 @@ void Communication::Update(uint64_t difftime)
 
             case GetDrivingState:
             {
+                //sLogger.debug("State = %u", mNavigation->getDrivingState());
+
                 // Respond with Movement State
                 if (mNavigation)
                 {
