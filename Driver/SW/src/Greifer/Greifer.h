@@ -29,7 +29,9 @@ enum ArmStatus
 enum PackStatus
 {
     STATUS_FAILED = 0,
-    STATUS_OK
+    STATUS_OK,
+    STATUS_ReadyToMove,
+    STATUS_WaitingForCustomer,
 };
 
 enum SERVO_Positionen
@@ -40,7 +42,8 @@ enum SERVO_Positionen
     BASE_GEIFERPOSITION = 60,
     BASE_PARKPOSITION = 90,
     BASE_HOVEROVERLAGER = 120,
-    BASE_LAGERPOSITION = 110,
+    BASE_LAGERPOSITION = 110, 
+    BASE_LAGERPOSITIONAUFNAHME = 110, //backup falls aufnahme und ablage unterschiedlich sein müssen.
     //SERVO_GRIPP
     GRIPP_OFFEN = 160,
     GRIPP_GESCHLOSSEN = 60,
@@ -66,7 +69,8 @@ public:
     ~Greifer();
 
     void Update(uint64_t difftime) override;
-
+    bool PaketAnnahmeBestätigungKunde = 0; //Freigabe das der Kunde berechtigt ist das paket zu empfangen.
+    bool PaketKundeOderAblageort = 0; // Ablageart definieren 0=Kunde 1=Ablageort
     uint8_t getPosition(ServoMapping servo);
     uint8_t getSollPosition(ServoMapping servo);
     void setSollPosition(ServoMapping servo, SERVO_Positionen degree); // uint8_t degree
@@ -77,7 +81,7 @@ public:
     void setArmStatus(ArmStatus state);
     ArmStatus getArmStatus();
     PackStatus PickPackage();
-    PackStatus PlacePackage();
+    PackStatus PlacePackage(); 
 
     // Index für die Automatikfahr
     void setLagerIndex(uint8_t index) { iLagerindex = index; }
@@ -95,6 +99,7 @@ protected:
     PWMServo servo[2];
 
     /*
+        INFORMATION FÜR MICH
         Schrittmotor 1 Step = 1.8° -> 200 Steps = 360°
         Driver -> Set to 1/8 Steps  -> 200*8 = 1600 steps = 360°
 
@@ -103,8 +108,9 @@ protected:
 
     uint8_t iGrundstellungStep = 0;
     uint8_t iPickPackageStep = 0;
+    uint8_t iPlacePackageStep = 0;
     ArmStatus iGripperState = ArmStatus::AS_Undefined;
-    uint8_t iLagerindex = 0;
+    uint8_t iLagerindex = 0; //@Aaron muss das nicht public sein damit Lorenz den wert ändern kann. wird das nur einmal auf null gesetzt wenn nicht kann man dann nullptr schreiben ?
 
     PosAntrieb* mAntrieb = nullptr;
     Navigation* mNavigation = nullptr;

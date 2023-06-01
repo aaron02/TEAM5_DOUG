@@ -112,7 +112,7 @@ uint8_t Greifer::getSollPosition(ServoMapping servo)
     return mPosition;
 }
 
-void Greifer::setSollPosition(ServoMapping servo, SERVO_Positionen degree) //uint8_t degree 
+void Greifer::setSollPosition(ServoMapping servo, SERVO_Positionen degree) 
 {
     switch (servo)
     {
@@ -214,73 +214,272 @@ PackStatus Greifer::PickPackage()
             if (inposition())
                 iPickPackageStep++;
         }
-        break; // Drehen
-        case 1:
-        {
-            //Funktion
-            uint32_t iTableAngle = getPositionFromIndex(iLagerindex);
-            mAntrieb->moveAbsolutAngle(iTableAngle);
+        break; 
+        case 1: // Drehen
+        {   
+            //Arm wird in die Position zum aufnehmen eines Paketes bewegt.
+            mAntrieb->moveAbsolutAngle(DT_Greifposition);
+            if (inposition())
+                iPickPackageStep++;
         }
         break;
-        case 2:
+        case 2: // Arm Runter
+        {   
+            //Servo BASE/Arm bewegt sich in die Greifposition.
+            setSollPosition(SERVO_BASE, BASE_GEIFERPOSITION);
+            if (inposition())
+                iPickPackageStep++;
+        }
+        break;
+        case 3: //vorfahren
         {
-            //Funktion
-            mNavigation->setSollPosition(3, 0);
+            //Roboter fährt zum Paket um es mit dem Greifer aufnehmen zu können #hier wird noch ein Abstandssensor eingebaut
+            mNavigation->setSollPosition(4, 0);
             if (mNavigation->getDrivingState() == DrivingState::DRIVE_STATE_FINISHED)
                 iPickPackageStep++;
         }
         break;
-        case 3:
-        {
-            //Funktion
+        case 4: // Greifen
+        {   
+            //Servo Greift das Paket
+            setSollPosition(SERVO_GRIPP, GRIPP_GESCHLOSSEN);
+            if (inposition())
+                iPickPackageStep++;
         }
         break;
+        case 5: // zurück fahren
+        {   
+            //Roboter fährt zurück damit der Arm wieder sich frei bewegen kann.
+            mNavigation->setSollPosition(-4, 0);
+            if (mNavigation->getDrivingState() == DrivingState::DRIVE_STATE_FINISHED)
+                iPickPackageStep++;
+        }
+        break;
+        case 6: // Arm Hoch
+        {   
+            //BASE fährt in die obere Position
+            setSollPosition(SERVO_BASE, BASE_OBEN);
+            if (inposition())
+                iPickPackageStep++;
+            
+        }
+        break;
+        case 7: // Drehen mit Freigabe (Optional)
+        {   
+            //Arm wird auf die Freigabe Position bewegt. Von dort aus kann dem Greifer nix passieren und der Roboter kann zur nächsten aufgabe fahren.
+            mAntrieb->moveAbsolutAngle(DT_Bewegung_Freigegeben);
+            if (inposition())
+                iPickPackageStep++;
+            return PackStatus::STATUS_ReadyToMove; 
+        }
+        break;
+        case 8: // Drehen auf Lagerposition BASE auf HoverOverLager Position
+        {   
+            //Arm wird auf die gewünschte Lagerposition gedreht
+            //Variable iLagerindex gibt die gewünschte Lagerposition an. Mittels getPositionFromIndex wird der Winkel der Lagerposition übertragen.
+            setSollPosition(SERVO_BASE, BASE_HOVEROVERLAGER); //Base wird auf eine Tiefe Positon gefahren um Zeit zu Sparen.
+            uint32_t iTableAnglePick = getPositionFromIndex(iLagerindex);
+            mAntrieb->moveAbsolutAngle(iTableAnglePick);
+            if (inposition())
+                iPickPackageStep++;
+        }
+        break;
+        case 9: // Arm Runter
+        {   
+            //Base auf Ablageposition.
+            setSollPosition(SERVO_BASE, BASE_LAGERPOSITION);
+            if (inposition())
+                iPickPackageStep++;
+        }
+        break;
+        case 10: // Arm Greifer öffnen
+        {   
+            //Greifer öffnet
+            setSollPosition(SERVO_GRIPP, GRIPP_OFFEN);
+            if (inposition())
+                iPickPackageStep++;
+        }
+        break;
+        case 11: // Arm hoch home
+        {   
+            //Arm fährt hoch um sich drehen zu können
+            setSollPosition(SERVO_BASE, BASE_HOVEROVERLAGER);
+            if (inposition())
+                iPickPackageStep++;
+        }
+        break;
+        case 12: // Drehen Home
+        {   
+            //Drehtisch fährt auf die Parkposition
+            mAntrieb->moveAbsolutAngle(DT_Parkposition);
+            if (inposition())
+                iPickPackageStep++;
+        }
+        break;
+        case 13: // Rücksetzen der Schrittkette
+        {   
+            //man siehts
+            iPickPackageStep = 0; //das muss ich sicher machen oder? Ich frag mich nur wenn noch zu lange die Funktion aufgerufen wird Startet der ablauf von vorne ???
+        }
+        return PackStatus::STATUS_OK;
     } 
-    // Arm Rauf
-    // Drehen
-    // Arm Runter
-    // Greiffen
-    // Arm Hoch
-    // Drehen
-    // Arm Runter
-    // Greiffer öffnen
-    // Home
-    return PackStatus::STATUS_OK;
-}
-
-PackStatus Greifer::PlacePackage()
-{
-    return PackStatus::STATUS_OK;
 }
 
 /*
-    int step = 1;
-
-        switch (step)
-    {
-        case 1:
-        {
-            //Funktion
-        }
-        break;
-        case 2:
-        {
-            //Funktion
-        }
-        break;
-        case 3:
-        {
-            //Funktion
-        }
-        break;
-        case 4:
-        {
-            //Funktion
-        }
-        break;
-    }
-
+Paket wird vom gewünschten Lagerplatz geholt und wird vom Kunden oder am Ablageort platziert
+Case 6 entscheidet über Kunde oder Ablageort
+ab Case 100 nimmt der Kunde das Paket an
+ab Case 200 wird das Paket beim Ablageort platziert
+Ablageart definieren 0=Kunde 1=Ablageort
 */
+PackStatus Greifer::PlacePackage()
+{
+    switch (iPlacePackageStep)
+    {
+        case 0: // Drehen
+        {
+            //Arm wird in die Position zum aufnehmen eines Paketes bewegt.
+            uint32_t iTableAnglePlace = getPositionFromIndex(iLagerindex); //#könnte auch sicher bei Greifer.h Variable definieren und bei beiden Funktionen verwenden.
+            mAntrieb->moveAbsolutAngle(iTableAnglePlace);
+            //Weiterschaltbedingung
+            if (inposition())
+                iPlacePackageStep++;
+        }
+        break; 
+        case 1: // Arm runter
+        {   
+            //Arm bewegt sich zur aufnahme Position
+            setSollPosition(SERVO_BASE, BASE_LAGERPOSITIONAUFNAHME);
+            if (inposition())
+                iPlacePackageStep++;
+        }
+        break;
+        case 2: // Greifen
+        {
+            //Gripper setzt zupacken ein
+            //sehr effektiv
+            setSollPosition(SERVO_GRIPP, GRIPP_GESCHLOSSEN);
+            if (inposition())
+                iPlacePackageStep++;
+        }
+        break; 
+        case 3: // Arm hoch
+        {   
+            // Arm fährt hoch um sich frei drehen zu können
+            //ist der finger oben wird man dich loben
+            setSollPosition(SERVO_BASE, BASE_HOVEROVERLAGER);
+            if (inposition())
+                iPlacePackageStep++;
+        }
+        break;
+        case 4: // drehen Freigabe Position
+        {
+            //aber nicht zu schnell Jacqueline sonst musst du wieder kotzen
+            //wird in die Sichere Position gedreht.
+            mAntrieb->moveAbsolutAngle(DT_Bewegung_Freigegeben);
+            setSollPosition(SERVO_BASE, BASE_OBEN);
+            if (inposition())
+                iPlacePackageStep++;
+        }
+        break; 
+        case 5: // drehen
+        {   
+            //dreht sich auf die Abgabe Position
+            mAntrieb->moveAbsolutAngle(DT_Greifposition);
+            if (inposition())
+                iPlacePackageStep++;
+        }
+        break;
+        case 6: // Arm runter
+        {
+            //Arm bewegt sich zur abgabe Position
+            //#könnte: man könnte auch die annahme Position vom Kunden bei der Position DT_Bewegung_Freigegeben machen.
+            setSollPosition(SERVO_BASE, BASE_GEIFERPOSITION); 
+            if (inposition())
+                if(PaketKundeOderAblageort)
+                {
+                iPlacePackageStep = 200;
+                }
+                else iPlacePackageStep = 100;
+        }
+        break;
+        //================================================== Paket Kunde ==================================================
+        case 100: // Annahme vom Kunden
+        {   
+            if (PaketAnnahmeBestätigungKunde);
+                iPlacePackageStep++;
+        }
+        return PackStatus::STATUS_WaitingForCustomer;
+        case 101: // Greifer öffnen Kunde
+        {
+            // Kunde hat bestätigt Paket wird übergeben
+            //Sprung zurück auf Case 7 Homing ausführen
+            setSollPosition(SERVO_GRIPP, GRIPP_OFFEN);
+            if (inposition())
+                iPlacePackageStep = 7;
+        }
+        break;
+        //================================================== Paket Ablageort ==================================================
+        case 200: // vorfahren
+        {
+            //Roboter fährt zum Paket um es mit dem Greifer ablegen zu können #hier wird noch ein Abstandssensor eingebaut
+            mNavigation->setSollPosition(4, 0);
+            if (mNavigation->getDrivingState() == DrivingState::DRIVE_STATE_FINISHED)
+                iPlacePackageStep++;
+        }
+        break;
+        case 201: // Greifer öffnen
+        {
+            //Greifer öffnet und Platziert das Paket
+            setSollPosition(SERVO_GRIPP, GRIPP_OFFEN);
+            if (inposition())
+                iPlacePackageStep++;
+        }
+        break;
+        case 202: // Greifer öffnen
+        {
+            //Roboter fährt zurück damit der Arm wieder sich frei bewegen kann.
+            //Sprung zurück auf Case 7 Homing ausführen
+            mNavigation->setSollPosition(-4, 0);
+            if (mNavigation->getDrivingState() == DrivingState::DRIVE_STATE_FINISHED)
+                iPlacePackageStep = 7;
+        }
+        break;
+        //================================================== Homing ==================================================
+        case 7: // Arm hoch 
+        {
+            //Arm hoch zum freien drehen
+            setSollPosition(SERVO_BASE, BASE_OBEN); 
+            if (inposition())
+                iPlacePackageStep++;
+        }
+        break;
+        case 8: // Drehen Freigabeposition
+        {
+            // Drehen auf die freigabe Position
+            mAntrieb->moveAbsolutAngle(DT_Bewegung_Freigegeben);
+            if (inposition())
+                iPlacePackageStep++;
+        }
+        return STATUS_ReadyToMove;
+        case 9: // Drehen
+        {
+            //
+            mAntrieb->moveAbsolutAngle(DT_Parkposition);
+            setSollPosition(SERVO_BASE, BASE_HOVEROVERLAGER); 
+            if (inposition())
+                iPlacePackageStep++;
+        }
+        break;
+        case 10: // Rücksetzen der Schrittkette
+        {
+            iPlacePackageStep = 0;
+        }
+        return PackStatus::STATUS_OK;
+    
+    }
+}
+
 
 Drehtisch_Position Greifer::getPositionFromIndex(uint8_t index)
 {
