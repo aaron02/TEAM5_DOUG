@@ -436,7 +436,7 @@ PackStatus Greifer::PlacePackage()
                 iPlacePackageStep++;
         }
         break;
-        case 202: // Greifer öffnen
+        case 202: // zurückfahren
         {
             //Roboter fährt zurück damit der Arm wieder sich frei bewegen kann.
             //Sprung zurück auf Case 7 Homing ausführen
