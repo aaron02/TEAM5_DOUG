@@ -34,6 +34,20 @@ void Navigation::Update(uint64_t difftime)
             if (debug)
                 sLogger.debug("xDif %f, yDif %f, Distance %f", xDifference, yDifference, distance);
 
+            // We are Further than 250mm away face our Target.
+            if (distance > 200.0)
+            {
+                float angle = calculateAngle(mSollPosition->getX(), mSollPosition->getY(), mPosition->getX(), mPosition->getY());
+                float turnSpeed = getTurnSpeed(angle / 180.0);
+
+                //if (debug)
+                    sLogger.debug("rotSpeed = %f, ActualAngle = %f, AngleToGo = %f", turnSpeed, m_Odometry->getHeading(), angle);
+
+                // Roboter Drehen
+                m_Drive->Drive(0.0f, 0.0f, turnSpeed, m_Odometry->getHeading());
+                return;
+            }
+
             // Gleichzeitiges Fahren
             if (0)
             {
@@ -129,6 +143,30 @@ float Navigation::calculateSpeed(float distance)
     }
 
     return speed;
+}
+
+// Funktion zur Berechnung des Winkels zwischen dem Roboter und dem Ziel
+float Navigation::calculateAngle(int targetX, int targetY, int robotX, int robotY)
+{
+  float dx = targetX - robotX;
+  float dy = targetY - robotY;
+  float angle = atan2(dy, dx) * 180 / PI;
+  return angle;
+}
+
+float Navigation::getTurnSpeed(float turnValue) 
+{
+    // Begrenzung der Geschwindigkeit auf die Mindestgeschwindigkeit (+-0.1)
+    if (turnValue > 0 && turnValue < 0.1) 
+    {
+        turnValue = 0.1;
+    }
+    else if (turnValue < 0 && turnValue > -0.1) 
+    {
+        turnValue = -0.1;
+    }
+
+    return turnValue;
 }
 
 void Navigation::abortDriving()

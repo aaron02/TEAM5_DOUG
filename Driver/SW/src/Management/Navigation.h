@@ -45,6 +45,10 @@ public:
     // abort current movement
     void abortDriving();
 
+
+    float calculateAngle(int targetX, int targetY, int robotX, int robotY);
+    float getTurnSpeed(float turnValue);
+
 private:
     Vector2D* mSollPosition;
 
