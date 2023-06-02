@@ -29,9 +29,10 @@ enum ArmStatus
 enum PackStatus
 {
     STATUS_FAILED = 0,
-    STATUS_OK,
+    STATUS_Undefined,
     STATUS_ReadyToMove,
     STATUS_WaitingForCustomer,
+    STATUS_OK
 };
 
 enum SERVO_Positionen
@@ -80,8 +81,11 @@ public:
     void Grundstellung();
     void setArmStatus(ArmStatus state);
     ArmStatus getArmStatus();
-    PackStatus PickPackage();
-    PackStatus PlacePackage(); 
+    void PickPackage();
+    void PlacePackage();
+
+    PackStatus getPackStatus();
+    void setPackStatus(PackStatus Status);
 
     // Index für die Automatikfahr
     void setLagerIndex(uint8_t index) { iLagerindex = index; }
@@ -110,7 +114,8 @@ protected:
     uint8_t iPickPackageStep = 0;
     uint8_t iPlacePackageStep = 0;
     ArmStatus iGripperState = ArmStatus::AS_Undefined;
-    uint8_t iLagerindex = 0; //@Aaron muss das nicht public sein damit Lorenz den wert ändern kann. wird das nur einmal auf null gesetzt wenn nicht kann man dann nullptr schreiben ?
+    PackStatus iPackStatus = PackStatus::STATUS_Undefined;
+    uint8_t iLagerindex = 0;
 
     PosAntrieb* mAntrieb = nullptr;
     Navigation* mNavigation = nullptr;

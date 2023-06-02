@@ -187,6 +187,8 @@ void Greifer::Grundstellung()
         {
             // Grundstellung abgeschlossen. Rücksetzten von der INIT variable
             setArmStatus(ArmStatus::AS_Ready);
+            setPackStatus(PackStatus::STATUS_OK);
+            iGrundstellungStep = 0;
         } break;
     }
 }
@@ -201,7 +203,7 @@ ArmStatus Greifer::getArmStatus()
     return iGripperState;
 }
 
-PackStatus Greifer::PickPackage()
+void Greifer::PickPackage()
 {
     switch (iPickPackageStep)
     {
@@ -233,14 +235,17 @@ PackStatus Greifer::PickPackage()
         break;
         case 3: //vorfahren
         {
+            setPackStatus(PackStatus::STATUS_ReadyToMove);
+
             //Roboter fährt zum Paket um es mit dem Greifer aufnehmen zu können #hier wird noch ein Abstandssensor eingebaut
-            mNavigation->setSollPosition(4, 0);
+            mNavigation->setSollPosition(mNavigation->getPosition()->getX(), mNavigation->getPosition()->getY() + 4);
             if (mNavigation->getDrivingState() == DrivingState::DRIVE_STATE_FINISHED)
                 iPickPackageStep++;
         }
         break;
         case 4: // Greifen
         {   
+            setPackStatus(PackStatus::STATUS_Undefined);
             //Servo Greift das Paket
             setSollPosition(SERVO_GRIPP, GRIPP_GESCHLOSSEN);
             if (inposition())
@@ -249,14 +254,16 @@ PackStatus Greifer::PickPackage()
         break;
         case 5: // zurück fahren
         {   
+            setPackStatus(PackStatus::STATUS_ReadyToMove);
             //Roboter fährt zurück damit der Arm wieder sich frei bewegen kann.
-            mNavigation->setSollPosition(-4, 0);
+            mNavigation->setSollPosition(mNavigation->getPosition()->getX(), mNavigation->getPosition()->getY() - 4);
             if (mNavigation->getDrivingState() == DrivingState::DRIVE_STATE_FINISHED)
                 iPickPackageStep++;
         }
         break;
         case 6: // Arm Hoch
         {   
+            setPackStatus(PackStatus::STATUS_Undefined);
             //BASE fährt in die obere Position
             setSollPosition(SERVO_BASE, BASE_OBEN);
             if (inposition())
@@ -270,7 +277,6 @@ PackStatus Greifer::PickPackage()
             mAntrieb->moveAbsolutAngle(DT_Bewegung_Freigegeben);
             if (inposition())
                 iPickPackageStep++;
-            return PackStatus::STATUS_ReadyToMove; 
         }
         break;
         case 8: // Drehen auf Lagerposition BASE auf HoverOverLager Position
@@ -320,8 +326,9 @@ PackStatus Greifer::PickPackage()
         {   
             //man siehts
             iPickPackageStep = 0; //das muss ich sicher machen oder? Ich frag mich nur wenn noch zu lange die Funktion aufgerufen wird Startet der ablauf von vorne ???
+            setArmStatus(ArmStatus::AS_Ready);
+            setPackStatus(PackStatus::STATUS_OK);
         }
-        return PackStatus::STATUS_OK;
     } 
 }
 
@@ -332,7 +339,7 @@ ab Case 100 nimmt der Kunde das Paket an
 ab Case 200 wird das Paket beim Ablageort platziert
 Ablageart definieren 0=Kunde 1=Ablageort
 */
-PackStatus Greifer::PlacePackage()
+void Greifer::PlacePackage()
 {
     switch (iPlacePackageStep)
     {
@@ -396,20 +403,17 @@ PackStatus Greifer::PlacePackage()
             //#könnte: man könnte auch die annahme Position vom Kunden bei der Position DT_Bewegung_Freigegeben machen.
             setSollPosition(SERVO_BASE, BASE_GEIFERPOSITION); 
             if (inposition())
-                if(PaketKundeOderAblageort)
-                {
-                iPlacePackageStep = 200;
-                }
-                else iPlacePackageStep = 100;
+                PaketKundeOderAblageort ? iPlacePackageStep = 200 : iPlacePackageStep = 100;
         }
         break;
         //================================================== Paket Kunde ==================================================
         case 100: // Annahme vom Kunden
         {   
+            setPackStatus(PackStatus::STATUS_WaitingForCustomer);
             if (PaketAnnahmeBestätigungKunde);
                 iPlacePackageStep++;
-        }
-        return PackStatus::STATUS_WaitingForCustomer;
+        } 
+        break;
         case 101: // Greifer öffnen Kunde
         {
             // Kunde hat bestätigt Paket wird übergeben
@@ -422,14 +426,16 @@ PackStatus Greifer::PlacePackage()
         //================================================== Paket Ablageort ==================================================
         case 200: // vorfahren
         {
+            setPackStatus(PackStatus::STATUS_ReadyToMove);
             //Roboter fährt zum Paket um es mit dem Greifer ablegen zu können #hier wird noch ein Abstandssensor eingebaut
-            mNavigation->setSollPosition(4, 0);
+            mNavigation->setSollPosition(mNavigation->getPosition()->getX(), mNavigation->getPosition()->getY() + 4);
             if (mNavigation->getDrivingState() == DrivingState::DRIVE_STATE_FINISHED)
                 iPlacePackageStep++;
         }
         break;
         case 201: // Greifer öffnen
         {
+            setPackStatus(PackStatus::STATUS_Undefined);
             //Greifer öffnet und Platziert das Paket
             setSollPosition(SERVO_GRIPP, GRIPP_OFFEN);
             if (inposition())
@@ -438,9 +444,10 @@ PackStatus Greifer::PlacePackage()
         break;
         case 202: // zurückfahren
         {
+            setPackStatus(PackStatus::STATUS_ReadyToMove);
             //Roboter fährt zurück damit der Arm wieder sich frei bewegen kann.
             //Sprung zurück auf Case 7 Homing ausführen
-            mNavigation->setSollPosition(-4, 0);
+            mNavigation->setSollPosition(mNavigation->getPosition()->getX(), mNavigation->getPosition()->getY() - 4);
             if (mNavigation->getDrivingState() == DrivingState::DRIVE_STATE_FINISHED)
                 iPlacePackageStep = 7;
         }
@@ -448,6 +455,7 @@ PackStatus Greifer::PlacePackage()
         //================================================== Homing ==================================================
         case 7: // Arm hoch 
         {
+            setPackStatus(PackStatus::STATUS_Undefined);
             //Arm hoch zum freien drehen
             setSollPosition(SERVO_BASE, BASE_OBEN); 
             if (inposition())
@@ -461,7 +469,7 @@ PackStatus Greifer::PlacePackage()
             if (inposition())
                 iPlacePackageStep++;
         }
-        return STATUS_ReadyToMove;
+        break;
         case 9: // Drehen
         {
             //
@@ -474,8 +482,10 @@ PackStatus Greifer::PlacePackage()
         case 10: // Rücksetzen der Schrittkette
         {
             iPlacePackageStep = 0;
+            setArmStatus(ArmStatus::AS_Ready);
+            setPackStatus(PackStatus::STATUS_OK);
         }
-        return PackStatus::STATUS_OK;
+        break;
     
     }
 }
