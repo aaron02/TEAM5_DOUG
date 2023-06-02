@@ -31,17 +31,20 @@ void Navigation::Update(uint64_t difftime)
             // Distanz Luftline
             float distance = sqrtf(yDifference * yDifference + xDifference * xDifference);
 
+            // Winkel zum Ziel
+            float targetAngle = calculateAngle(mSollPosition->getX(), mSollPosition->getY(), mPosition->getX(), mPosition->getY());
+
             if (debug)
                 sLogger.debug("xDif %f, yDif %f, Distance %f", xDifference, yDifference, distance);
 
-            // We are Further than 250mm away face our Target.
-            if (distance > 200.0)
+            // We are Further than 200mm away face our Target.
+            if (distance > 200.0 && targetAngle > 0.5 || targetAngle < -0.5)
             {
-                float angle = calculateAngle(mSollPosition->getX(), mSollPosition->getY(), mPosition->getX(), mPosition->getY());
-                float turnSpeed = getTurnSpeed(angle / 180.0);
+                float remainingAngle = calculateRemainingAngle(m_Odometry->getHeading(), targetAngle);
+                float turnSpeed = getTurnSpeed(remainingAngle / 180.0);
 
                 //if (debug)
-                    sLogger.debug("rotSpeed = %f, ActualAngle = %f, AngleToGo = %f", turnSpeed, m_Odometry->getHeading(), angle);
+                    sLogger.debug("rotSpeed = %f, ActualAngle = %f, RemainingAngle = %f", turnSpeed, m_Odometry->getHeading(), remainingAngle);
 
                 // Roboter Drehen
                 m_Drive->Drive(0.0f, 0.0f, turnSpeed, m_Odometry->getHeading());
@@ -152,6 +155,22 @@ float Navigation::calculateAngle(int targetX, int targetY, int robotX, int robot
   float dy = targetY - robotY;
   float angle = atan2(dy, dx) * 180 / PI;
   return angle;
+}
+
+// Funktion zur Berechnung des Winkels zwischen der aktuellen Richtung und dem Ziel
+float Navigation::calculateRemainingAngle(float currentDirection, float targetDirection)
+{
+  float remainingAngle = targetDirection - currentDirection;
+  if (remainingAngle > 180) 
+  {
+    remainingAngle -= 360;
+  }
+  else if (remainingAngle < -180)
+  {
+    remainingAngle += 360;
+  }
+
+  return remainingAngle;
 }
 
 float Navigation::getTurnSpeed(float turnValue) 

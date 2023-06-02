@@ -47,6 +47,7 @@ public:
 
 
     float calculateAngle(int targetX, int targetY, int robotX, int robotY);
+    float calculateRemainingAngle(float currentDirection, float targetDirection);
     float getTurnSpeed(float turnValue);
 
 private:
