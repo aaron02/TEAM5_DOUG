@@ -193,16 +193,6 @@ void Greifer::Grundstellung()
     }
 }
 
-void Greifer::setArmStatus(ArmStatus state)
-{
-    iGripperState = state;
-}
-
-ArmStatus Greifer::getArmStatus()
-{
-    return iGripperState;
-}
-
 void Greifer::PickPackage()
 {
     switch (iPickPackageStep)
@@ -284,8 +274,7 @@ void Greifer::PickPackage()
             //Arm wird auf die gewünschte Lagerposition gedreht
             //Variable iLagerindex gibt die gewünschte Lagerposition an. Mittels getPositionFromIndex wird der Winkel der Lagerposition übertragen.
             setSollPosition(SERVO_BASE, BASE_HOVEROVERLAGER); //Base wird auf eine Tiefe Positon gefahren um Zeit zu Sparen.
-            uint32_t iTableAnglePick = getPositionFromIndex(iLagerindex);
-            mAntrieb->moveAbsolutAngle(iTableAnglePick);
+            mAntrieb->moveAbsolutAngle(getPositionFromIndex(iLagerindex));
             if (inposition())
                 iPickPackageStep++;
         }
@@ -325,7 +314,7 @@ void Greifer::PickPackage()
         case 13: // Rücksetzen der Schrittkette
         {   
             //man siehts
-            iPickPackageStep = 0; //das muss ich sicher machen oder? Ich frag mich nur wenn noch zu lange die Funktion aufgerufen wird Startet der ablauf von vorne ???
+            iPickPackageStep = 0;
             setArmStatus(ArmStatus::AS_Ready);
             setPackStatus(PackStatus::STATUS_OK);
         }
@@ -337,7 +326,7 @@ Paket wird vom gewünschten Lagerplatz geholt und wird vom Kunden oder am Ablage
 Case 6 entscheidet über Kunde oder Ablageort
 ab Case 100 nimmt der Kunde das Paket an
 ab Case 200 wird das Paket beim Ablageort platziert
-Ablageart definieren 0=Kunde 1=Ablageort
+Ablageart definieren false=Kunde true=Ablageort
 */
 void Greifer::PlacePackage()
 {
@@ -346,7 +335,7 @@ void Greifer::PlacePackage()
         case 0: // Drehen
         {
             //Arm wird in die Position zum aufnehmen eines Paketes bewegt.
-            uint32_t iTableAnglePlace = getPositionFromIndex(iLagerindex); //#könnte auch sicher bei Greifer.h Variable definieren und bei beiden Funktionen verwenden.
+            uint32_t iTableAnglePlace = getPositionFromIndex(iLagerindex);
             mAntrieb->moveAbsolutAngle(iTableAnglePlace);
             //Weiterschaltbedingung
             if (inposition())
@@ -410,7 +399,7 @@ void Greifer::PlacePackage()
         case 100: // Annahme vom Kunden
         {   
             setPackStatus(PackStatus::STATUS_WaitingForCustomer);
-            if (PaketAnnahmeBestätigungKunde);
+            if (PaketAnnahmeBestätigungKunde)
                 iPlacePackageStep++;
         } 
         break;
@@ -427,7 +416,7 @@ void Greifer::PlacePackage()
         case 200: // vorfahren
         {
             setPackStatus(PackStatus::STATUS_ReadyToMove);
-            //Roboter fährt zum Paket um es mit dem Greifer ablegen zu können #hier wird noch ein Abstandssensor eingebaut
+            //Roboter fährt zum Paket um es mit dem Greifer ablegen zu können.
             mNavigation->setSollPosition(mNavigation->getPosition()->getX(), mNavigation->getPosition()->getY() + 4);
             if (mNavigation->getDrivingState() == DrivingState::DRIVE_STATE_FINISHED)
                 iPlacePackageStep++;

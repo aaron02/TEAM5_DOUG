@@ -9,6 +9,7 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 class PosAntrieb;
 class Navigation;
 class Updateable;
+class Odometry;
 
 enum ServoMapping
 {
@@ -48,18 +49,18 @@ enum SERVO_Positionen
     //SERVO_GRIPP
     GRIPP_OFFEN = 160,
     GRIPP_GESCHLOSSEN = 60,
-    GRIPP_PARKPOSITION = 90,
+    GRIPP_PARKPOSITION = 90
 };
 
 enum Drehtisch_Position
 {
-    DT_Lager_PS1 =1,
-    DT_Lager_PS2,
-    DT_Lager_PS3,
-    DT_Lager_PS4,
-    DT_Parkposition = 45, // Soll in der mitte vom Robo sein
-    DT_Greifposition = 270,
-    DT_Bewegung_Freigegeben = 180, //Greifer-Arm hat sich bis zu dieser Position bewegt wo er nicht mehr im Vorderen
+    DT_Lager_PS1 = 240,
+    DT_Lager_PS2 = 260,
+    DT_Lager_PS3 = 280,
+    DT_Lager_PS4 = 300,
+    DT_Parkposition = 270, // Soll in der mitte vom Robo sein
+    DT_Greifposition = 90,
+    DT_Bewegung_Freigegeben = 180  //Greifer-Arm hat sich bis zu dieser Position bewegt wo er nicht mehr im Vorderen
                                    //Teil des Roboters ist. Damit könnte man ein Signal ausgeben das sich der Roboter bewegen darf. 
 };
 
@@ -70,22 +71,19 @@ public:
     ~Greifer();
 
     void Update(uint64_t difftime) override;
-    bool PaketAnnahmeBestätigungKunde = 0; //Freigabe das der Kunde berechtigt ist das paket zu empfangen.
-    bool PaketKundeOderAblageort = 0; // Ablageart definieren 0=Kunde 1=Ablageort
     uint8_t getPosition(ServoMapping servo);
     uint8_t getSollPosition(ServoMapping servo);
     void setSollPosition(ServoMapping servo, SERVO_Positionen degree); // uint8_t degree
 
     // Drive Befehle
-
     void Grundstellung();
-    void setArmStatus(ArmStatus state);
-    ArmStatus getArmStatus();
     void PickPackage();
     void PlacePackage();
 
-    PackStatus getPackStatus();
-    void setPackStatus(PackStatus Status);
+    void setArmStatus(ArmStatus state) { iGripperState = state;}
+    ArmStatus getArmStatus() { return iGripperState; }
+    void setPackStatus(PackStatus Status) { iPackStatus = Status; }
+    PackStatus getPackStatus() { return iPackStatus; }
 
     // Index für die Automatikfahr
     void setLagerIndex(uint8_t index) { iLagerindex = index; }
@@ -93,6 +91,10 @@ public:
     Drehtisch_Position getPositionFromIndex(uint8_t index);
 
     void setTimer(ServoMapping servo, int32_t timer);
+
+    // Schnittstelle Kunde
+    bool PaketAnnahmeBestätigungKunde = false; //Freigabe das der Kunde berechtigt ist das paket zu empfangen.
+    bool PaketKundeOderAblageort = false; // Ablageart definieren 0=Kunde 1=Ablageort
 
 private:
     void runServo(ServoMapping servoIndex, uint64_t difftime);

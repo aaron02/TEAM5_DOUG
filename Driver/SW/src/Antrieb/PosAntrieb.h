@@ -45,7 +45,7 @@ class PosAntrieb : public Updateable
 
     // Software Limits
     int32_t minLimitGrad = 0;
-    int32_t MaxLimitGrad = 360;
+    int32_t MaxLimitGrad = 340;
 
     // Anzahl Schritte für 1 Umdrehung der Achse
     float anzahlSchritteProGrad = 13.33;

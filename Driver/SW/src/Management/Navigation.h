@@ -34,7 +34,7 @@ public:
     Vector2D* getSollPosition() { return mSollPosition; }
 
     // get Istpositionn
-    Vector2D* getPosition () { return m_Odometry->GetPosition(); }
+    Vector2D* getPosition();
 
     // set driving state
     void setDrivingState(DrivingState state) { mDriveState = state; }

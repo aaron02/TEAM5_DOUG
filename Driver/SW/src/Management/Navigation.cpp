@@ -38,7 +38,7 @@ void Navigation::Update(uint64_t difftime)
                 sLogger.debug("xDif %f, yDif %f, Distance %f", xDifference, yDifference, distance);
 
             // We are Further than 200mm away face our Target.
-            if (distance > 200.0 && targetAngle > 0.5 || targetAngle < -0.5)
+            if ((distance > 200.0) && (targetAngle > 0.5 || targetAngle < -0.5))
             {
                 float remainingAngle = calculateRemainingAngle(m_Odometry->getHeading(), targetAngle);
                 float turnSpeed = getTurnSpeed(remainingAngle / 180.0);
@@ -192,4 +192,9 @@ void Navigation::abortDriving()
 {
     // Soll zu Istposition sollte genügen um die Motoren zu stoppen
     mSollPosition->changeCoords(m_Odometry->GetPosition()->getX(), m_Odometry->GetPosition()->getY());
+}
+
+Vector2D* Navigation::getPosition ()
+{
+    return m_Odometry->GetPosition();
 }

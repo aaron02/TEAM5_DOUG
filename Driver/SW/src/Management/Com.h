@@ -11,6 +11,12 @@ class Navigation;
 class PDB;
 class Odometry;
 class Updateable;
+class Communication;
+
+struct OpcodeHandler
+{
+    void (Communication::*handler)(JsonDocument& doc);
+};
 
 class Communication : public Updateable
 {
@@ -20,6 +26,8 @@ public:
 
     // Cyclyc Update
     void Update(uint64_t difftime) override;
+
+    static void loadHandlers();
 
 private:
 
@@ -35,7 +43,18 @@ private:
 protected:
     // Handles
     Navigation* mNavigation = nullptr;
-    Odometry* mOdometry = nullptr;
     Greifer* mGreifer = nullptr;
     PDB* mPower = nullptr;
+    Odometry* mOdometry = nullptr;
+
+    // Handlers
+    void handleGetCurrentPosition(JsonDocument& doc);
+    void handleSetDrivingWaypoint(JsonDocument& doc);
+    void handleAbortDriving(JsonDocument& doc);
+    void handleGetDrivingState(JsonDocument& doc);
+    void handleSetArmStatus(JsonDocument& doc);
+    void handleGetArmStatus(JsonDocument& doc);
+    void handlePickPackage(JsonDocument& doc);
+    void handlePlacePackage(JsonDocument& doc);
+    void handleGetBatteryState(JsonDocument& doc);
 };
