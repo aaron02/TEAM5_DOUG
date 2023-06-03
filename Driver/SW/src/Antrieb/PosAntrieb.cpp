@@ -28,8 +28,8 @@ PosAntrieb::PosAntrieb(std::string sName, uint32_t iStep,uint32_t iDir,uint32_t 
     // Achse Referenzieren
     //setHoming();
 
-    stepper->setSpeed(100);
-    stepper->setAcceleration(100);
+    stepper->setSpeed(5.0);
+    stepper->setAcceleration(5.0);
 }
 
 PosAntrieb::~PosAntrieb()
@@ -83,8 +83,8 @@ void PosAntrieb::setHoming()
     // Initial Homing Sequenz
     // Setze Maximale Geschwindigkeit fuer den Schrittmotor fuer die Homing Sequenz
     referenziert = HOMING_IN_PROGRESS;
-    stepper->setSpeed(25.0);
-    stepper->setAcceleration(25.0);
+    stepper->setSpeed(5.0);
+    stepper->setAcceleration(5.0);
 
     // Seriell Debug
     if (debug)
@@ -94,7 +94,7 @@ void PosAntrieb::setHoming()
     while (digitalRead(iHomePin))
     {                                   // Make the Stepper move CCW until the switch is activated   
         stepper->moveTo(initial_homing);   // Set the position to move to
-        initial_homing--;               // Decrease by 1 for next move if needed
+        initial_homing++;               // Decrease by 1 for next move if needed
         stepper->runSpeed();                    // Start moving the stepper
         delay(1);
     }
@@ -110,7 +110,7 @@ void PosAntrieb::setHoming()
         // Make the Stepper move CW until the switch is deactivated
         stepper->moveTo(initial_homing);
         stepper->runSpeed();
-        initial_homing++;
+        initial_homing--;
         delay(1);
     }
 
@@ -120,7 +120,10 @@ void PosAntrieb::setHoming()
         sLogger.debug("Homing Completed");
 
     // Setze Positionswert
-    stepper->setCurrentPosition(long(minLimitGrad * anzahlSchritteProGrad));
+    stepper->setCurrentPosition(long(356.5 * anzahlSchritteProGrad));
+    calculateCurrentOrientation();
+    
+    sLogger.debug("Nullposition Greiffer Gesetzt auf %u", m_position);
 
     // Setze Maximale Geschwindigkeit und Beschleunigung
     stepper->setSpeed(100);

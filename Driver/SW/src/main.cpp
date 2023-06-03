@@ -130,7 +130,7 @@ void setup()
     nav = new Navigation(driveTrain, odometry);
     //
 
-    greifer = new Greifer(29, 28, *gripperBase, *nav);
+    greifer = new Greifer(36, 33, *gripperBase, *nav);
 
     // Communication
     com = new Communication(nav, greifer, pdb, odometry);

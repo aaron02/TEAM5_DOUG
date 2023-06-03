@@ -44,8 +44,8 @@ class PosAntrieb : public Updateable
     void calculateCurrentOrientation();
 
     // Software Limits
-    int32_t minLimitGrad = 0;
-    int32_t MaxLimitGrad = 340;
+    int32_t minLimitGrad = 90;
+    int32_t MaxLimitGrad = 360;
 
     // Anzahl Schritte für 1 Umdrehung der Achse
     float anzahlSchritteProGrad = 13.33;

@@ -39,28 +39,29 @@ enum PackStatus
 enum SERVO_Positionen
 {
     //SERVO_BASE
-    BASE_GS = 130, //GS=Grundstellung
-    BASE_OBEN = 160,
-    BASE_GEIFERPOSITION = 60,
+    BASE_GS = 90, //GS=Grundstellung
+    BASE_OBEN = 60,
+    BASE_GEIFERPOSITION = 126,
     BASE_PARKPOSITION = 90,
-    BASE_HOVEROVERLAGER = 120,
-    BASE_LAGERPOSITION = 110, 
-    BASE_LAGERPOSITIONAUFNAHME = 110, //backup falls aufnahme und ablage unterschiedlich sein müssen.
+    BASE_HOVEROVERLAGER = 81,
+    BASE_LAGERPOSITION = 99, 
+    BASE_LAGERPOSITIONAUFNAHME = 99, //backup falls aufnahme und ablage unterschiedlich sein müssen.
     //SERVO_GRIPP
-    GRIPP_OFFEN = 160,
-    GRIPP_GESCHLOSSEN = 60,
-    GRIPP_PARKPOSITION = 90
+    GRIPP_OFFEN = 60,
+    GRIPP_GESCHLOSSEN = 15,
+    GRIPP_PARKPOSITION = 60,
+    GRIPP_OPEN_LAGER = 35
 };
 
 enum Drehtisch_Position
 {
-    DT_Lager_PS1 = 240,
-    DT_Lager_PS2 = 260,
-    DT_Lager_PS3 = 280,
-    DT_Lager_PS4 = 300,
-    DT_Parkposition = 270, // Soll in der mitte vom Robo sein
-    DT_Greifposition = 90,
-    DT_Bewegung_Freigegeben = 180  //Greifer-Arm hat sich bis zu dieser Position bewegt wo er nicht mehr im Vorderen
+    DT_Lager_PS1 = 205,
+    DT_Lager_PS2 = 187,
+    DT_Lager_PS3 = 169,
+    DT_Lager_PS4 = 151,
+    DT_Parkposition = 180, // Soll in der mitte vom Robo sein
+    DT_Greifposition = 360,
+    DT_Bewegung_Freigegeben = 270  //Greifer-Arm hat sich bis zu dieser Position bewegt wo er nicht mehr im Vorderen
                                    //Teil des Roboters ist. Damit könnte man ein Signal ausgeben das sich der Roboter bewegen darf. 
 };
 
@@ -98,11 +99,13 @@ public:
 
 private:
     void runServo(ServoMapping servoIndex, uint64_t difftime);
-    std::vector<int32_t> updateTimer = { 500, 500 };
+    std::vector<int32_t> updateTimer = { 1 * TimeVar::Seconds, 1 * TimeVar::Seconds };
     bool inposition();
 
 protected:
     PWMServo servo[2];
+
+    long servoPos[2];
 
     /*
         INFORMATION FÜR MICH

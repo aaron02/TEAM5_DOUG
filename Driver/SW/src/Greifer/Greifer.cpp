@@ -8,6 +8,14 @@ Greifer::Greifer(uint8_t servoPin1, uint8_t servoPin2, PosAntrieb& dreh, Navigat
 {
     servo[SERVO_BASE].attach(servoPin1);
     servo[SERVO_GRIPP].attach(servoPin2);
+
+    servo[SERVO_BASE].write(BASE_GS);
+    servo[SERVO_GRIPP].write(GRIPP_OFFEN);
+
+    servoPos[SERVO_BASE] = BASE_GS;
+    setSollPosition(SERVO_BASE, BASE_GS);
+    servoPos[SERVO_GRIPP] = GRIPP_OFFEN;
+    setSollPosition(SERVO_GRIPP, GRIPP_OFFEN);
 }
 
 Greifer::~Greifer()
@@ -47,21 +55,30 @@ void Greifer::Update(uint64_t difftime)
 //Prüft ob alle Aktoren die gewünschte Position erreicht
 bool Greifer::inposition()
 {
-    return (getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE)) && (getPosition(SERVO_GRIPP) == getSollPosition(SERVO_GRIPP)) && (mAntrieb->inPosition());
+    //bool inPos = (getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE)) && (getPosition(SERVO_GRIPP) == getSollPosition(SERVO_GRIPP)) && (mAntrieb->inPosition());
+    
+    int8_t diff1 = (getPosition(SERVO_BASE) - getSollPosition(SERVO_BASE));
+    int8_t diff2 = (getPosition(SERVO_GRIPP) - getSollPosition(SERVO_GRIPP));
+    bool inPos = diff1 <= 1 && diff1 >= -1;
+    bool inPos1 = diff2 <= 1 && diff2 >= -1;
+
+    return inPos && inPos1 && (mAntrieb->inPosition());
 }
 
 void Greifer::runServo(ServoMapping servoIndex, uint64_t difftime)
 {
-    if (getPosition(servoIndex) != getSollPosition(servoIndex))
+    //if (getPosition(servoIndex) != getSollPosition(servoIndex))
     {
         if (updateTimer[servoIndex] <= 0)
         {
-            setTimer(servoIndex, 500); //1000:500 -> 2 grad/s
+            setTimer(servoIndex, 100 * TimeVar::Millis); //1000:500 -> 2 grad/s
 
             int8_t value = (getPosition(servoIndex) < getSollPosition(servoIndex)) ? 1 : -1;
 
             // Servo Um 1 Grad Bewegen
+            //sLogger.debug("Servo Nr. %u Istwert Servo %u || Sollwert an Servo %u", servoIndex, getPosition(servoIndex), getSollPosition(servoIndex));
             servo[servoIndex].write(getPosition(servoIndex) + value);
+            servoPos[servoIndex] = getPosition(servoIndex) + value;
         }
         else
             updateTimer[servoIndex] -= difftime;
@@ -76,11 +93,11 @@ uint8_t Greifer::getPosition(ServoMapping servoNumber)
     {
         case SERVO_BASE:
         {
-            mPosition = servo[SERVO_BASE].read();
+            mPosition = servoPos[SERVO_BASE]/*map(servo[SERVO_BASE].read(), 0, 1023, 0, 179)*/;
         } break;
         case SERVO_GRIPP:
         {
-            mPosition = servo[SERVO_GRIPP].read();
+            mPosition = servoPos[SERVO_GRIPP]/*map(servo[SERVO_GRIPP].read(), 0, 1023, 0, 179)*/;
         } break;
         default:
             sLogger.failure("Servo Unbekannt %u", servo);
@@ -148,8 +165,6 @@ Drehtisch: Wird nur referenziert wenn er noch nicht referenziert ist
 */
 void Greifer::Grundstellung()
 {
-    return;
-    
     switch (iGrundstellungStep)
     {
         case 0:
@@ -160,6 +175,8 @@ void Greifer::Grundstellung()
             */
             setSollPosition(SERVO_BASE, BASE_GS);
             setSollPosition(SERVO_GRIPP, GRIPP_OFFEN);
+
+            //sLogger.debug("Servo 1 = %u Servo 2 = %u", getPosition(SERVO_BASE), getPosition(SERVO_GRIPP));
 
             //Weiterschaltbedingung
             if (getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE))
@@ -177,7 +194,7 @@ void Greifer::Grundstellung()
         {
             // Drehtisch und SERVO_BASE gehen in die Parkposition.
             mAntrieb->moveAbsolutAngle(DT_Parkposition);
-            setSollPosition(SERVO_BASE, BASE_HOVEROVERLAGER);
+            setSollPosition(SERVO_BASE, BASE_PARKPOSITION);
 
             //Weiterschaltbedingung
             if ((mAntrieb->inPosition()) && (getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE)))
@@ -228,7 +245,7 @@ void Greifer::PickPackage()
             setPackStatus(PackStatus::STATUS_ReadyToMove);
 
             //Roboter fährt zum Paket um es mit dem Greifer aufnehmen zu können #hier wird noch ein Abstandssensor eingebaut
-            mNavigation->setSollPosition(mNavigation->getPosition()->getX(), mNavigation->getPosition()->getY() + 4);
+            //mNavigation->setSollPosition(mNavigation->getPosition()->getX(), mNavigation->getPosition()->getY() + 4);
             if (mNavigation->getDrivingState() == DrivingState::DRIVE_STATE_FINISHED)
                 iPickPackageStep++;
         }
@@ -246,7 +263,7 @@ void Greifer::PickPackage()
         {   
             setPackStatus(PackStatus::STATUS_ReadyToMove);
             //Roboter fährt zurück damit der Arm wieder sich frei bewegen kann.
-            mNavigation->setSollPosition(mNavigation->getPosition()->getX(), mNavigation->getPosition()->getY() - 4);
+            //mNavigation->setSollPosition(mNavigation->getPosition()->getX(), mNavigation->getPosition()->getY() - 4);
             if (mNavigation->getDrivingState() == DrivingState::DRIVE_STATE_FINISHED)
                 iPickPackageStep++;
         }
@@ -290,7 +307,7 @@ void Greifer::PickPackage()
         case 10: // Arm Greifer öffnen
         {   
             //Greifer öffnet
-            setSollPosition(SERVO_GRIPP, GRIPP_OFFEN);
+            setSollPosition(SERVO_GRIPP, GRIPP_OPEN_LAGER);
             if (inposition())
                 iPickPackageStep++;
         }
@@ -345,6 +362,7 @@ void Greifer::PlacePackage()
         case 1: // Arm runter
         {   
             //Arm bewegt sich zur aufnahme Position
+            setSollPosition(SERVO_GRIPP, GRIPP_GESCHLOSSEN);
             setSollPosition(SERVO_BASE, BASE_LAGERPOSITIONAUFNAHME);
             if (inposition())
                 iPlacePackageStep++;
@@ -399,7 +417,7 @@ void Greifer::PlacePackage()
         case 100: // Annahme vom Kunden
         {   
             setPackStatus(PackStatus::STATUS_WaitingForCustomer);
-            if (PaketAnnahmeBestätigungKunde)
+            //if (PaketAnnahmeBestätigungKunde)
                 iPlacePackageStep++;
         } 
         break;
@@ -417,7 +435,7 @@ void Greifer::PlacePackage()
         {
             setPackStatus(PackStatus::STATUS_ReadyToMove);
             //Roboter fährt zum Paket um es mit dem Greifer ablegen zu können.
-            mNavigation->setSollPosition(mNavigation->getPosition()->getX(), mNavigation->getPosition()->getY() + 4);
+            //mNavigation->setSollPosition(mNavigation->getPosition()->getX(), mNavigation->getPosition()->getY() + 4);
             if (mNavigation->getDrivingState() == DrivingState::DRIVE_STATE_FINISHED)
                 iPlacePackageStep++;
         }
@@ -436,7 +454,7 @@ void Greifer::PlacePackage()
             setPackStatus(PackStatus::STATUS_ReadyToMove);
             //Roboter fährt zurück damit der Arm wieder sich frei bewegen kann.
             //Sprung zurück auf Case 7 Homing ausführen
-            mNavigation->setSollPosition(mNavigation->getPosition()->getX(), mNavigation->getPosition()->getY() - 4);
+            //mNavigation->setSollPosition(mNavigation->getPosition()->getX(), mNavigation->getPosition()->getY() - 4);
             if (mNavigation->getDrivingState() == DrivingState::DRIVE_STATE_FINISHED)
                 iPlacePackageStep = 7;
         }
@@ -482,6 +500,8 @@ void Greifer::PlacePackage()
 
 Drehtisch_Position Greifer::getPositionFromIndex(uint8_t index)
 {
+    //sLogger.debug("GetPositionFromIndex %u", index);
+
     switch (index)
     {
         case 1:
