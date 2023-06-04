@@ -33,4 +33,5 @@ static std::unordered_map<std::string, Functions> mOpcodes =
     {"PickPackage", PickPackage},
     {"PlacePackage", PlacePackage},
     {"GetBatteryState", GetBatteryState},
+    {"CustomerAccepted", CustomerAccepted},
 };
