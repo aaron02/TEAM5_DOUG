@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include "Waypoint.h"
 #include <ArduinoJson.h>
-#include <ArduinoQueue.h>
+#include <queue>
 
 enum RobotState
 {
@@ -19,11 +19,11 @@ public:
     bool connect();
     void setNextWaypoint(Waypoint waypoint);
     bool readyForNextWaypoint();
-    bool addWaypointToQueue(Waypoint waypoint);
+    void addWaypointToQueue(Waypoint waypoint);
     Waypoint popWaypointFromQueue();
     bool hasWaypointInQueue();
 
 private:
     unsigned long baudRate;
-    ArduinoQueue<Waypoint> waypointQueue;
+    std::queue<Waypoint> waypointQueue;
 };

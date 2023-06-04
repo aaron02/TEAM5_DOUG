@@ -46,7 +46,7 @@ bool MqttHelper::connect()
                                 MqttMessage mqttMessage;
                                 mqttMessage.topic = String(topic);
                                 mqttMessage.payload = payloadString;
-                                messageQueue.enqueue(mqttMessage); });
+                                messageQueue.push(mqttMessage); });
 
     return true;
 }
@@ -81,12 +81,14 @@ bool MqttHelper::publish(String topic, String message)
 
 bool MqttHelper::hasMessage()
 {
-    return !messageQueue.isEmpty();
+    return !messageQueue.empty();
 }
 
 MqttMessage MqttHelper::getNextMessage()
 {
-    return messageQueue.dequeue();
+    MqttMessage mqttMessage = messageQueue.front();
+    messageQueue.pop();
+    return mqttMessage;
 }
 
 void MqttHelper::loop()

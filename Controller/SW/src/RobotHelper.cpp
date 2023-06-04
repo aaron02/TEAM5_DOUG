@@ -68,17 +68,19 @@ bool RobotHelper::readyForNextWaypoint()
     return false;
 }
 
-bool RobotHelper::addWaypointToQueue(Waypoint waypoint)
+void RobotHelper::addWaypointToQueue(Waypoint waypoint)
 {
-    return waypointQueue.enqueue(waypoint);
+     waypointQueue.push(waypoint);
 }
 
 Waypoint RobotHelper::popWaypointFromQueue()
 {
-    return waypointQueue.dequeue();
+        Waypoint waypoint = waypointQueue.front();
+    waypointQueue.pop();
+    return waypoint;
 }
 
 bool RobotHelper::hasWaypointInQueue()
 {
-    return !waypointQueue.isEmpty();
+    return !waypointQueue.empty();
 }
