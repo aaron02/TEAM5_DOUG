@@ -94,6 +94,7 @@ void setup()
     // Serial Interface Initialization
     Serial.begin(9600);
     Serial1.begin(115200);
+    Serial4.begin(115200);
     Wire.begin();
     delay(100);
 

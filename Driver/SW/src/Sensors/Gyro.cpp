@@ -13,19 +13,10 @@ sh2_SensorValue_t sensorValue;
 Gyro::Gyro()
 {
     // Try to initialize!
-    /*while (!bno08x.begin_I2C()) 
-    {
-        sLogger.debug("Gyro:: Failed to find BNO08x chip");
-        bno08x.begin_I2C();
-        delay(10); 
-    }*/
-    Serial4.begin(115200);
-
     if (!bno08x.begin_UART(&Serial4))  // Requires a device with > 300 byte UART buffer!
     {
         sLogger.debug("Gyro:: Failed to find BNO08x chip");
-        bno08x.begin_UART(&Serial4);
-        delay(10); 
+        while (1) { delay(10); }
     }
 
     sLogger.debug("Gyro:: BNO08x Found!");
