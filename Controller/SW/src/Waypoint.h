@@ -1,6 +1,5 @@
 #pragma once
 
-#include <ArduinoQueue.h>
 #include "LogHelper.h"
 
 enum WaypointType

@@ -6,6 +6,15 @@
 #include "RobotHelper.h"
 #include <HardwareSerial.h>
 
+// ===================== ENUMS =====================
+enum ProgramState
+{
+    ProgramStateInit,
+    ProgramStateRecieveOrder,
+    ProgramStateDeliverOrder,
+    ProgramStateError
+};
+
 // ===================== CONSTANTS =====================
 const String IP = "91.121.93.94";
 const String SSID = "McDonalds";
@@ -20,13 +29,41 @@ WiFiHelper wifiHelper(SSID, PASSWORD, logHelper, wifiClient);
 MqttHelper mqttHelper(IP, MQTT_PORT, MQTT_DEVICE_ID, logHelper, wifiClient, 10000);
 RobotHelper robotHelper(115200);
 String topicDeliveryOrder;
+ProgramState programState = ProgramStateInit;
+
+void changeState(ProgramState newState)
+{
+    String logMessage = "Change program state to ";
+    switch (newState)
+    {
+    case ProgramState::ProgramStateInit:
+        logMessage += "Init";
+        break;
+
+    case ProgramState::ProgramStateRecieveOrder:
+        logMessage += "Init";
+        break;
+
+    case ProgramState::ProgramStateDeliverOrder:
+        logMessage += "Deliver order";
+        break;
+
+    case ProgramState::ProgramStateError:
+        logMessage += "Error";
+        break;
+
+    default:
+        break;
+    }
+
+    logHelper.println(LOG_LEVEL_LOG, logMessage);
+    programState = newState;
+}
 
 // ===================== SETUP =====================
 void setup()
 {
-    logHelper.connect();
-    wifiHelper.connect(100000);
-    mqttHelper.connect();
+    programState = ProgramState::ProgramStateInit;
 
     topicDeliveryOrder = "Robots/" + wifiHelper.getMacAddress() + "/To/DeliveryOrder";
 
@@ -37,6 +74,39 @@ void setup()
 // ===================== LOOP =====================
 void loop()
 {
+    switch (programState)
+    {
+    case ProgramState::ProgramStateInit:
+        if (!logHelper.connect())
+        {
+            changeState(ProgramStateError);
+        }
+        if (!wifiHelper.connect(100000))
+        {
+            changeState(ProgramStateError);
+        }
+        if (!mqttHelper.connect())
+        {
+            changeState(ProgramStateError);
+        }
+
+        changeState(ProgramStateRecieveOrder);
+        break;
+
+    case ProgramState::ProgramStateRecieveOrder:
+    
+        /* code */
+        break;
+
+    case ProgramState::ProgramStateDeliverOrder:
+        /* code */
+        break;
+
+    default:
+        programState = ProgramState::ProgramStateError;
+        break;
+    }
+
     mqttHelper.loop();
 
     if (mqttHelper.hasMessage())
@@ -72,7 +142,7 @@ void loop()
                 {
                     delay(3000);
                 } while (!robotHelper.readyForNextWaypoint());
-                
+
                 logHelper.println(LOG_LEVEL_LOG, "Arrived!");
             }
         }

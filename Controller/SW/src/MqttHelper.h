@@ -2,13 +2,15 @@
 
 #include <WiFiClient.h>
 #include <PubSubClient.h>
-#include <ArduinoQueue.h>
 #include <ArduinoJson.h>
+
+#include <queue>
 
 #include "LogHelper.h"
 
-struct MqttMessage{
-    String topic,payload;
+struct MqttMessage
+{
+    String topic, payload;
 };
 
 class MqttHelper
@@ -30,5 +32,5 @@ private:
     LogHelper &logHelper;
     WiFiClient wifiClient;
     PubSubClient mqttClient;
-    ArduinoQueue<MqttMessage> messageQueue;
+    std::queue<MqttMessage> messageQueue;
 };
