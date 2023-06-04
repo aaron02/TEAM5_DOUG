@@ -242,4 +242,7 @@ void Communication::handleCustomerAccepted(JsonDocument& doc)
     {
         mGreifer->PaketAnnahmeBestätigungKunde = true;
     }
+
+    if (debug)
+        sLogger.debug("handleCustomerAccepted");
 }

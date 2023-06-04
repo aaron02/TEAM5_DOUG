@@ -16,7 +16,8 @@ Gyro::Gyro()
     if (!bno08x.begin_UART(&Serial4))  // Requires a device with > 300 byte UART buffer!
     {
         sLogger.debug("Gyro:: Failed to find BNO08x chip");
-        while (1) { delay(10); }
+        bno08x.begin_UART(&Serial4);
+        delay(10);
     }
 
     sLogger.debug("Gyro:: BNO08x Found!");
