@@ -55,8 +55,6 @@ void Greifer::Update(uint64_t difftime)
 //Prüft ob alle Aktoren die gewünschte Position erreicht
 bool Greifer::inposition()
 {
-    //bool inPos = (getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE)) && (getPosition(SERVO_GRIPP) == getSollPosition(SERVO_GRIPP)) && (mAntrieb->inPosition());
-    
     int8_t diff1 = (getPosition(SERVO_BASE) - getSollPosition(SERVO_BASE));
     int8_t diff2 = (getPosition(SERVO_GRIPP) - getSollPosition(SERVO_GRIPP));
     bool inPos = diff1 <= 1 && diff1 >= -1;
@@ -93,11 +91,11 @@ uint8_t Greifer::getPosition(ServoMapping servoNumber)
     {
         case SERVO_BASE:
         {
-            mPosition = servoPos[SERVO_BASE]/*map(servo[SERVO_BASE].read(), 0, 1023, 0, 179)*/;
+            mPosition = servoPos[SERVO_BASE];
         } break;
         case SERVO_GRIPP:
         {
-            mPosition = servoPos[SERVO_GRIPP]/*map(servo[SERVO_GRIPP].read(), 0, 1023, 0, 179)*/;
+            mPosition = servoPos[SERVO_GRIPP];
         } break;
         default:
             sLogger.failure("Servo Unbekannt %u", servo);
@@ -175,8 +173,6 @@ void Greifer::Grundstellung()
             */
             setSollPosition(SERVO_BASE, BASE_GS);
             setSollPosition(SERVO_GRIPP, GRIPP_OFFEN);
-
-            //sLogger.debug("Servo 1 = %u Servo 2 = %u", getPosition(SERVO_BASE), getPosition(SERVO_GRIPP));
 
             //Weiterschaltbedingung
             if (getPosition(SERVO_BASE) == getSollPosition(SERVO_BASE))
@@ -352,8 +348,7 @@ void Greifer::PlacePackage()
         case 0: // Drehen
         {
             //Arm wird in die Position zum aufnehmen eines Paketes bewegt.
-            uint32_t iTableAnglePlace = getPositionFromIndex(iLagerindex);
-            mAntrieb->moveAbsolutAngle(iTableAnglePlace);
+            mAntrieb->moveAbsolutAngle(getPositionFromIndex(iLagerindex));
             //Weiterschaltbedingung
             if (inposition())
                 iPlacePackageStep++;
@@ -417,12 +412,13 @@ void Greifer::PlacePackage()
         case 100: // Annahme vom Kunden
         {   
             setPackStatus(PackStatus::STATUS_WaitingForCustomer);
-            //if (PaketAnnahmeBestätigungKunde)
+            if (PaketAnnahmeBestätigungKunde)
                 iPlacePackageStep++;
         } 
         break;
         case 101: // Greifer öffnen Kunde
         {
+            PaketAnnahmeBestätigungKunde = false;
             // Kunde hat bestätigt Paket wird übergeben
             //Sprung zurück auf Case 7 Homing ausführen
             setSollPosition(SERVO_GRIPP, GRIPP_OFFEN);
@@ -462,6 +458,7 @@ void Greifer::PlacePackage()
         //================================================== Homing ==================================================
         case 7: // Arm hoch 
         {
+            PaketAnnahmeBestätigungKunde = false;
             setPackStatus(PackStatus::STATUS_Undefined);
             //Arm hoch zum freien drehen
             setSollPosition(SERVO_BASE, BASE_OBEN); 
@@ -500,8 +497,6 @@ void Greifer::PlacePackage()
 
 Drehtisch_Position Greifer::getPositionFromIndex(uint8_t index)
 {
-    //sLogger.debug("GetPositionFromIndex %u", index);
-
     switch (index)
     {
         case 1:

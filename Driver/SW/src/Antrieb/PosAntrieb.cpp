@@ -121,9 +121,6 @@ void PosAntrieb::setHoming()
 
     // Setze Positionswert
     stepper->setCurrentPosition(long(356.5 * anzahlSchritteProGrad));
-    calculateCurrentOrientation();
-    
-    sLogger.debug("Nullposition Greiffer Gesetzt auf %u", m_position);
 
     // Setze Maximale Geschwindigkeit und Beschleunigung
     stepper->setSpeed(100);

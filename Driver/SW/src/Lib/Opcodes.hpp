@@ -18,6 +18,7 @@ enum Functions : uint8_t
     PickPackage,
     PlacePackage,
     GetBatteryState,
+    CustomerAccepted,
     MAXFUNCTIONS
 };
 

@@ -32,6 +32,7 @@ void Communication::loadHandlers()
     PacketHandlers[Functions::PickPackage].handler = &Communication::handlePickPackage;
     PacketHandlers[Functions::PlacePackage].handler = &Communication::handlePlacePackage;
     PacketHandlers[Functions::GetBatteryState].handler = &Communication::handleGetBatteryState;
+    PacketHandlers[Functions::CustomerAccepted].handler = &Communication::handleCustomerAccepted;
 }
 
 void Communication::Update(uint64_t difftime)
@@ -197,17 +198,29 @@ void Communication::handleGetArmStatus(JsonDocument& doc)
 void Communication::handlePickPackage(JsonDocument& doc)
 {
     uint32_t lagerIndex = doc["Data"]["Lagerindex"];
-    mGreifer->setLagerIndex(lagerIndex);
-    mGreifer->setArmStatus(AS_PickPackage);
+    if (mGreifer)
+    {
+        mGreifer->setLagerIndex(lagerIndex);
+        mGreifer->setArmStatus(AS_PickPackage);
+    }
 
-    sLogger.debug("Index %u", lagerIndex);
+    if (debug)
+        sLogger.debug("handlePickPackage to Index %u", lagerIndex);
 }
 
 void Communication::handlePlacePackage(JsonDocument& doc)
 {
     uint32_t lagerIndex = doc["Data"]["Lagerindex"];
-    mGreifer->setLagerIndex(lagerIndex);
-    mGreifer->setArmStatus(AS_PlacePackage);
+    bool autonom = doc["Data"]["Autonom"];
+    if (mGreifer)
+    {
+        mGreifer->setLagerIndex(lagerIndex);
+        mGreifer->setArmStatus(AS_PlacePackage);
+        mGreifer->PaketKundeOderAblageort = autonom;
+    }
+
+    if (debug)
+        sLogger.debug("handlePlacePackage from Index %u", lagerIndex);
 }
 
 void Communication::handleGetBatteryState(JsonDocument& doc)
@@ -220,5 +233,13 @@ void Communication::handleGetBatteryState(JsonDocument& doc)
     else
     {
         responseData("BatteryState", "Error");
+    }
+}
+
+void Communication::handleCustomerAccepted(JsonDocument& doc)
+{
+    if (mGreifer)
+    {
+        mGreifer->PaketAnnahmeBestätigungKunde = true;
     }
 }

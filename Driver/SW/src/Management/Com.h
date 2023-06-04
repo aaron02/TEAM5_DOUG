@@ -40,6 +40,9 @@ private:
     // send a single data to the controller
     void responseData(std::string response, std::string message);
 
+    // Debug Outputs enabled
+    bool debug = false;
+
 protected:
     // Handles
     Navigation* mNavigation = nullptr;
@@ -57,4 +60,5 @@ protected:
     void handlePickPackage(JsonDocument& doc);
     void handlePlacePackage(JsonDocument& doc);
     void handleGetBatteryState(JsonDocument& doc);
+    void handleCustomerAccepted(JsonDocument& doc);
 };
