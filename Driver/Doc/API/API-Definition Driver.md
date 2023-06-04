@@ -83,5 +83,5 @@ Nächsten Waypoint senden (mit Fehler):
 | `SetArmState`        | `Ready`: Arm vorbereiten<br>`Stored`: Arm verstauen | `Ok`                                                           |
 | `GetArmState`        |                                                     | `AS_Undefined `: Undefinierter zustand <br>`AS_Grundstellung,`: Arm in Grundstellung <br> `AS_PickPackage` : PickingPackage <br> `AS_PlacePackage` : PlacingPackage <br> `AS_Ready` : Arm Ready <br> `AS_Error`  : ArmStörung          |
 | `PickPackage`        | Lagerindex                                          | `Ok`                                                           |
-| `PlacePackage`       | Lagerindex                                          | `Ok`                                                           |
+| `PlacePackage`       | `Lagerindex` `Autonom`                              | `Ok`                                                           |
 | `GetBatteryState`    |                                                     | Batteriestatus in %                                            |
