@@ -85,3 +85,4 @@ Nächsten Waypoint senden (mit Fehler):
 | `PickPackage`        | Lagerindex                                          | `Ok`                                                           |
 | `PlacePackage`       | `Lagerindex`: integer 1-4<br>`Autonom`: bool true/false                              | `Ok`                                                           |
 | `GetBatteryState`    |                                                     | Batteriestatus in %                                            |
+| `CustomerAccepted`   |                                                     |                                                                |
