@@ -33,14 +33,15 @@ void Navigation::Update(uint64_t difftime)
 
             // Winkel zum Ziel
             float targetAngle = calculateAngle(mSollPosition->getX(), mSollPosition->getY(), mPosition->getX(), mPosition->getY());
+            float remainingAngle = calculateRemainingAngle(m_Odometry->getHeading(), targetAngle);
 
             if (debug)
                 sLogger.debug("xDif %f, yDif %f, Distance %f", xDifference, yDifference, distance);
 
             // We are Further than 200mm away face our Target.
-            if ((distance > 200.0) && (targetAngle > 0.5 || targetAngle < -0.5))
+            if ((distance > 200.0) && (remainingAngle > 0.5 || remainingAngle < -0.5))
             {
-                float remainingAngle = calculateRemainingAngle(m_Odometry->getHeading(), targetAngle);
+                
                 float turnSpeed = getTurnSpeed(remainingAngle / 180.0);
 
                 //if (debug)
@@ -69,7 +70,7 @@ void Navigation::Update(uint64_t difftime)
 
                     // Fahre zuerst Y Richtung
                     fSpeedX = 0.0f;
-                    fSpeedY = calculateSpeed(yDifference);
+                    fSpeedY = calculateSpeed(yDifference) * -1;
 
                     if (debug)
                         sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
@@ -128,12 +129,12 @@ float Navigation::calculateSpeed(float distance)
     // Berechnung der Geschwindigkeit
     float speed = (distance / maxDistance) * maxSpeed * -1;
 
-    // Niemels unter 0.25
-    if (speed != 0 && (speed < 0.25 && speed > 0))
-        speed = 0.25;
+    // Niemels unter 0.15
+    if (speed != 0 && (speed < 0.15 && speed > 0))
+        speed = 0.15;
 
-    if (speed != 0 && (speed > -0.25 && speed < 0))
-        speed = -0.25;
+    if (speed != 0 && (speed > -0.15 && speed < 0))
+        speed = -0.15;
 
     // Begrenze die Geschwindigkeit innerhalb des zulässigen Bereichs
     if (speed > maxSpeed) 
@@ -175,17 +176,17 @@ float Navigation::calculateRemainingAngle(float currentDirection, float targetDi
 
 float Navigation::getTurnSpeed(float turnValue) 
 {
-    // Begrenzung der Geschwindigkeit auf die Mindestgeschwindigkeit (+-0.1)
-    if (turnValue > 0 && turnValue < 0.1) 
+    // Begrenzung der Geschwindigkeit auf die Mindestgeschwindigkeit (+-0.5)
+    if (turnValue > 0 && turnValue < 0.5) 
     {
-        turnValue = 0.1;
+        turnValue = 0.5;
     }
-    else if (turnValue < 0 && turnValue > -0.1) 
+    else if (turnValue < 0 && turnValue > -0.5) 
     {
-        turnValue = -0.1;
+        turnValue = -0.5;
     }
 
-    return turnValue;
+    return turnValue * -1;
 }
 
 void Navigation::abortDriving()

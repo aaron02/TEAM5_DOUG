@@ -12,7 +12,6 @@ int32_t ADNStimer = 5 * TimeVar::Millis;
 
 uint8_t status = Status::Startup;
 
-Antrieb2* mecanumDrive = nullptr;
 Antrieb* frontLeft = nullptr;
 Antrieb* frontRight = nullptr;
 Antrieb* backLeft = nullptr;
@@ -34,7 +33,6 @@ void MainThread(uint32_t difftime)
     CALL_UPDATE(frontRight, Update(difftime));
     CALL_UPDATE(backLeft, Update(difftime));
     CALL_UPDATE(backRight, Update(difftime));
-    //CALL_UPDATE(mecanumDrive, Update(difftime));
     CALL_UPDATE(gripperBase, Update(difftime));
     // Mouse Sensor ( eats alot of resources aprox 129µs )
     CALL_UPDATE(adnsController, Update(difftime));
@@ -114,8 +112,6 @@ void setup()
     backLeft = new Antrieb("Back Left", 6, 7, 15);
     backRight = new Antrieb("Back Right", 8, 9, 15);
     driveTrain = new DriveTrain(*frontLeft, *backLeft, *frontRight, *backRight);
-    //mecanumDrive = new Antrieb2("Mecanum Drive", 2, 3, 5, 7, 9, 15);
-    //driveTrain = new DriveTrain(*mecanumDrive);
 
     gripperBase = new PosAntrieb("Gripper Base", 25, 24, 14, 32);
     //
