@@ -95,8 +95,8 @@ void Communication::handleGetCurrentPosition(JsonDocument& doc)
     if (mOdometry)
     {
         DynamicJsonDocument doc(1024);
-        doc["Data"]["x"] = std::to_string(mOdometry->GetPosition()->getX());
-        doc["Data"]["y"] = std::to_string(mOdometry->GetPosition()->getY());
+        doc["Data"]["x"] = std::to_string(static_cast<int32_t>(mOdometry->GetPosition()->getX()));
+        doc["Data"]["y"] = std::to_string(static_cast<int32_t>(mOdometry->GetPosition()->getY()));
         serializeJson(doc, Serial1);
     }
     else
@@ -228,7 +228,9 @@ void Communication::handleGetBatteryState(JsonDocument& doc)
     // Response with Battery in %
     if (mPower)
     {
-        responseData("BatteryState", std::to_string(mPower->GetVoltagePct()));
+        sLogger.debug("%u", static_cast<int32_t>(mPower->GetVoltagePct()));
+        responseData("BatteryState", std::to_string(33));
+        //responseData("BatteryState", std::to_string(static_cast<int32_t>(mPower->GetVoltagePct())));
     }
     else
     {
