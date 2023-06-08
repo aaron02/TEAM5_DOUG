@@ -2,14 +2,13 @@
 
 #include <WiFi.h>
 #include <PubSubClient.h>
-#include <ArduinoJson.h>
 #include <queue>
 #include "Log.h"
 
 struct MqttMessage
 {
-    String topic;
-    String payload;
+    std::string topic;
+    std::string payload;
 };
 
 /**
@@ -19,35 +18,30 @@ class MqttManager
 {
 public:
     /**
-     * @brief Initializes the MqttManager with the specified parameters.
+     * @brief Connects to the Wi-Fi network and the MQTT server.
      * @param serverIP The IP address of the MQTT server.
      * @param serverPort The port number of the MQTT server.
      * @param clientID The client ID to be used for MQTT connection.
      * @param ssid The SSID of the Wi-Fi network to connect to.
      * @param password The password for the Wi-Fi network.
      * @param bufferSize The size of the message buffer.
-     */
-    static void initialize(const char *serverIP, int serverPort, const char *clientID, const char *ssid, const char *password, uint16_t bufferSize);
-
-    /**
-     * @brief Connects to the Wi-Fi network and the MQTT server.
      * @return `true` if the connection is successful, `false` otherwise.
      */
-    static bool connect();
+  static  bool connect(IPAddress serverIP, int serverPort, std::string clientID, std::string ssid, std::string password, uint16_t bufferSize);
 
     /**
      * @brief Subscribes to the specified topic.
      * @param topic The topic to subscribe to.
      * @return `true` if the subscription is successful, `false` otherwise.
      */
-    static bool subscribeTopic(const char *topic);
+    static bool subscribeTopic(std::string topic);
 
     /**
      * @brief Unsubscribes from the specified topic.
      * @param topic The topic to unsubscribe from.
      * @return `true` if the unsubscription is successful, `false` otherwise.
      */
-    static bool unsubscribeTopic(const char *topic);
+    static bool unsubscribeTopic(std::string topic);
 
     /**
      * @brief Unsubscribes from all topics.
@@ -55,11 +49,17 @@ public:
      */
     static bool unsubscribeAllTopics();
 
+    /**
+     * @brief Checks if the MQTT client is currently connected.
+     * @return `true` if connected, `false` otherwise.
+     */
+    static bool isConnected();
+
 /**
- * @brief Checks if the MQTT client is currently connected.
- * @return `true` if connected, `false` otherwise.
- */
-static bool isConnected();
+     * @brief Retruns the MAC-Address
+     * @return MAC-Address
+     */
+    static std::string getMacAddress();
 
     /**
      * @brief Publishes a message to the specified topic.
@@ -67,7 +67,8 @@ static bool isConnected();
      * @param message The message to be published.
      * @return `true` if the publishing is successful, `false` otherwise.
      */
-    static bool publishMessage(const char *topic, const char *message);
+    static bool publishMessage(std::string topic, std::string message);
+    static bool publishMessage(std::string topic, bool value);
 
     /**
      * @brief Checks if there is an incoming message in the message queue.
@@ -93,11 +94,11 @@ static bool isConnected();
 
 private:
     static uint16_t messageBufferSize;           /**< The size of the message buffer. */
-    static const char *mqttServerIP;             /**< The IP address of the MQTT server. */
+    static IPAddress mqttServerIP;               /**< The IP address of the MQTT server. */
     static int mqttServerPort;                   /**< The port number of the MQTT server. */
-    static const char *mqttClientID;             /**< The client ID for MQTT connection. */
-    static const char *wifiSsid;                 /**< The SSID of the Wi-Fi network. */
-    static const char *wifiPassword;             /**< The password for the Wi-Fi network. */
+    static std::string mqttClientID;             /**< The client ID for MQTT connection. */
+    static std::string wifiSsid;                 /**< The SSID of the Wi-Fi network. */
+    static std::string wifiPassword;             /**< The password for the Wi-Fi network. */
     static WiFiClient wifiClient;                /**< The Wi-Fi client. */
     static PubSubClient mqttClient;              /**< The MQTT client. */
     static std::queue<MqttMessage> messageQueue; /**< The message queue. */

@@ -1,18 +1,18 @@
 #include "MqttManager.h"
 
 uint16_t MqttManager::messageBufferSize;
-const char* MqttManager::mqttServerIP;
+IPAddress MqttManager::mqttServerIP;
 int MqttManager::mqttServerPort;
-const char* MqttManager::mqttClientID;
-const char* MqttManager::wifiSsid;
-const char* MqttManager::wifiPassword;
+std::string MqttManager::mqttClientID;
+std::string MqttManager::wifiSsid;
+std::string MqttManager::wifiPassword;
 WiFiClient MqttManager::wifiClient;
 PubSubClient MqttManager::mqttClient(MqttManager::wifiClient);
 std::queue<MqttMessage> MqttManager::messageQueue;
 
-void MqttManager::initialize(const char* serverIP, int serverPort, const char* clientID, const char* ssid, const char* password, uint16_t bufferSize)
+bool MqttManager::connect(IPAddress serverIP, int serverPort, std::string clientID, std::string ssid, std::string password, uint16_t bufferSize)
 {
-    MqttManager::mqttServerIP = serverIP;
+        MqttManager::mqttServerIP = serverIP;
     MqttManager::mqttServerPort = serverPort;
     MqttManager::mqttClientID = clientID;
     MqttManager::wifiSsid = ssid;
@@ -21,12 +21,9 @@ void MqttManager::initialize(const char* serverIP, int serverPort, const char* c
 
     mqttClient.setServer(serverIP, serverPort);
     mqttClient.setCallback(mqttCallback);
-}
 
-bool MqttManager::connect()
-{
     Log::println(LogType::LOG_TYPE_LOG, "Connecting to Wi-Fi with timeout of 10s...");
-    WiFi.begin(wifiSsid, wifiPassword);
+    WiFi.begin(wifiSsid.c_str(), wifiPassword.c_str());
 
     unsigned long startMillis = millis();
     while (WiFi.status() != WL_CONNECTED && (millis() - startMillis) < 10000)
@@ -46,7 +43,7 @@ bool MqttManager::connect()
     unsigned long mqttStartMillis = millis();
     while (!mqttClient.connected() && (millis() - mqttStartMillis) < 5000)
     {
-        if (mqttClient.connect(mqttClientID))
+        if (mqttClient.connect(mqttClientID.c_str()))
         {
             Log::println(LogType::LOG_TYPE_LOG, "Connected to MQTT Server");
         }
@@ -65,7 +62,7 @@ bool MqttManager::connect()
 
     if (!mqttClient.setBufferSize(messageBufferSize))
     {
-        Log::println(LogType::LOG_TYPE_ERROR, "Failed to set MQTT buffer size to: " + String(messageBufferSize));
+        Log::println(LogType::LOG_TYPE_ERROR, "Failed to set MQTT buffer size to: " + std::to_string(messageBufferSize));
         return false;
     }
 
@@ -73,10 +70,10 @@ bool MqttManager::connect()
     return true;
 }
 
-bool MqttManager::subscribeTopic(const char* topic)
+bool MqttManager::subscribeTopic(std::string topic)
 {
-    Log::println(LogType::LOG_TYPE_LOG, "Subscribing to \"" + String(topic) + "\"...");
-    if (!mqttClient.subscribe(topic))
+    Log::println(LogType::LOG_TYPE_LOG, "Subscribing to \"" + std::string(topic) + "\"...");
+    if (!mqttClient.subscribe(topic.c_str()))
     {
         Log::println(LogType::LOG_TYPE_ERROR, "Failed to subscribe");
         return false;
@@ -86,10 +83,10 @@ bool MqttManager::subscribeTopic(const char* topic)
     return true;
 }
 
-bool MqttManager::unsubscribeTopic(const char* topic)
+bool MqttManager::unsubscribeTopic(std::string topic)
 {
-    Log::println(LogType::LOG_TYPE_LOG, "Unsubscribing from \"" + String(topic) + "\"...");
-    if (!mqttClient.unsubscribe(topic))
+    Log::println(LogType::LOG_TYPE_LOG, "Unsubscribing from \"" + std::string(topic) + "\"...");
+    if (!mqttClient.unsubscribe(topic.c_str()))
     {
         Log::println(LogType::LOG_TYPE_ERROR, "Failed to unsubscribe");
         return false;
@@ -117,10 +114,30 @@ bool MqttManager::isConnected()
     return mqttClient.connected();
 }
 
-bool MqttManager::publishMessage(const char* topic, const char* message)
+std::string MqttManager::getMacAddress()
 {
-    Log::println(LogType::LOG_TYPE_LOG, "Publishing to \"" + String(topic) + "\"...");
-    if (!mqttClient.publish(topic, message))
+    return std::string(WiFi.macAddress().c_str());
+}
+
+bool MqttManager::publishMessage(std::string topic, std::string message)
+{
+    Log::println(LogType::LOG_TYPE_LOG, "Publishing to \"" + std::string(topic) + "\"...");
+    if (!mqttClient.publish(topic.c_str(), message.c_str()))
+    {
+        Log::println(LogType::LOG_TYPE_ERROR, "Failed to publish");
+        return false;
+    }
+
+    Log::println(LogType::LOG_TYPE_LOG, "Publish successful");
+    return true;
+}
+
+bool MqttManager::publishMessage(std::string topic, bool value)
+{
+    std::string stringValue = value ? "true" : "false";
+
+    Log::println(LogType::LOG_TYPE_LOG, "Publishing \"" + stringValue + "\" to \"" + std::string(topic) + "\"...");
+    if (!mqttClient.publish(topic.c_str(), stringValue.c_str()))
     {
         Log::println(LogType::LOG_TYPE_ERROR, "Failed to publish");
         return false;
@@ -155,9 +172,9 @@ void MqttManager::clearMessageQueue()
     }
 }
 
-void MqttManager::mqttCallback(char* topic, byte* payload, unsigned int length)
+void MqttManager::mqttCallback(char *topic, byte *payload, unsigned int length)
 {
-    String payloadString(reinterpret_cast<char*>(payload), length);
-    MqttMessage mqttMessage = {String(topic), payloadString};
+    std::string payloadString(reinterpret_cast<char *>(payload), length);
+    MqttMessage mqttMessage = {std::string(topic), payloadString};
     messageQueue.push(mqttMessage);
 }

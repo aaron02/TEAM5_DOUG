@@ -1,10 +1,11 @@
 #include <Arduino.h>
-#include "WiFiHelper.h"
-#include "MqttHelper.h"
+#include <MqttManager.h>
 #include <ArduinoJson.h>
-#include "Waypoint.h"
-#include "RobotHelper.h"
+#include "RobotManager.h"
+#include "Log.h"
 #include <HardwareSerial.h>
+#include "Order.h"
+#include <array>
 
 // ===================== ENUMS =====================
 enum ProgramState
@@ -16,24 +17,23 @@ enum ProgramState
 };
 
 // ===================== CONSTANTS =====================
-const String IP = "91.121.93.94";
-const String SSID = "McDonalds";
-const String PASSWORD = "burgerking";
-const String MQTT_DEVICE_ID = "Dough";
+const std::string WIFI_SSID = "McDonalds";
+const std::string WIFI_PASSWORD = "burgerking";
+const IPAddress MQTT_IP(91, 121, 93, 94);
+const std::string MQTT_ID = "Dough";
 const int MQTT_PORT = 1883;
 
 // ===================== OBJECTS =====================
-WiFiClient wifiClient;
-LogHelper logHelper(Serial, 115200);
-WiFiHelper wifiHelper(SSID, PASSWORD, logHelper, wifiClient);
-MqttHelper mqttHelper(IP, MQTT_PORT, MQTT_DEVICE_ID, logHelper, wifiClient, 10000);
-RobotHelper robotHelper(115200);
-String topicDeliveryOrder;
 ProgramState programState = ProgramStateInit;
+bool firstRun = true;
+Order order;
+std::array<std::string, 4> storageArray;
+
+TaskHandle_t mqttRunTask;
 
 void changeState(ProgramState newState)
 {
-    String logMessage = "Change program state to ";
+    std::string logMessage = "Change program state to ";
     switch (newState)
     {
     case ProgramState::ProgramStateInit:
@@ -41,7 +41,7 @@ void changeState(ProgramState newState)
         break;
 
     case ProgramState::ProgramStateRecieveOrder:
-        logMessage += "Init";
+        logMessage += "Recieve order";
         break;
 
     case ProgramState::ProgramStateDeliverOrder:
@@ -56,19 +56,30 @@ void changeState(ProgramState newState)
         break;
     }
 
-    logHelper.println(LOG_LEVEL_LOG, logMessage);
+    Log::println(LogType::LOG_TYPE_LOG, logMessage);
     programState = newState;
+    firstRun = true;
+}
+
+void mqttRun(void *pvParameters)
+{
+    MqttManager::run();
 }
 
 // ===================== SETUP =====================
 void setup()
 {
-    programState = ProgramState::ProgramStateInit;
+    changeState(ProgramState::ProgramStateInit);
 
-    topicDeliveryOrder = "Robots/" + wifiHelper.getMacAddress() + "/To/DeliveryOrder";
-
-    mqttHelper.subscribe(topicDeliveryOrder);
-    robotHelper.connect();
+    xTaskCreatePinnedToCore(
+        mqttRun,      // Task function
+        "MyTask",     // Task name
+        10000,        // Stack size (bytes)
+        NULL,         // Task parameters
+        1,            // Task priority
+        &mqttRunTask, // Task handle
+        1             // Task core (1 for core 1)
+    );
 }
 
 // ===================== LOOP =====================
@@ -77,15 +88,16 @@ void loop()
     switch (programState)
     {
     case ProgramState::ProgramStateInit:
-        if (!logHelper.connect())
+        Log::initialize(115200);
+
+        if (!MqttManager::connect(MQTT_IP, MQTT_PORT, MQTT_ID, WIFI_SSID, WIFI_PASSWORD, 10000))
         {
             changeState(ProgramStateError);
         }
-        if (!wifiHelper.connect(100000))
-        {
-            changeState(ProgramStateError);
-        }
-        if (!mqttHelper.connect())
+
+        vTaskResume(mqttRunTask);
+
+        if (!RobotManager::connect(115200))
         {
             changeState(ProgramStateError);
         }
@@ -94,57 +106,116 @@ void loop()
         break;
 
     case ProgramState::ProgramStateRecieveOrder:
-    
-        /* code */
+        if (firstRun)
+        {
+            MqttManager::unsubscribeAllTopics();
+            MqttManager::subscribeTopic("Robots/" + MqttManager::getMacAddress() + "/To/DeliveryOrder");
+            MqttManager::publishMessage("Robots/" + MqttManager::getMacAddress() + "/From/Requests/GiveMeAnOrder", true);
+
+            firstRun = false;
+        }
+
+        if (MqttManager::hasIncomingMessage())
+        {
+            MqttMessage newMessage = MqttManager::getNextMessage();
+            order.parse(newMessage.payload);
+
+            MqttManager::unsubscribeTopic("Robots/" + MqttManager::getMacAddress() + "/To/DeliveryOrder");
+            changeState(ProgramStateDeliverOrder);
+        }
+
+        MqttManager::run();
         break;
 
     case ProgramState::ProgramStateDeliverOrder:
-        /* code */
+        if (firstRun)
+        {
+            MqttManager::publishMessage("Robots/" + MqttManager::getMacAddress() + "/From/Status/CurrentDeliveryId", order.getdeliveryId());
+            MqttManager::publishMessage("Robots/" + MqttManager::getMacAddress() + "/From/Status/DeliveryDone", false);
+
+            RobotManager::abortDriving();
+            while (RobotManager::getDrivingState() != RobotDrivingState::RobotDrivingStateFinished)
+            {
+            }
+
+            RobotManager::setArmPosition(RobotArmPosition::RobotArmPositionReady);
+            while (RobotManager::getArmState() != RobotArmState::RobotArmStateFinished)
+            {
+            }
+
+            firstRun = false;
+        }
+
+        while (order.hasDeliveryStep())
+        {
+            DeliveryStep nextDeliveryStep = order.getNextDeliveryStep();
+
+            std::string mqttMessage;
+            DynamicJsonDocument doc(1024);
+            doc["deliveryId"] = order.getdeliveryId();
+            doc["deliveryStep"] = nextDeliveryStep.id;
+            serializeJson(doc, mqttMessage);
+            doc.clear();
+            MqttManager::publishMessage("Robots/" + MqttManager::getMacAddress() + "/From/Status/CurrentDeliveryStep", mqttMessage);
+
+            RobotManager::setDrivingWaypoint(nextDeliveryStep.coordinates);
+            while (RobotManager::getDrivingState() != RobotDrivingState::RobotDrivingStateFinished)
+            {
+                MqttManager::publishMessage("Robots/" + MqttManager::getMacAddress() + "/From/Status/BatteryChargePct", std::to_string(RobotManager::getBatteryState()));
+
+                DynamicJsonDocument doc(1024);
+                Coordinates currentPosition = RobotManager::getPosition();
+                doc["x"] = currentPosition.x;
+                doc["y"] = currentPosition.y;
+                serializeJson(doc, mqttMessage);
+                doc.clear();
+                MqttManager::publishMessage("Robots/" + MqttManager::getMacAddress() + "/From/Status/CurrentPosition", mqttMessage);
+
+                delay(500);
+            }
+
+            if (nextDeliveryStep.waypointType == WaypointType::WAYPOINT_DEPOSIT || nextDeliveryStep.waypointType == WaypointType::WAYPOINT_HANDOVER)
+            {
+                int index = 0;
+                for (int i = 0; i < storageArray.size(); ++i)
+                {
+                    if (storageArray[i] == nextDeliveryStep.productId)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+                RobotManager::placePackage(index);
+                while (RobotManager::getArmState() != RobotArmState::RobotArmStateFinished)
+                {
+                }
+
+                storageArray[index] = "";
+            }
+
+            if (nextDeliveryStep.waypointType == WaypointType::WAYPOINT_PARK_DISTRIBUTION_CENTER)
+            {
+                int index = 0;
+                for (int i = 0; i < storageArray.size(); ++i)
+                {
+                    if (storageArray[i].empty())
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+                RobotManager::pickPackage(index);
+                while (RobotManager::getArmState() != RobotArmState::RobotArmStateFinished)
+                {
+                }
+                storageArray[index] = nextDeliveryStep.productId;
+            }
+        }
+        MqttManager::publishMessage("Robots/" + MqttManager::getMacAddress() + "/From/Status/DeliveryDone", true);
         break;
 
     default:
         programState = ProgramState::ProgramStateError;
         break;
-    }
-
-    mqttHelper.loop();
-
-    if (mqttHelper.hasMessage())
-    {
-        MqttMessage message = mqttHelper.getNextMessage();
-
-        DynamicJsonDocument doc(10000);
-        deserializeJson(doc, message.payload);
-
-        if (doc["deliverySteps"].is<JsonArray>())
-        {
-            JsonArray array = doc["deliverySteps"].as<JsonArray>();
-            size_t size = array.size();
-
-            for (int i = 0; i < size; i++)
-            {
-                Coordinates coordinates;
-                coordinates.x = doc["deliverySteps"][i]["coordinates"]["x"].as<int>();
-                coordinates.y = doc["deliverySteps"][i]["coordinates"]["y"].as<int>();
-
-                Waypoint waypoint(WAYPOINT, coordinates, doc["deliverySteps"][i]["id"]);
-
-                robotHelper.addWaypointToQueue(waypoint);
-            }
-
-            while (robotHelper.hasWaypointInQueue())
-            {
-                Waypoint waypoint = robotHelper.popWaypointFromQueue();
-                logHelper.println(LOG_LEVEL_LOG, "Send new waypoint: x = " + String(waypoint.GetCoordinates().x) + " y = " + String(waypoint.GetCoordinates().y));
-                robotHelper.setNextWaypoint(waypoint);
-
-                do
-                {
-                    delay(3000);
-                } while (!robotHelper.readyForNextWaypoint());
-
-                logHelper.println(LOG_LEVEL_LOG, "Arrived!");
-            }
-        }
     }
 }

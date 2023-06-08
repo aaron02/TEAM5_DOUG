@@ -28,5 +28,5 @@ public:
      * @param type The type of the log message.
      * @param message The log message.
      */
-    static void println(LogType type, String message);
+    static void println(LogType type, std::string message);
 };
