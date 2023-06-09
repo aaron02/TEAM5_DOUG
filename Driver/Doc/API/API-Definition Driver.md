@@ -105,10 +105,23 @@ enum ArmStatus : uint8_t
     "Command":"GetDrivingState"
 }
 ```
+```
+enum ArmStatus : uint8_t
+{
+    AS_Undefined            = 0,
+    AS_Grundstellung        = 1,
+    AS_PickPackage          = 2,
+    AS_PlacePackage         = 3,
+    AS_Ready                = 4,
+    AS_Error                = 5
+};
+```
 
 ```json
 {
     "Command":"SetArmState"
+     "Data":{
+        "State":"ArmStatus"
 }
 ```
 
