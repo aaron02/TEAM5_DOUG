@@ -53,10 +53,10 @@ void MainThread(uint32_t difftime)
             status = Status::Started;
             // Start Location
             adnsController->reset_xy_dist();
-            odometry->setStartLocation(Vector2D(0, 0), gyro->getGyroAngle(YAW));
+            odometry->setStartLocation(Vector2D(0, -800), gyro->getGyroAngle(YAW));
+            nav->setSollPosition(0, -800);
 
-            // Drive Absolute Test
-            //nav->setSollPosition(100, 0);
+            //nav->setSollPosition(100, -800);
 
             sLogger.debug("Controller Started and Ready");
         }

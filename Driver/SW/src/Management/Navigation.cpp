@@ -44,7 +44,7 @@ void Navigation::Update(uint64_t difftime)
                 
                 float turnSpeed = getTurnSpeed(remainingAngle / 180.0);
 
-                //if (debug)
+                if (debug)
                     sLogger.debug("rotSpeed = %f, ActualAngle = %f, RemainingAngle = %f", turnSpeed, m_Odometry->getHeading(), remainingAngle);
 
                 // Roboter Drehen
@@ -64,7 +64,7 @@ void Navigation::Update(uint64_t difftime)
             }
             else
             {
-                if (yDifference > 0.5 || yDifference < -0.5)
+                if (yDifference > 1.5 || yDifference < -1.5)
                 {
                     setDrivingState(DRIVE_STATE_BUSY);
 

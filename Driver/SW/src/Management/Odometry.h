@@ -48,7 +48,7 @@ public:
     double dDeltay;
 
     // Korrekturfaktor
-    double dHeadingCorrection = 3.57170f; //93.57170f
+    double dHeadingCorrection = -2.45762; //93.57170f  3.57170
 
     // Aktuelle Position
     Vector2D* position;

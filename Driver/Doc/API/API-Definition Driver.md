@@ -8,7 +8,7 @@ Pinbelegung ist im HW-Schema ersichtlich.
 
 | Parameter    | Wert        |
 | ------------ | ----------- |
-| Baud Rate    | 9600 bits/s |
+| Baud Rate    | 115200 bits/s |
 | Data         | 8 bits      |
 | Parity       | none        |
 | Stop bits    | 1 bit       |
