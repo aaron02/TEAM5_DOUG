@@ -105,6 +105,7 @@ enum ArmStatus : uint8_t
     "Command":"GetDrivingState"
 }
 ```
+
 ```
 enum ArmStatus : uint8_t
 {
@@ -137,6 +138,7 @@ enum ArmStatus : uint8_t
     "Data":{
         "RoboterIndex":"1-4",
         "LagerIndex":"1-4"
+        }
 }
 ```
 
@@ -145,6 +147,7 @@ enum ArmStatus : uint8_t
     "Command":"PlacePackage"
     "Data":{
         "RoboterIndex":"1-4"
+        }
 }
 ```
 
