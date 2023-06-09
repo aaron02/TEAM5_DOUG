@@ -21,7 +21,7 @@ Für Befehle und Antworten wird das JSON-Format verwendet.
 ### Senden
 ```json
 {
-    "Command":"SendBatteryState"
+    "Command":"SendBatteryState",
     "Data":{
         "BatteryState":"85"
         }
@@ -30,7 +30,7 @@ Für Befehle und Antworten wird das JSON-Format verwendet.
 
 ```json
 {
-    "Command":"SendCurrentPosition"
+    "Command":"SendCurrentPosition",
     "Data":{
         "x":"85",
         "y":"15"
@@ -49,9 +49,9 @@ enum DrivingState : uint8_t
 
 ```json
 {
-    "Command":"SendDrivingState"
+    "Command":"SendDrivingState",
     "Data":{
-        "State":"DrivingState",
+        "State":"DrivingState"
         }
 }
 ```
@@ -70,9 +70,9 @@ enum ArmStatus : uint8_t
 
 ```json
 {
-    "Command":"SendArmState"
+    "Command":"SendArmState",
     "Data":{
-        "State":"ArmStatus",
+        "State":"ArmStatus"
         }
 }
 ```
@@ -120,9 +120,10 @@ enum ArmStatus : uint8_t
 
 ```json
 {
-    "Command":"SetArmState"
+    "Command":"SetArmState",
      "Data":{
         "State":"ArmStatus"
+        }
 }
 ```
 
@@ -134,7 +135,7 @@ enum ArmStatus : uint8_t
 
 ```json
 {
-    "Command":"PickPackage"
+    "Command":"PickPackage",
     "Data":{
         "RoboterIndex":"1-4",
         "LagerIndex":"1-4"
@@ -144,7 +145,7 @@ enum ArmStatus : uint8_t
 
 ```json
 {
-    "Command":"PlacePackage"
+    "Command":"PlacePackage",
     "Data":{
         "RoboterIndex":"1-4"
         }
