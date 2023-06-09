@@ -17,9 +17,9 @@ enum ProgramState
 };
 
 // ===================== CONSTANTS =====================
-const std::string WIFI_SSID = "McDonalds";
-const std::string WIFI_PASSWORD = "burgerking";
-const IPAddress MQTT_IP(91, 121, 93, 94);
+const std::string WIFI_SSID = "High5Dynamics";
+const std::string WIFI_PASSWORD = "H1gh5Dyn4m1cs!";
+const IPAddress MQTT_IP(10, 1, 0, 1);
 const std::string MQTT_ID = "Dough";
 const int MQTT_PORT = 1883;
 
@@ -71,15 +71,15 @@ void setup()
 {
     changeState(ProgramState::ProgramStateInit);
 
-    xTaskCreatePinnedToCore(
-        mqttRun,      // Task function
-        "MyTask",     // Task name
-        10000,        // Stack size (bytes)
-        NULL,         // Task parameters
-        1,            // Task priority
-        &mqttRunTask, // Task handle
-        1             // Task core (1 for core 1)
-    );
+    // xTaskCreatePinnedToCore(
+    //     mqttRun,      // Task function
+    //     "MyTask",     // Task name
+    //     10000,        // Stack size (bytes)
+    //     NULL,         // Task parameters
+    //     1,            // Task priority
+    //     &mqttRunTask, // Task handle
+    //     1             // Task core (1 for core 1)
+    // );
 }
 
 // ===================== LOOP =====================
@@ -95,11 +95,52 @@ void loop()
             changeState(ProgramStateError);
         }
 
-        vTaskResume(mqttRunTask);
+        //  vTaskResume(mqttRunTask);
 
         if (!RobotManager::connect(115200))
         {
             changeState(ProgramStateError);
+        }
+        Coordinates test;
+        test.x = 100;
+        test.y = -800;
+
+        RobotManager::setDrivingWaypoint(test);
+
+        Log::println(LogType::LOG_TYPE_LOG, "next");
+        while (true)
+        {
+            RobotDrivingState state = RobotManager::getDrivingState();
+            int bat = RobotManager::getBatteryState();
+            Log::println(LogType::LOG_TYPE_LOG, std::to_string(bat));
+            MqttManager::publishMessage("Robots/" + MqttManager::getMacAddress() + "/From/Status/BatteryChargePct", std::to_string(bat));
+
+            if (state == RobotDrivingState::RobotDrivingStateFinished)
+            {
+                break;
+            }
+            delay(500);
+        }
+
+        test.x = 0;
+        test.y = -800;
+
+        RobotManager::setDrivingWaypoint(test);
+
+        Log::println(LogType::LOG_TYPE_LOG, "next");
+
+        while (true)
+        {
+            RobotDrivingState state = RobotManager::getDrivingState();
+            int bat = RobotManager::getBatteryState();
+            Log::println(LogType::LOG_TYPE_LOG, std::to_string(bat));
+            MqttManager::publishMessage("Robots/" + MqttManager::getMacAddress() + "/From/Status/BatteryChargePct", std::to_string(bat));
+
+            if (state == RobotDrivingState::RobotDrivingStateFinished)
+            {
+                break;
+            }
+            delay(500);
         }
 
         changeState(ProgramStateRecieveOrder);
@@ -121,6 +162,7 @@ void loop()
             order.parse(newMessage.payload);
 
             MqttManager::unsubscribeTopic("Robots/" + MqttManager::getMacAddress() + "/To/DeliveryOrder");
+
             changeState(ProgramStateDeliverOrder);
         }
 
@@ -133,15 +175,17 @@ void loop()
             MqttManager::publishMessage("Robots/" + MqttManager::getMacAddress() + "/From/Status/CurrentDeliveryId", order.getdeliveryId());
             MqttManager::publishMessage("Robots/" + MqttManager::getMacAddress() + "/From/Status/DeliveryDone", false);
 
-            RobotManager::abortDriving();
+            //   RobotManager::abortDriving();
             while (RobotManager::getDrivingState() != RobotDrivingState::RobotDrivingStateFinished)
             {
             }
 
-            RobotManager::setArmPosition(RobotArmPosition::RobotArmPositionReady);
-            while (RobotManager::getArmState() != RobotArmState::RobotArmStateFinished)
-            {
-            }
+            // RobotManager::setArmPosition(RobotArmPosition::RobotArmPositionReady);
+            // while (RobotManager::getArmState() != RobotArmState::RobotArmStateFinished)
+            // {
+            // }
+
+            MqttManager::run();
 
             firstRun = false;
         }
@@ -159,59 +203,67 @@ void loop()
             MqttManager::publishMessage("Robots/" + MqttManager::getMacAddress() + "/From/Status/CurrentDeliveryStep", mqttMessage);
 
             RobotManager::setDrivingWaypoint(nextDeliveryStep.coordinates);
+
+            delay(2000);
+
             while (RobotManager::getDrivingState() != RobotDrivingState::RobotDrivingStateFinished)
             {
                 MqttManager::publishMessage("Robots/" + MqttManager::getMacAddress() + "/From/Status/BatteryChargePct", std::to_string(RobotManager::getBatteryState()));
 
+                std::string mqttMessage2;
                 DynamicJsonDocument doc(1024);
                 Coordinates currentPosition = RobotManager::getPosition();
                 doc["x"] = currentPosition.x;
                 doc["y"] = currentPosition.y;
-                serializeJson(doc, mqttMessage);
+                serializeJson(doc, mqttMessage2);
                 doc.clear();
-                MqttManager::publishMessage("Robots/" + MqttManager::getMacAddress() + "/From/Status/CurrentPosition", mqttMessage);
+                MqttManager::publishMessage("Robots/" + MqttManager::getMacAddress() + "/From/Status/CurrentPosition", mqttMessage2);
+                MqttManager::run();
 
-                delay(500);
+                delay(2000);
             }
 
-            if (nextDeliveryStep.waypointType == WaypointType::WAYPOINT_DEPOSIT || nextDeliveryStep.waypointType == WaypointType::WAYPOINT_HANDOVER)
-            {
-                int index = 0;
-                for (int i = 0; i < storageArray.size(); ++i)
-                {
-                    if (storageArray[i] == nextDeliveryStep.productId)
-                    {
-                        index = i;
-                        break;
-                    }
-                }
-                RobotManager::placePackage(index);
-                while (RobotManager::getArmState() != RobotArmState::RobotArmStateFinished)
-                {
-                }
+            // if (nextDeliveryStep.waypointType == WaypointType::WAYPOINT_DEPOSIT || nextDeliveryStep.waypointType == WaypointType::WAYPOINT_HANDOVER)
+            // {
+            //     int index = 0;
+            //     for (int i = 0; i < storageArray.size(); ++i)
+            //     {
+            //         if (storageArray[i] == nextDeliveryStep.productId)
+            //         {
+            //             index = i;
+            //             break;
+            //         }
+            //     }
+            //     RobotManager::placePackage(index);
+            //     while (RobotManager::getArmState() != RobotArmState::RobotArmStateFinished)
+            //     {
+            //     }
+            //     MqttManager::run();
 
-                storageArray[index] = "";
-            }
+            //     storageArray[index] = "";
+            // }
 
-            if (nextDeliveryStep.waypointType == WaypointType::WAYPOINT_PARK_DISTRIBUTION_CENTER)
-            {
-                int index = 0;
-                for (int i = 0; i < storageArray.size(); ++i)
-                {
-                    if (storageArray[i].empty())
-                    {
-                        index = i;
-                        break;
-                    }
-                }
-                RobotManager::pickPackage(index);
-                while (RobotManager::getArmState() != RobotArmState::RobotArmStateFinished)
-                {
-                }
-                storageArray[index] = nextDeliveryStep.productId;
-            }
+            // if (nextDeliveryStep.waypointType == WaypointType::WAYPOINT_PARK_DISTRIBUTION_CENTER)
+            // {
+            //     int index = 0;
+            //     for (int i = 0; i < storageArray.size(); ++i)
+            //     {
+            //         if (storageArray[i].empty())
+            //         {
+            //             index = i;
+            //             break;
+            //         }
+            //     }
+            //     RobotManager::pickPackage(index);
+            //     while (RobotManager::getArmState() != RobotArmState::RobotArmStateFinished)
+            //     {
+            //     }
+            //     storageArray[index] = nextDeliveryStep.productId;
+            // }
         }
         MqttManager::publishMessage("Robots/" + MqttManager::getMacAddress() + "/From/Status/DeliveryDone", true);
+        MqttManager::run();
+
         break;
 
     default:

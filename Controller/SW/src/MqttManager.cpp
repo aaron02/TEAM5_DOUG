@@ -12,7 +12,7 @@ std::queue<MqttMessage> MqttManager::messageQueue;
 
 bool MqttManager::connect(IPAddress serverIP, int serverPort, std::string clientID, std::string ssid, std::string password, uint16_t bufferSize)
 {
-        MqttManager::mqttServerIP = serverIP;
+    MqttManager::mqttServerIP = serverIP;
     MqttManager::mqttServerPort = serverPort;
     MqttManager::mqttClientID = clientID;
     MqttManager::wifiSsid = ssid;
@@ -116,7 +116,8 @@ bool MqttManager::isConnected()
 
 std::string MqttManager::getMacAddress()
 {
-    return std::string(WiFi.macAddress().c_str());
+    //  return std::string(WiFi.macAddress().c_str());
+    return "ce29a244-acb0-4dde-9497-24eda5b46b11";
 }
 
 bool MqttManager::publishMessage(std::string topic, std::string message)
@@ -134,7 +135,7 @@ bool MqttManager::publishMessage(std::string topic, std::string message)
 
 bool MqttManager::publishMessage(std::string topic, bool value)
 {
-    std::string stringValue = value ? "true" : "false";
+    std::string stringValue = value ? "1" : "0";
 
     Log::println(LogType::LOG_TYPE_LOG, "Publishing \"" + stringValue + "\" to \"" + std::string(topic) + "\"...");
     if (!mqttClient.publish(topic.c_str(), stringValue.c_str()))

@@ -25,10 +25,12 @@ RobotDrivingState RobotManager::getDrivingState()
 
     if (returnedstate == "Finished")
     {
+        Log::println(LogType::LOG_TYPE_LOG, "State: Finished");
         return RobotDrivingState::RobotDrivingStateFinished;
     }
     else if (returnedstate == "Busy")
     {
+        Log::println(LogType::LOG_TYPE_LOG, "State: Busy");
         return RobotDrivingState::RobotDrivingStateBusy;
     }
 
@@ -77,7 +79,7 @@ int RobotManager::getBatteryState()
     sendDoc["Command"] = "GetBatteryState";
     DynamicJsonDocument recieveDoc = getCommand(sendDoc);
 
-    return recieveDoc["Response"].as<int>();
+    return recieveDoc["BatteryState"].as<int>();
 }
 
 void RobotManager::abortDriving()
@@ -108,7 +110,7 @@ void RobotManager::setArmPosition(RobotArmPosition state)
 void RobotManager::setDrivingWaypoint(Coordinates coordinates)
 {
     DynamicJsonDocument sendDoc(1024);
-    sendDoc["Command"] = "SetArmState";
+    sendDoc["Command"] = "SetNextWaypoint";
     sendDoc["Data"]["x"] = coordinates.x;
     sendDoc["Data"]["y"] = coordinates.y;
     sendCommand(sendDoc);
@@ -121,8 +123,8 @@ Coordinates RobotManager::getPosition()
     DynamicJsonDocument recieveDoc = getCommand(sendDoc);
 
     Coordinates coordinates;
-    coordinates.x = recieveDoc["Response"]["x"].as<int>();
-    coordinates.y = recieveDoc["Response"]["y"].as<int>();
+    coordinates.x = recieveDoc["Data"]["x"].as<int>();
+    coordinates.y = recieveDoc["Data"]["y"].as<int>();
 
     return coordinates;
 }
