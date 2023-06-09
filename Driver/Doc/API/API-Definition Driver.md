@@ -18,25 +18,71 @@ Pinbelegung ist im HW-Schema ersichtlich.
 
 Für Befehle und Antworten wird das JSON-Format verwendet.
 
-### Beispiele
-
-Batteriestatus abfragen:
-
+### Senden
 ```json
 {
-    "Command":"GetBatteryState"
-}
-```
-
-```json
-{
+    "Command":"SendBatteryState"
     "Data":{
         "BatteryState":"85"
-    }
+        }
 }
 ```
 
-Nächsten Waypoint senden:
+```json
+{
+    "Command":"SendCurrentPosition"
+    "Data":{
+        "x":"85",
+        "y":"15"
+        }
+}
+```
+
+```
+enum DrivingState : uint8_t
+{
+    DRIVE_STATE_ERROR       = 0,
+    DRIVE_STATE_BUSY        = 1,
+    DRIVE_STATE_FINISHED    = 2
+};
+```
+
+```json
+{
+    "Command":"SendDrivingState"
+    "Data":{
+        "State":"DrivingState",
+        }
+}
+```
+
+```
+enum ArmStatus : uint8_t
+{
+    AS_Undefined            = 0,
+    AS_Grundstellung        = 1,
+    AS_PickPackage          = 2,
+    AS_PlacePackage         = 3,
+    AS_Ready                = 4,
+    AS_Error                = 5
+};
+```
+
+```json
+{
+    "Command":"SendArmState"
+    "Data":{
+        "State":"ArmStatus",
+        }
+}
+```
+### Empfangen
+
+```json
+{
+    "Command":"GetCurrentPosition"
+}
+```
 
 ```json
 {
@@ -50,39 +96,53 @@ Nächsten Waypoint senden:
 
 ```json
 {
-    "Response":"Ok"
+    "Command":"AbortDriving"
 }
 ```
 
-Nächsten Waypoint senden (mit Fehler):
+```json
+{
+    "Command":"GetDrivingState"
+}
+```
 
 ```json
 {
-    "Command":"SetNextWaypoint",
+    "Command":"SetArmState"
+}
+```
+
+```json
+{
+    "Command":"GetArmState"
+}
+```
+
+```json
+{
+    "Command":"PickPackage"
     "Data":{
-        "x":"240"
-    }
+        "RoboterIndex":"1-4",
+        "LagerIndex":"1-4"
 }
 ```
 
 ```json
 {
-    "Response":"Error",
-    "Message":"ArgumentError"
+    "Command":"PlacePackage"
+    "Data":{
+        "RoboterIndex":"1-4"
 }
 ```
 
-## Befehle
+```json
+{
+    "Command":"GetBatteryState"
+}
+```
 
-| Befehl               | Parameter                                           | Antwort                                                        |
-| -------------------- | --------------------------------------------------- | -------------------------------------------------------------- |
-| `GetCurrentPosition` |                                                     |                                                                |
-| `SetDrivingWaypoint` | X und Y-Koordinaten in mm                           | `Ok`                                                           |
-| `AbortDriving`       |                                                     | `Ok`                                                           |
-| `GetDrivingState`    |                                                     | `Busy`: Unterwegs<br>`Finished`: Angekommen<br>`Error`: Fehler |
-| `SetArmState`        | `Ready`: Arm vorbereiten<br>`Stored`: Arm verstauen | `Ok`                                                           |
-| `GetArmState`        |                                                     | `AS_Undefined `: Undefinierter zustand <br>`AS_Grundstellung,`: Arm in Grundstellung <br> `AS_PickPackage` : PickingPackage <br> `AS_PlacePackage` : PlacingPackage <br> `AS_Ready` : Arm Ready <br> `AS_Error`  : ArmStörung          |
-| `PickPackage`        | Lagerindex                                          | `Ok`                                                           |
-| `PlacePackage`       | `Lagerindex`: integer 1-4<br>`Autonom`: bool true/false                              | `Ok`                                                           |
-| `GetBatteryState`    |                                                     | Batteriestatus in %                                            |
-| `CustomerAccepted`   |                                                     |                                                                |
+```json
+{
+    "Command":"CustomerAccepted"
+}
+```
