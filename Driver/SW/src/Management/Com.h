@@ -29,16 +29,16 @@ public:
 
     static void loadHandlers();
 
+    // Helpers
+    void sendBatteryState();
+    void sendCurrentPosition();
+    void sendDrivingState();
+    void sendArmState();
+
 private:
 
     // returns a function indes of our enum Functions
     uint8_t getFunctionIndex(std::string command);
-
-    // sends a Response to the controller
-    void response(std::string response, std::string message = "");
-
-    // send a single data to the controller
-    void responseData(std::string response, std::string message);
 
     // Debug Outputs enabled
     bool debug = false;
@@ -49,6 +49,9 @@ protected:
     Greifer* mGreifer = nullptr;
     PDB* mPower = nullptr;
     Odometry* mOdometry = nullptr;
+
+    // Timer
+    int32_t timer = 1 * TimeVar::Seconds;
 
     // Handlers
     void handleGetCurrentPosition(JsonDocument& doc);

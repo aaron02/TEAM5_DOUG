@@ -81,7 +81,7 @@ public:
     void PickPackage();
     void PlacePackage();
 
-    void setArmStatus(ArmStatus state) { iGripperState = state;}
+    void setArmStatus(ArmStatus state);
     ArmStatus getArmStatus() { return iGripperState; }
     void setPackStatus(PackStatus Status) { iPackStatus = Status; }
     PackStatus getPackStatus() { return iPackStatus; }
@@ -92,6 +92,8 @@ public:
     Drehtisch_Position getPositionFromIndex(uint8_t index);
 
     void setTimer(ServoMapping servo, int32_t timer);
+
+    void setCommunication(Communication* com) { m_Communication = com; }
 
     // Schnittstelle Kunde
     bool PaketAnnahmeBestätigungKunde = false; //Freigabe das der Kunde berechtigt ist das paket zu empfangen.
@@ -122,6 +124,7 @@ protected:
     PackStatus iPackStatus = PackStatus::STATUS_Undefined;
     uint8_t iLagerindex = 0;
 
+    Communication* m_Communication = nullptr;
     PosAntrieb* mAntrieb = nullptr;
     Navigation* mNavigation = nullptr;
     uint8_t servo1PositionToGo = 0;

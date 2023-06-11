@@ -199,3 +199,13 @@ Vector2D* Navigation::getPosition ()
 {
     return m_Odometry->GetPosition();
 }
+
+void Navigation::setDrivingState(DrivingState state)
+{
+    // Only Set new State when it Differs
+    if (mDriveState != state)
+    {
+        mDriveState = state;
+        m_Communication->sendDrivingState();
+    }
+}

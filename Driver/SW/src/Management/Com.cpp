@@ -14,6 +14,10 @@ Communication::Communication(Navigation* mNav ,Greifer* mGrip, PDB* mPwr, Odomet
         PacketHandler.handler = nullptr;
     }
     loadHandlers();
+
+    // Reference Us in other Classes
+    mNav->setCommunication(this);
+    mGreifer->setCommunication(this);
 }
 
 Communication::~Communication()
@@ -46,20 +50,33 @@ void Communication::Update(uint64_t difftime)
 
         uint8_t functionIndex = getFunctionIndex(cCommandName);
 
-        sLogger.debug("Received Command %s with Index %u", cCommandName.c_str(), functionIndex);
+        if (debug)
+            sLogger.debug("Received Command %s with Index %u", cCommandName.c_str(), functionIndex);
 
         OpcodeHandler* handler = &PacketHandlers[functionIndex];
-        // Valid Packet :>
+        // Valid Handler
         if (handler->handler == 0)
         {
-            sLogger.debug("Received Unhandledcommand %s with Index %u", cCommandName.c_str(), functionIndex);
+            if (debug)
+                sLogger.debug("Received Unhandledcommand %s with Index %u", cCommandName.c_str(), functionIndex);
         }
         else
         {
-            sLogger.debug("Received Command %s with Index %u", cCommandName.c_str(), functionIndex);
+            if (debug)
+                sLogger.debug("Received Command %s with Index %u", cCommandName.c_str(), functionIndex);
             (this->*handler->handler)(doc);
         }            
     }
+
+    // Periodicaly Send Status Updates
+    if (timer <= 0)
+    {
+        timer = 1 * TimeVar::Seconds;
+        sendBatteryState();
+        sendCurrentPosition();
+    }
+    else
+        timer -= difftime;
 }
 
 uint8_t Communication::getFunctionIndex(std::string command)
@@ -72,54 +89,28 @@ uint8_t Communication::getFunctionIndex(std::string command)
     return Functions::Unk;
 }
 
-void Communication::response(std::string response, std::string message)
-{
-    DynamicJsonDocument doc(1024);
-    doc["Response"] = response;
-        if (message.size())
-            doc["Message"] = message;
-
-    serializeJson(doc, Serial1);
-}
-
-void Communication::responseData(std::string response, std::string message)
-{
-    DynamicJsonDocument doc(1024);
-    doc["Data"][response] = message;
-    serializeJson(doc, Serial1);
-}
-
 // Handlers
 void Communication::handleGetCurrentPosition(JsonDocument& doc)
 {
-    if (mOdometry)
-    {
-        DynamicJsonDocument doc(1024);
-        doc["Data"]["x"] = std::to_string(static_cast<int32_t>(mOdometry->GetPosition()->getX()));
-        doc["Data"]["y"] = std::to_string(static_cast<int32_t>(mOdometry->GetPosition()->getY()));
-        serializeJson(doc, Serial1);
-    }
-    else
-    {
-        response("Error");
-    }
+    if (debug)
+        sLogger.debug("handleGetCurrentPosition");
+
+    sendCurrentPosition();
 }
 
 void Communication::handleSetDrivingWaypoint(JsonDocument& doc)
 {
+    if (debug)
+        sLogger.debug("handleSetDrivingWaypoint");
+
     if (doc.size() < 2 || doc["Data"].size() < 2)
-    {
-        response("Error", "ArgumentError");
         return;
-    }
 
     int32_t x = doc["Data"]["x"];
     int32_t y = doc["Data"]["y"];
 
     if (mNavigation)
         mNavigation->setSollPosition(x, y);
-
-    response("OK");
 }
 
 void Communication::handleAbortDriving(JsonDocument& doc)
@@ -127,124 +118,126 @@ void Communication::handleAbortDriving(JsonDocument& doc)
     // Stop Movement
     if (mNavigation)
         mNavigation->abortDriving();
-
-    response("OK");
 }
 
 void Communication::handleGetDrivingState(JsonDocument& doc)
 {
-    // Respond with Movement State
-    if (mNavigation)
-    {
-        switch (mNavigation->getDrivingState())
-        {
-            case DRIVE_STATE_BUSY:
-            {
-                response("Busy");
-            } break;
+    if (debug)
+        sLogger.debug("handleGetDrivingState");
 
-            case DRIVE_STATE_FINISHED:
-            {
-                response("Finished");
-            } break;
-
-            case DRIVE_STATE_ERROR:
-            {
-                response("Error");
-            } break;
-        }
-    }
-    else
-        response("Error");
+    sendDrivingState();
 }
 
 void Communication::handleSetArmStatus(JsonDocument& doc)
 {
     uint8_t armState = doc["Data"];
+
+    if (debug)
+        sLogger.debug("handleSetArmStatus to armState = %u", armState);
+
     mGreifer->setArmStatus(ArmStatus(armState));
 }
 
 void Communication::handleGetArmStatus(JsonDocument& doc)
 {
-    // Response with Arm State
-    switch (mGreifer->getArmStatus())
-    {
-        case ArmStatus::AS_Error:
-        {
-            response("Error");
-        } break;
-        case ArmStatus::AS_Ready:
-        {
-            response("Ready");
-        } break;
-        case ArmStatus::AS_Grundstellung:
-        {
-            response("Stored");
-        } break;
-        case ArmStatus::AS_PickPackage:
-        {
-            response("PickingPackage");
-        } break;
-        case ArmStatus::AS_PlacePackage:
-        {
-            response("PlacingPackage");
-        } break;
-        default:
-            response("Undefined");
-            break;
-    }                
+    if (debug)
+        sLogger.debug("handleGetArmStatus");
+
+    sendArmState();
 }
 
 void Communication::handlePickPackage(JsonDocument& doc)
 {
     uint32_t lagerIndex = doc["Data"]["Lagerindex"];
+    
+    if (debug)
+        sLogger.debug("handlePickPackage to Index %u", lagerIndex);
+
     if (mGreifer)
     {
         mGreifer->setLagerIndex(lagerIndex);
         mGreifer->setArmStatus(AS_PickPackage);
     }
-
-    if (debug)
-        sLogger.debug("handlePickPackage to Index %u", lagerIndex);
 }
 
 void Communication::handlePlacePackage(JsonDocument& doc)
 {
     uint32_t lagerIndex = doc["Data"]["Lagerindex"];
     bool autonom = doc["Data"]["Autonom"];
+
+    if (debug)
+        sLogger.debug("handlePlacePackage from Index %u", lagerIndex);
+
     if (mGreifer)
     {
         mGreifer->setLagerIndex(lagerIndex);
         mGreifer->setArmStatus(AS_PlacePackage);
         mGreifer->PaketKundeOderAblageort = autonom;
     }
-
-    if (debug)
-        sLogger.debug("handlePlacePackage from Index %u", lagerIndex);
 }
 
 void Communication::handleGetBatteryState(JsonDocument& doc)
 {
-    // Response with Battery in %
-    if (mPower)
-    {
-        sLogger.debug("%u", static_cast<int32_t>(mPower->GetVoltagePct()));
-        responseData("BatteryState", std::to_string(33));
-        //responseData("BatteryState", std::to_string(static_cast<int32_t>(mPower->GetVoltagePct())));
-    }
-    else
-    {
-        responseData("BatteryState", "Error");
-    }
+    if (debug)
+        sLogger.debug("handleGetBatteryState");
+
+    sendBatteryState();
 }
 
 void Communication::handleCustomerAccepted(JsonDocument& doc)
 {
+    if (debug)
+        sLogger.debug("handleCustomerAccepted");
+
     if (mGreifer)
     {
         mGreifer->PaketAnnahmeBestätigungKunde = true;
     }
-
-    if (debug)
-        sLogger.debug("handleCustomerAccepted");
 }
+
+    void Communication::sendBatteryState()
+    {
+        int32_t voltagePct = static_cast<int32_t>(mPower->GetVoltagePct());
+        sLogger.debug("sendBatteryState Voltage Pct = %u", voltagePct);
+        
+
+        DynamicJsonDocument doc(1024);
+        doc["Command"]["SendBatteryState"];
+        doc["Data"]["BatteryState"] = voltagePct;
+        serializeJson(doc, Serial1);
+    }
+
+    void Communication::sendCurrentPosition()
+    {
+        int32_t x = static_cast<int32_t>(mOdometry->GetPosition()->getX());
+        int32_t y = static_cast<int32_t>(mOdometry->GetPosition()->getY());
+        sLogger.debug("sendCurrentPosition x = %u y = %u", x, y);
+
+        DynamicJsonDocument doc(1024);
+        doc["Command"]["SendCurrentPosition"];
+        doc["Data"]["x"] = x;
+        doc["Data"]["y"] = y;
+        serializeJson(doc, Serial1);
+    }
+
+    void Communication::sendDrivingState()
+    {
+        uint8_t drivingState = mNavigation->getDrivingState();
+        sLogger.debug("sendDrivingState State = %u", drivingState);
+
+        DynamicJsonDocument doc(1024);
+        doc["Command"]["SendDrivingState"];
+        doc["Data"]["State"] = drivingState;
+        serializeJson(doc, Serial1);
+    }
+
+    void Communication::sendArmState()
+    {
+        uint8_t armState = mGreifer->getArmStatus();
+        sLogger.debug("sendArmState State = %u", armState);
+
+        DynamicJsonDocument doc(1024);
+        doc["Command"]["SendArmState"];
+        doc["Data"]["State"] = armState;
+        serializeJson(doc, Serial1);
+    }

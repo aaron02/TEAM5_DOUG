@@ -495,6 +495,15 @@ void Greifer::PlacePackage()
     }
 }
 
+void Greifer::setArmStatus(ArmStatus state)
+{
+    // Only Set new State when it Differs
+    if (iGripperState != state)
+    {
+        iGripperState = state;
+        m_Communication->sendArmState();
+    }
+}
 
 Drehtisch_Position Greifer::getPositionFromIndex(uint8_t index)
 {

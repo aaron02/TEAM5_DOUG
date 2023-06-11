@@ -10,6 +10,7 @@ class Vector2D;
 class DriveTrain;
 class Odometry;
 class Updateable;
+class Communication;
 
 enum DrivingState : uint8_t
 {
@@ -37,7 +38,7 @@ public:
     Vector2D* getPosition();
 
     // set driving state
-    void setDrivingState(DrivingState state) { mDriveState = state; }
+    void setDrivingState(DrivingState state);
 
     // get state of navigation process
     DrivingState getDrivingState() { return mDriveState; }
@@ -45,10 +46,11 @@ public:
     // abort current movement
     void abortDriving();
 
-
     float calculateAngle(int targetX, int targetY, int robotX, int robotY);
     float calculateRemainingAngle(float currentDirection, float targetDirection);
     float getTurnSpeed(float turnValue);
+
+    void setCommunication(Communication* com) { m_Communication = com; }
 
 private:
     Vector2D* mSollPosition;
@@ -57,8 +59,9 @@ private:
     float calculateSpeed(float distance);
 
 protected:
-    DriveTrain* m_Drive;
-    Odometry* m_Odometry;
+    DriveTrain* m_Drive = nullptr;
+    Odometry* m_Odometry = nullptr;
+    Communication* m_Communication = nullptr;
 
     DrivingState mDriveState = DrivingState::DRIVE_STATE_FINISHED;
 
