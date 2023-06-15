@@ -67,7 +67,7 @@ double Antrieb2::mapDouble(double x, double in_min, double in_max, double out_mi
 
 void Antrieb2::setSpeed(MotorType iMotor, float fSpeed)
 {
-    fDemandedSpeed[iMotor] = mapDouble(fSpeed, -1.0, 1.0, -1500.0, 1500.0);
+    fDemandedSpeed[iMotor] = mapDouble(fSpeed, -1.0, 1.0, -2500.0, 2500.0);
 
     switch (iMotor)
     {
