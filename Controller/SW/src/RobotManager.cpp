@@ -1,175 +1,250 @@
 #include "RobotManager.h"
-#include <ArduinoJson.h>
 
-bool RobotManager::connect(unsigned long baudRate)
+// Initialize static variables
+int RobotManager::currentBatteryState = -1;
+Coordinates RobotManager::currentPosition;
+RobotDrivingState RobotManager::drivingState = RobotDrivingState::RobotDrivingStateUndefined;
+RobotArmState RobotManager::armState = RobotArmState::RobotArmStateUndefined;
+
+bool RobotManager::initialize(unsigned long baudRate, unsigned long serialTimeout_ms)
 {
-    // Init port
+    // Write log message
+    Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Initializing robot connection with timeout of " + std::to_string(serialTimeout_ms) + "ms");
+
+    // Initialize the serial connection
     Serial1.begin(baudRate, SERIAL_8N1, 18, 17);
 
-    // Check if port is ready
+    // Wait for the serial connection to be established with a timeout of 2 seconds
+    unsigned long startTime = millis();
+    while (!Serial1 && millis() - startTime < serialTimeout_ms)
+    {
+    }
+
+    // Check if the serial connection is established
     if (!Serial1)
     {
+        // Write log message
+        Log::println(LogType::LOG_TYPE_ERROR, "RobotManager", "Serial connection could not be established");
+
+        // Return false if the serial connection is not established
         return false;
     }
 
+    // Write log message
+    Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Robot connection established");
     return true;
 }
 
-RobotDrivingState RobotManager::getDrivingState()
+void RobotManager::startDrivingToWaypoint(Coordinates coordinates)
 {
-    DynamicJsonDocument sendDoc(1024);
-    sendDoc["Command"] = "GetDrivingState";
-    DynamicJsonDocument recieveDoc = getCommand(sendDoc);
+    // Write log message
+    Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Start driving to waypoint (" + std::to_string(coordinates.x) + ", " + std::to_string(coordinates.y) + ")");
 
-    String returnedstate = recieveDoc["Response"];
+    // Set the driving state to busy
+    drivingState = RobotDrivingState::RobotDrivingStateBusy;
 
-    if (returnedstate == "Finished")
-    {
-        Log::println(LogType::LOG_TYPE_LOG, "State: Finished");
-        return RobotDrivingState::RobotDrivingStateFinished;
-    }
-    else if (returnedstate == "Busy")
-    {
-        Log::println(LogType::LOG_TYPE_LOG, "State: Busy");
-        return RobotDrivingState::RobotDrivingStateBusy;
-    }
+    // Create the JSON command
+    DynamicJsonDocument jsonDoc(1024);
+    jsonDoc["Command"] = "SetNextWaypoint";
+    jsonDoc["Data"]["x"] = coordinates.x;
+    jsonDoc["Data"]["y"] = coordinates.y;
 
-    return RobotDrivingState::RobotDrivingStateError;
+    // Send the command to the robot
+    sendCommand(jsonDoc);
 }
 
-RobotArmState RobotManager::getArmState()
+void RobotManager::stopDriving()
 {
-    DynamicJsonDocument sendDoc(1024);
-    sendDoc["Command"] = "GetArmState";
-    DynamicJsonDocument recieveDoc = getCommand(sendDoc);
+    // Wirte log message
+    Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Stop driving");
 
-    String returnedstate = recieveDoc["Response"];
+    // Create the JSON command
+    DynamicJsonDocument jsonDoc(1024);
+    jsonDoc["Command"] = "AbortDriving";
 
-    if (returnedstate == "AS_Undefined")
-    {
-        return RobotArmState ::RobotArmStateError;
-    }
-    else if (returnedstate == "AS_Grundstellung")
-    {
-        return RobotArmState ::RobotArmStateFinished;
-    }
-    else if (returnedstate == "AS_PickPackage")
-    {
-        return RobotArmState ::RobotArmStateBusy;
-    }
-    else if (returnedstate == "AS_PlacePackage")
-    {
-        return RobotArmState ::RobotArmStateBusy;
-    }
-    else if (returnedstate == "AS_Ready")
-    {
-        return RobotArmState ::RobotArmStateFinished;
-    }
-    else if (returnedstate == "AS_Error")
-    {
-        return RobotArmState ::RobotArmStateError;
-    }
-
-    return RobotArmState ::RobotArmStateError;
+    // Send the command to the robot
+    sendCommand(jsonDoc);
 }
 
-int RobotManager::getBatteryState()
+void RobotManager::startPickPackage(int robotStorageIndex, int distributionCenterIndex)
 {
-    DynamicJsonDocument sendDoc(1024);
-    sendDoc["Command"] = "GetBatteryState";
-    DynamicJsonDocument recieveDoc = getCommand(sendDoc);
+    // Write log message
+    Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Start picking package from distribution center " + std::to_string(distributionCenterIndex) + " to robot storage " + std::to_string(robotStorageIndex));
 
-    return recieveDoc["BatteryState"].as<int>();
+    // Set the arm state to busy
+    armState = RobotArmState::RobotArmStateBusy;
+
+    // Create the JSON command
+    DynamicJsonDocument jsonDoc(1024);
+    jsonDoc["Command"] = "PickPackage";
+    jsonDoc["Data"]["RoboterIndex"] = robotStorageIndex;
+    jsonDoc["Data"]["LagerIndex"] = distributionCenterIndex;
+
+    // Send the command to the robot
+    sendCommand(jsonDoc);
 }
 
-void RobotManager::abortDriving()
+void RobotManager::startPlacePackage(int robotStorageIndex)
 {
-    DynamicJsonDocument sendDoc(1024);
-    sendDoc["Command"] = "AbortDriving";
-    sendCommand(sendDoc);
+    // Write log message
+    Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Start placing package from robot storage " + std::to_string(robotStorageIndex));
+
+    // Set the arm state to busy
+    armState = RobotArmState::RobotArmStateBusy;
+
+    // Create the JSON command
+    DynamicJsonDocument jsonDoc(1024);
+    jsonDoc["Command"] = "PlacePackage";
+    jsonDoc["Data"]["RoboterIndex"] = robotStorageIndex;
+
+    // Send the command to the robot
+    sendCommand(jsonDoc);
 }
 
-void RobotManager::setArmPosition(RobotArmPosition state)
+void RobotManager::processIncomingeMessages()
 {
-    DynamicJsonDocument sendDoc(1024);
-    sendDoc["Command"] = "SetArmState";
-    switch (state)
-    {
-    case RobotArmPosition::RobotArmPositionReady:
-        sendDoc["Data"]["ArmState"] = "Ready";
-        break;
-    case RobotArmPosition::RobotArmPositionStored:
-        sendDoc["Data"]["ArmState"] = "Stored";
-        break;
-    default:
-        break;
-    }
-    sendCommand(sendDoc);
-}
-
-void RobotManager::setDrivingWaypoint(Coordinates coordinates)
-{
-    DynamicJsonDocument sendDoc(1024);
-    sendDoc["Command"] = "SetNextWaypoint";
-    sendDoc["Data"]["x"] = coordinates.x;
-    sendDoc["Data"]["y"] = coordinates.y;
-    sendCommand(sendDoc);
-}
-
-Coordinates RobotManager::getPosition()
-{
-    DynamicJsonDocument sendDoc(1024);
-    sendDoc["Command"] = "GetCurrentPosition";
-    DynamicJsonDocument recieveDoc = getCommand(sendDoc);
-
-    Coordinates coordinates;
-    coordinates.x = recieveDoc["Data"]["x"].as<int>();
-    coordinates.y = recieveDoc["Data"]["y"].as<int>();
-
-    return coordinates;
-}
-
-void RobotManager::pickPackage(int index)
-{
-    DynamicJsonDocument sendDoc(1024);
-    sendDoc["Command"] = "PickPackage";
-    sendDoc["Data"]["Lagerindex"] = index;
-    sendDoc["Data"]["Autonom"] = true;
-    sendCommand(sendDoc);
-}
-
-void RobotManager::placePackage(int index)
-{
-    DynamicJsonDocument sendDoc(1024);
-    sendDoc["Command"] = "PlacePackage";
-    sendDoc["Data"]["Lagerindex"] = index;
-    sendCommand(sendDoc);
-}
-
-void RobotManager::clearSerialInputBuffer()
-{
+    // Process all incoming messages until the serial connection is empty
     while (Serial1.available())
     {
+        // Deserialize the incoming message into a JSON document
+        DynamicJsonDocument jsonDoc(1024);
+        deserializeJson(jsonDoc, Serial1);
+
+        // Check if the message contains the battery state
+        if (jsonDoc["Command"] == "SendBatteryState")
+        {
+            // Write log message
+            Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Battery state changed to " + std::to_string(jsonDoc["Data"]["BatteryState"].as<int>()));
+
+            // Update the battery state
+            currentBatteryState = jsonDoc["Data"]["BatteryState"].as<int>();
+        }
+
+        // Check if the message contains the current position
+        if (jsonDoc["Command"] == "SendCurrentPosition")
+        {
+            // Write log message
+            Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Current position changed to (" + std::to_string(jsonDoc["Data"]["x"].as<int>()) + ", " + std::to_string(jsonDoc["Data"]["y"].as<int>()) + ")");
+
+            // Update the current position
+            currentPosition.x = jsonDoc["Data"]["x"].as<int>();
+            currentPosition.y = jsonDoc["Data"]["y"].as<int>();
+        }
+
+        // Check if the message contains the driving state
+        if (jsonDoc["Command"] == "SendDrivingState")
+        {
+            // Update the driving state
+            int stateInt = jsonDoc["Data"]["State"].as<int>();
+
+            switch (stateInt)
+            {
+            case 0:
+                // Write log message
+                Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Driving state changed to error");
+
+                drivingState = RobotDrivingState::RobotDrivingStateError;
+                break;
+            case 1:
+                // Write log message
+                Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Driving state changed to busy");
+
+                drivingState = RobotDrivingState::RobotDrivingStateBusy;
+                break;
+            case 2:
+                // Write log message
+                Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Driving state changed to ready");
+
+                drivingState = RobotDrivingState::RobotDrivingStateReady;
+                break;
+            default:
+                break;
+            }
+        }
+
+        // Check if the message contains the arm state
+        if (jsonDoc["Command"] == "SendArmState")
+        {
+            // Update the arm state
+            int stateInt = jsonDoc["Data"]["State"].as<int>();
+
+            switch (stateInt)
+            {
+            case 0:
+                // Write log message
+                Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Arm state changed to busy");
+
+                armState = RobotArmState::RobotArmStateBusy;
+                break;
+            case 1:
+                // Write log message
+                Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Arm state changed to ready");
+
+                armState = RobotArmState::RobotArmStateReady;
+                break;
+            case 2:
+                // Write log message
+                Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Arm state changed to error");
+
+                armState = RobotArmState::RobotArmStateBusy;
+                break;
+            case 3:
+                // Write log message
+                Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Arm state changed to busy");
+
+                armState = RobotArmState::RobotArmStateBusy;
+                break;
+            case 4:
+                // Write log message
+                Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Arm state changed to ready");
+
+                armState = RobotArmState::RobotArmStateReady;
+                break;
+            case 5:
+                // Write log message
+                Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Arm state changed to error");
+
+                armState = RobotArmState::RobotArmStateError;
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}
+
+void RobotManager::clearIncomingeMessages()
+{
+    // Check if there is data available on the serial connection
+    while (Serial1.available())
+    {
+        // Read the data into a dummy variable
         char c = Serial1.read();
     }
 }
 
-void RobotManager::sendCommand(DynamicJsonDocument &doc)
+int RobotManager::getBatteryState()
 {
-
-    serializeJson(doc, Serial1);
+    return currentBatteryState;
 }
 
-DynamicJsonDocument RobotManager::getCommand(DynamicJsonDocument &doc)
+Coordinates RobotManager::getCurrentPosition()
 {
-    Serial.setTimeout(2000);
+    return currentPosition;
+}
 
-    clearSerialInputBuffer();
+RobotDrivingState RobotManager::getDrivingState()
+{
+    return drivingState;
+}
 
-    sendCommand(doc);
+RobotArmState RobotManager::getArmState()
+{
+    return armState;
+}
 
-    DynamicJsonDocument recieveDoc(1024);
-    deserializeJson(recieveDoc, Serial1);
-
-    return recieveDoc;
+void RobotManager::sendCommand(DynamicJsonDocument &payload)
+{
+    // Serialize the JSON document and send it to the robot
+    serializeJson(payload, Serial1);
 }

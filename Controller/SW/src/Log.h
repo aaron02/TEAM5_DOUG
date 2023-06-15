@@ -2,31 +2,26 @@
 
 #include "MqttManager.h"
 
-/**
- * @brief Enum representing the type of log message.
- */
+/// @brief The different log types
 enum class LogType
 {
-    LOG_TYPE_LOG,  /**< Log message type. */
-    LOG_TYPE_ERROR /**< Error message type. */
+    LOG_TYPE_LOG,
+    LOG_TYPE_ERROR
 };
 
-/**
- * @brief Class for logging messages.
- */
+/// @brief This class is used to manage the log
 class Log
 {
 public:
-    /**
-     * @brief Initializes the Log class.
-     * @param serialBaud The baud rate for serial communication.
-     */
-    static void initialize(unsigned long serialBaud);
+    /// @brief Initialize the log
+    /// @param serialBaud Baud rate of the serial connection
+    /// @param serialTimeout_ms Timeout for the serial connection in milliseconds
+    /// @return True if the initialization was successful otherwise false
+    static bool initialize(unsigned long serialBaud, unsigned long serialTimeout_ms);
 
-    /**
-     * @brief Prints a log message.
-     * @param type The type of the log message.
-     * @param message The log message.
-     */
-    static void println(LogType type, std::string message);
+    /// @brief Print a log message
+    /// @param type The type of the log message
+    /// @param sender The sender of the message (e.g. the class name)
+    /// @param message The message to print
+    static void println(LogType type, std:: string sender, std::string message);
 };

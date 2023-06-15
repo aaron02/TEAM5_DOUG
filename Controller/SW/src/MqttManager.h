@@ -3,111 +3,93 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <queue>
-#include "Log.h"
+#include <ArduinoJson.h>
 
-struct MqttMessage
+#include "Log.h"
+#include "Coordinates.h"
+#include "MqttMessage.h"
+#include "OrderManager.h"
+
+// The different Request types from the application
+enum MqttApplicationRequest
 {
-    std::string topic;
-    std::string payload;
+    MqttApplicationRequestStatusUpdate,
+    MqttApplicationRequestReturnToBase
 };
 
-/**
- * @brief The MqttManager class provides functionality to manage MQTT communication.
- */
+/// @brief This class is used to manage the MQTT connection
 class MqttManager
 {
 public:
-    /**
-     * @brief Connects to the Wi-Fi network and the MQTT server.
-     * @param serverIP The IP address of the MQTT server.
-     * @param serverPort The port number of the MQTT server.
-     * @param clientID The client ID to be used for MQTT connection.
-     * @param ssid The SSID of the Wi-Fi network to connect to.
-     * @param password The password for the Wi-Fi network.
-     * @param bufferSize The size of the message buffer.
-     * @return `true` if the connection is successful, `false` otherwise.
-     */
-  static  bool connect(IPAddress serverIP, int serverPort, std::string clientID, std::string ssid, std::string password, uint16_t bufferSize);
+    /// @brief Initialize the MQTT manager
+    /// @param mqttMaxBufferSize The maximum receive buffer size for MQTT messages
+    /// @return  True if the initialization was successful otherwise false
+    static bool initialize(std::string WifiSsid, std::string WifiPassword, unsigned long wifiConectionTimeout_ms,IPAddress mqttServerIP,  int mqttServerPort, std::string mqttClientID, uint16_t mqttMaxBufferSize, unsigned long mqttConectionTimeout_ms);
 
-    /**
-     * @brief Subscribes to the specified topic.
-     * @param topic The topic to subscribe to.
-     * @return `true` if the subscription is successful, `false` otherwise.
-     */
-    static bool subscribeTopic(std::string topic);
+    /// @brief Keep the MQTT connection alive
+    static void keepAlive();
 
-    /**
-     * @brief Unsubscribes from the specified topic.
-     * @param topic The topic to unsubscribe from.
-     * @return `true` if the unsubscription is successful, `false` otherwise.
-     */
-    static bool unsubscribeTopic(std::string topic);
+    /// @brief Unsubscribe from all topics
+    static void unsubscribeAllTopics();
 
-    /**
-     * @brief Unsubscribes from all topics.
-     * @return `true` if the unsubscription is successful, `false` otherwise.
-     */
-    static bool unsubscribeAllTopics();
+    /// @brief Send uptade on the current delivery id
+    /// @param currentDeliveryId Current delivery ID
+    static void sendCurrentDeliveryId(std::string currentDeliveryId);
 
-    /**
-     * @brief Checks if the MQTT client is currently connected.
-     * @return `true` if connected, `false` otherwise.
-     */
-    static bool isConnected();
+    /// @brief Send sptade on the current delivery step and delivery id
+    static void sendCurrentDeliveryStep(std::string currentDeliveryId, int currentDeliveryStep);
 
-/**
-     * @brief Retruns the MAC-Address
-     * @return MAC-Address
-     */
-    static std::string getMacAddress();
+    /// @brief Send uptade on the current battery state
+    static void sendCurrentBatteryState(int currentBatteryState);
 
-    /**
-     * @brief Publishes a message to the specified topic.
-     * @param topic The topic to publish the message to.
-     * @param message The message to be published.
-     * @return `true` if the publishing is successful, `false` otherwise.
-     */
-    static bool publishMessage(std::string topic, std::string message);
-    static bool publishMessage(std::string topic, bool value);
+    /// @brief Send the flag delivery done
+    static void sendDeliveryDone();
 
-    /**
-     * @brief Checks if there is an incoming message in the message queue.
-     * @return `true` if there is an incoming message, `false` otherwise.
-     */
-    static bool hasIncomingMessage();
+    /// @brief Send uptade on the current position
+    static void sendCurrentPosition(Coordinates currentPosition);
 
-    /**
-     * @brief Retrieves the next incoming message from the message queue.
-     * @return The next incoming message.
-     */
-    static MqttMessage getNextMessage();
+    /// @brief Subscribe to the order topic and delete all orders in the queue and then request an new order by sending the GiveMeAnOrder flag
+    static void requestOrder();
 
-    /**
-     * @brief Runs the MQTT client loop to handle incoming messages.
-     */
-    static void run();
+    /// @brief Check if there is an order in the queue
+    /// @return True if there is an order in the queue otherwise false
+    static bool hasOrder();
 
-    /**
-     * @brief Clears the message queue.
-     */
-    static void clearMessageQueue();
+    /// @brief Check if there is an application request in the queue
+    /// @return True if there is an application request in the queue otherwise false
+    static bool hasApplicationRequest();
+
+    /// @brief Get the first application request in the queue
+    static MqttApplicationRequest getApplicationRequest();
 
 private:
-    static uint16_t messageBufferSize;           /**< The size of the message buffer. */
-    static IPAddress mqttServerIP;               /**< The IP address of the MQTT server. */
-    static int mqttServerPort;                   /**< The port number of the MQTT server. */
-    static std::string mqttClientID;             /**< The client ID for MQTT connection. */
-    static std::string wifiSsid;                 /**< The SSID of the Wi-Fi network. */
-    static std::string wifiPassword;             /**< The password for the Wi-Fi network. */
-    static WiFiClient wifiClient;                /**< The Wi-Fi client. */
-    static PubSubClient mqttClient;              /**< The MQTT client. */
-    static std::queue<MqttMessage> messageQueue; /**< The message queue. */
+    /// @brief Application request queue used to store incoming application requests
+    static std::queue<MqttApplicationRequest> applicationRequestQueue;
 
-    /**
-     * @brief The callback function called when an MQTT message is received.
-     * @param topic The topic of the received message.
-     * @param payload The payload of the received message.
-     * @param length The length of the payload.
-     */
+    /// @brief WiFi client used to connect to the MQTT server
+    static WiFiClient wifiClient;
+
+    /// @brief MQTT client used to communicate with the MQTT server
+    static PubSubClient mqttClient;
+
+    /// @brief Flag used to indicate if there is an order
+    static bool hasOrderFlag;
+
+    /// @brief Returns the UUID of the robot generated from the MAC-Address
+    /// @return UUID in the format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    static std::string getRobotUuid();
+
+    /// @brief  Publish a message to the MQTT server
+    static void publishMessage(std::string topic, std::string message);
+    static void publishMessage(std::string topic, DynamicJsonDocument &doc);
+    static void publishMessage(std::string topic, bool value);
+
+    /// @brief Subscribe to a topic
+    static void subscribeTopic(std::string topic);
+
+    /// @brief Unsubscribe from a topic
+    static void unsubscribeTopic(std::string topic);
+
+    /// @brief Callback function for MQTT messages: Messages get parsed and added to the queues
     static void mqttCallback(char *topic, byte *payload, unsigned int length);
 };
