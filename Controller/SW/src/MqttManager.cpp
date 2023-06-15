@@ -6,7 +6,7 @@ PubSubClient MqttManager::mqttClient(MqttManager::wifiClient);
 std::queue<MqttApplicationRequest> MqttManager::applicationRequestQueue;
 bool MqttManager::hasOrderFlag = false;
 
-bool MqttManager::initialize(std::string WifiSsid, std::string WifiPassword, unsigned long wifiConectionTimeout_ms,IPAddress mqttServerIP,  int mqttServerPort, std::string mqttClientID, uint16_t mqttMaxBufferSize, unsigned long mqttConectionTimeout_ms)
+bool MqttManager::initialize(std::string WifiSsid, std::string WifiPassword, unsigned long wifiConectionTimeout_ms, IPAddress mqttServerIP, int mqttServerPort, std::string mqttClientID, uint16_t mqttMaxBufferSize, unsigned long mqttConectionTimeout_ms)
 {
     // Write log message
     Log::println(LogType::LOG_TYPE_LOG, "MqttManager", "Connect to wifi with SSID: \"" + WifiSsid + "\" and password: \"" + WifiPassword + "\" with a timeout of " + std::to_string(wifiConectionTimeout_ms) + "ms");
@@ -35,7 +35,7 @@ bool MqttManager::initialize(std::string WifiSsid, std::string WifiPassword, uns
 
     // Write log message
     Log::println(LogType::LOG_TYPE_LOG, "MqttManager", "Connect to MQTT server with a timeout");
-    
+
     // Setup MQTT connection
     mqttClient.setServer(mqttServerIP, mqttServerPort);
     mqttClient.setCallback(mqttCallback);
@@ -121,8 +121,8 @@ void MqttManager::requestOrder()
     // Unsubscribe from the order topic
     unsubscribeTopic("Robots/" + getRobotUuid() + "/To/DeliveryOrder");
 
-     // Reset the flag that a new order is available
-        hasOrderFlag = false;
+    // Reset the flag that a new order is available
+    hasOrderFlag = false;
 
     // Subscribe to the order topic
     subscribeTopic("Robots/" + getRobotUuid() + "/To/DeliveryOrder");
@@ -226,7 +226,7 @@ void MqttManager::mqttCallback(char *topic, byte *payload, unsigned int length)
         // Write log message
         Log::println(LogType::LOG_TYPE_LOG, "MqttManager", "Received new order");
 
-// Parse the order
+        // Parse the order
         OrderManager::parse(mqttMessage.payload);
 
         // Set the flag that a new order is available

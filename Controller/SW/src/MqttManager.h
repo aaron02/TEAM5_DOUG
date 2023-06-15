@@ -24,7 +24,7 @@ public:
     /// @brief Initialize the MQTT manager
     /// @param mqttMaxBufferSize The maximum receive buffer size for MQTT messages
     /// @return  True if the initialization was successful otherwise false
-    static bool initialize(std::string WifiSsid, std::string WifiPassword, unsigned long wifiConectionTimeout_ms,IPAddress mqttServerIP,  int mqttServerPort, std::string mqttClientID, uint16_t mqttMaxBufferSize, unsigned long mqttConectionTimeout_ms);
+    static bool initialize(std::string WifiSsid, std::string WifiPassword, unsigned long wifiConectionTimeout_ms, IPAddress mqttServerIP, int mqttServerPort, std::string mqttClientID, uint16_t mqttMaxBufferSize, unsigned long mqttConectionTimeout_ms);
 
     /// @brief Keep the MQTT connection alive
     static void keepAlive();

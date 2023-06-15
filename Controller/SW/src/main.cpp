@@ -244,7 +244,7 @@ void loop()
         break;
 
     case ProgramState::ProgramStateError:
-   // Write log message
+        // Write log message
         Log::println(LogType::LOG_TYPE_LOG, "Loop", "ERROR!!");
         break;
 
