@@ -9,7 +9,7 @@ bool MqttManager::hasOrderFlag = false;
 bool MqttManager::initialize(std::string WifiSsid, std::string WifiPassword, unsigned long wifiConectionTimeout_ms,IPAddress mqttServerIP,  int mqttServerPort, std::string mqttClientID, uint16_t mqttMaxBufferSize, unsigned long mqttConectionTimeout_ms)
 {
     // Write log message
-    Log::println(LogType::LOG_TYPE_LOG, "MqttManager", "Cnnect to wifi with SSID: \"" + WifiSsid + "\" and password: \"" + WifiPassword + "\" with a timeout of " + std::to_string(wifiConectionTimeout_ms) + "ms");
+    Log::println(LogType::LOG_TYPE_LOG, "MqttManager", "Connect to wifi with SSID: \"" + WifiSsid + "\" and password: \"" + WifiPassword + "\" with a timeout of " + std::to_string(wifiConectionTimeout_ms) + "ms");
 
     // Start wifi connection
     WiFi.begin(WifiSsid.c_str(), WifiPassword.c_str());
@@ -57,6 +57,9 @@ bool MqttManager::initialize(std::string WifiSsid, std::string WifiPassword, uns
         // Return false if MQTT connection is not established
         return false;
     }
+
+    // Write log message
+    Log::println(LogType::LOG_TYPE_LOG, "MqttManager", "MQTT connection established");
 
     // Set MQTT buffer size
     mqttClient.setBufferSize(mqttMaxBufferSize);
@@ -154,6 +157,9 @@ std::string MqttManager::getRobotUuid()
 {
     // Get the wifi MAC-Address and convert it to a string
     std::string macAddress = WiFi.macAddress().c_str();
+
+    // Convert the MAC-Address to lower case
+    std::transform(macAddress.begin(), macAddress.end(), macAddress.begin(), ::tolower);
 
     // Remove the colons from the MAC-Address
     macAddress.erase(std::remove(macAddress.begin(), macAddress.end(), ':'), macAddress.end());

@@ -27,6 +27,10 @@ void StateMachineManager::changeState(ProgramState newState)
         logMessage += "Deliver order";
         break;
 
+    case ProgramState::ProgramStateFinished:
+        logMessage += "Finisshed";
+        break;
+
     case ProgramState::ProgramStateError:
         logMessage += "Error";
         break;

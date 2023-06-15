@@ -27,7 +27,7 @@ bool Log::initialize(unsigned long serialBaud, unsigned long serialTimeout_ms)
 void Log::println(LogType type, std::string sender, std::string message)
 {
     // Generate the log message
-    std::string prefix = (type == LogType::LOG_TYPE_LOG) ? "[log] " : "[error] ";
+    std::string prefix = (type == LogType::LOG_TYPE_LOG) ? "[LOG] " : "[ERROR] ";
     std::string fullMessage = "[" + std::to_string(millis()) + "] " + prefix + "[" + sender + "] " + message;
 
     // Print the log message

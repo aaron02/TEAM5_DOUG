@@ -6,9 +6,10 @@
 enum ProgramState
 {
     ProgramStateUndefined,
-   ProgramStateInit,
+    ProgramStateInit,
     ProgramStateRecieveOrder,
     ProgramStateDeliverOrder,
+    ProgramStateFinished,
     ProgramStateError
 };
 

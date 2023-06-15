@@ -77,11 +77,14 @@ void OrderManager::parse(std::string orderJson)
 
         Coordinates coordinates;
         coordinates.x = deliveryStep["coordinates"]["x"].as<int>();
-        coordinates.y = deliveryStep["coordinates"]["x"].as<int>();
+        coordinates.y = deliveryStep["coordinates"]["y"].as<int>();
 
         step.coordinates = coordinates;
 
         deliveryStepsQueue.push(step);
+
+        // Write log message
+        Log::println(LogType::LOG_TYPE_LOG, "OrderManager", "Parsed delivery step with id " + std::to_string(step.id) + " and type " + deliveryStep["type"].as<std::string>() + " and product id " + step.productIdToPlace +" and coordinates (" + std::to_string(step.coordinates.x) + ", " + std::to_string(step.coordinates.y) + ")");
     }
 }
 
