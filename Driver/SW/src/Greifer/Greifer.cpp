@@ -163,7 +163,6 @@ Drehtisch: Wird nur referenziert wenn er noch nicht referenziert ist
 */
 void Greifer::Grundstellung()
 {
-    return; 
     switch (iGrundstellungStep)
     {
         case 0:

@@ -148,7 +148,8 @@ void Communication::handleGetArmStatus(JsonDocument& doc)
 
 void Communication::handlePickPackage(JsonDocument& doc)
 {
-    uint32_t lagerIndex = doc["Data"]["Lagerindex"];
+    uint32_t roboterIndex = doc["Data"]["RoboterIndex"];
+    uint32_t lagerIndex = doc["Data"]["LagerIndex"];
     
     if (debug)
         sLogger.debug("handlePickPackage to Index %u", lagerIndex);
@@ -162,7 +163,7 @@ void Communication::handlePickPackage(JsonDocument& doc)
 
 void Communication::handlePlacePackage(JsonDocument& doc)
 {
-    uint32_t lagerIndex = doc["Data"]["Lagerindex"];
+    uint32_t lagerIndex = doc["Data"]["LagerIndex"];
     bool autonom = doc["Data"]["Autonom"];
 
     if (debug)
@@ -202,7 +203,7 @@ void Communication::handleCustomerAccepted(JsonDocument& doc)
         
 
         DynamicJsonDocument doc(1024);
-        doc["Command"]["SendBatteryState"];
+        doc["Command"] = "SendBatteryState";
         doc["Data"]["BatteryState"] = voltagePct;
         serializeJson(doc, Serial1);
     }
@@ -214,7 +215,7 @@ void Communication::handleCustomerAccepted(JsonDocument& doc)
         sLogger.debug("sendCurrentPosition x = %u y = %u", x, y);
 
         DynamicJsonDocument doc(1024);
-        doc["Command"]["SendCurrentPosition"];
+        doc["Command"] = "SendCurrentPosition";
         doc["Data"]["x"] = x;
         doc["Data"]["y"] = y;
         serializeJson(doc, Serial1);
@@ -226,7 +227,7 @@ void Communication::handleCustomerAccepted(JsonDocument& doc)
         sLogger.debug("sendDrivingState State = %u", drivingState);
 
         DynamicJsonDocument doc(1024);
-        doc["Command"]["SendDrivingState"];
+        doc["Command"] = "SendDrivingState";
         doc["Data"]["State"] = drivingState;
         serializeJson(doc, Serial1);
     }
@@ -237,7 +238,7 @@ void Communication::handleCustomerAccepted(JsonDocument& doc)
         sLogger.debug("sendArmState State = %u", armState);
 
         DynamicJsonDocument doc(1024);
-        doc["Command"]["SendArmState"];
+        doc["Command"] = "SendArmState";
         doc["Data"]["State"] = armState;
         serializeJson(doc, Serial1);
     }
