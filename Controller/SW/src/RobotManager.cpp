@@ -11,6 +11,9 @@ bool RobotManager::initialize(unsigned long baudRate, unsigned long serialTimeou
     // Write log message
     Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Initializing robot connection with timeout of " + std::to_string(serialTimeout_ms) + "ms");
 
+    // Set arm state to busy
+    armState = RobotArmState::RobotArmStateBusy;
+
     // Initialize the serial connection
     Serial1.begin(baudRate, SERIAL_8N1, 18, 17);
 
@@ -32,6 +35,17 @@ bool RobotManager::initialize(unsigned long baudRate, unsigned long serialTimeou
 
     // Write log message
     Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Robot connection established");
+
+    // Wait until arm state is ready
+    while (armState != RobotArmState::RobotArmStateReady)
+    {
+        // Prosess incoming messages
+        processIncomingeMessages();
+    }
+
+    // Write log message
+    Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Robot arm is ready");
+
     return true;
 }
 
@@ -96,6 +110,7 @@ void RobotManager::startPlacePackage(int robotStorageIndex)
     DynamicJsonDocument jsonDoc(1024);
     jsonDoc["Command"] = "PlacePackage";
     jsonDoc["Data"]["RoboterIndex"] = robotStorageIndex;
+    jsonDoc["Data"]["Autonom"] = 1;
 
     // Send the command to the robot
     sendCommand(jsonDoc);
