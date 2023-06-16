@@ -23,6 +23,10 @@ void StateMachineManager::changeState(ProgramState newState)
         logMessage += "Recieve order";
         break;
 
+    case ProgramState::ProgramStateRecieveBackupOrder:
+        logMessage += "Recieve backup order";
+        break;
+
     case ProgramState::ProgramStateDeliverOrder:
         logMessage += "Deliver order";
         break;

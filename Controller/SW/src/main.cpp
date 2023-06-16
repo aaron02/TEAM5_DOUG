@@ -12,6 +12,7 @@
 #include "Log.h"
 #include "MqttManager.h"
 #include "StateMachineManager.h"
+#include "BackupOrder.h"
 
 // Log configuration
 const unsigned long LOG_BAUD_RATE = 115200;
@@ -36,9 +37,6 @@ const int MQTT_PORT = 1883;
 const uint16_t MQTT_MAX_BUFFER_SIZE = 10000;
 const unsigned long MQTT_TIMEOUT = 10000;
 
-// Backup order in case the mqtt server is not available
-const std::string backupOrder = R"({"deliveryId":"27a88501-a89a-48ec-8f85-d97eb925920f","productsToPickUp":[{"productId":"0c6cc4aa-4ed2-472f-a299-3c31903947fd","storageLocation":1,"quantity":1},{"productId":"25535516-6bf1-420e-8184-38c8686ff554","storageLocation":2,"quantity":1},{"productId":"94b98de0-e02e-409f-bd76-cfb595933b60","storageLocation":4,"quantity":1},{"productId":"3ca5190a-834c-4fba-8f37-bf3f33daf52d","storageLocation":3,"quantity":1}],"deliverySteps":[{"id":1,"type":"parkPosition","authorizationKey":"","productId":"","plannedDeliveryTime":"2023-05-29T19:41:37.7570977+02:00","coordinates":{"x":0,"y":-800}},{"id":2,"type":"waypoint","authorizationKey":"","productId":"","plannedDeliveryTime":"2023-05-29T19:41:59.7570977+02:00","coordinates":{"x":1100,"y":-800}},{"id":3,"type":"waypoint","authorizationKey":"","productId":"","plannedDeliveryTime":"2023-05-29T19:42:15.7570977+02:00","coordinates":{"x":1100,"y":0}},{"id":4,"type":"distributionCenter","authorizationKey":"","productId":"","plannedDeliveryTime":"2023-05-29T19:44:37.7570977+02:00","coordinates":{"x":0,"y":0}},{"id":5,"type":"waypoint","authorizationKey":"","productId":"","plannedDeliveryTime":"2023-05-29T19:44:59.7570977+02:00","coordinates":{"x":1100,"y":0}},{"id":6,"type":"deposit","authorizationKey":"","productId":"0c6cc4aa-4ed2-472f-a299-3c31903947fd","plannedDeliveryTime":"2023-05-29T19:46:19.7570977+02:00","coordinates":{"x":1100,"y":1000}},{"id":7,"type":"waypoint","authorizationKey":"","productId":"","plannedDeliveryTime":"2023-05-29T19:46:39.7570977+02:00","coordinates":{"x":1100,"y":0}},{"id":8,"type":"waypoint","authorizationKey":"","productId":"","plannedDeliveryTime":"2023-05-29T19:46:57.7570977+02:00","coordinates":{"x":2000,"y":0}},{"id":9,"type":"handOver","authorizationKey":"test1","productId":"25535516-6bf1-420e-8184-38c8686ff554","plannedDeliveryTime":"2023-05-29T19:48:17.7570977+02:00","coordinates":{"x":2000,"y":1000}},{"id":10,"type":"waypoint","authorizationKey":"","productId":"","plannedDeliveryTime":"2023-05-29T19:48:37.7570977+02:00","coordinates":{"x":2000,"y":0}},{"id":11,"type":"waypoint","authorizationKey":"","productId":"","plannedDeliveryTime":"2023-05-29T19:48:55.7570977+02:00","coordinates":{"x":2900,"y":0}},{"id":12,"type":"deposit","authorizationKey":"","productId":"3ca5190a-834c-4fba-8f37-bf3f33daf52d","plannedDeliveryTime":"2023-05-29T19:50:15.7570977+02:00","coordinates":{"x":2900,"y":1000}},{"id":13,"type":"waypoint","authorizationKey":"","productId":"","plannedDeliveryTime":"2023-05-29T19:50:35.7570977+02:00","coordinates":{"x":2900,"y":0}},{"id":14,"type":"handOver","authorizationKey":"test2","productId":"94b98de0-e02e-409f-bd76-cfb595933b60","plannedDeliveryTime":"2023-05-29T19:51:57.7570977+02:00","coordinates":{"x":4000,"y":0}},{"id":15,"type":"waypoint","authorizationKey":"","productId":"","plannedDeliveryTime":"2023-05-29T19:52:19.7570977+02:00","coordinates":{"x":2900,"y":0}}]})";
-
 void setup()
 {
     // Initialize the state machine
@@ -62,20 +60,21 @@ void loop()
             // Initialize the log
             if (!Log::initialize(LOG_BAUD_RATE, LOG_TIMEOUT))
             {
-                StateMachineManager::changeState(ProgramStateError);
+                StateMachineManager::changeState(ProgramState::ProgramStateError);
                 break;
             }
 
             // Initialize the driver
             if (!RobotManager::initialize(ROBOT_BAUD_RATE, ROBOT_TIMEOUT))
             {
-                StateMachineManager::changeState(ProgramStateError);
+                StateMachineManager::changeState(ProgramState::ProgramStateError);
                 break;
             }
+
             // Initialize the MQTT manager
             if (!MqttManager::initialize(WIFI_SSID, WIFI_PASSWORD, WIFI_TIMEOUT, MQTT_IP, MQTT_PORT, MQTT_ID, MQTT_MAX_BUFFER_SIZE, MQTT_TIMEOUT))
             {
-                StateMachineManager::changeState(ProgramStateError);
+                StateMachineManager::changeState(ProgramState::ProgramStateError);
                 break;
             }
         }
@@ -84,7 +83,7 @@ void loop()
         MqttManager::unsubscribeAllTopics();
 
         // Change the program state to the next state
-        StateMachineManager::changeState(ProgramStateRecieveOrder);
+        StateMachineManager::changeState(ProgramState::ProgramStateRecieveOrder);
         break;
 
     case ProgramState::ProgramStateRecieveOrder:
@@ -101,18 +100,29 @@ void loop()
         if (MqttManager::hasOrder())
         {
             // Change the program state to the next state
-            StateMachineManager::changeState(ProgramStateDeliverOrder);
+            StateMachineManager::changeState(ProgramState::ProgramStateDeliverOrder);
         }
         else
         {
             // Write log message
             Log::println(LogType::LOG_TYPE_LOG, "Loop", "No order recieved from the server using the backup order");
 
-            // Execute a fixed order
+            // Change the program state to the next state
+            StateMachineManager::changeState(ProgramState::ProgramStateRecieveBackupOrder);
+        }
+        break;
+
+    case ProgramState::ProgramStateRecieveBackupOrder:
+        if (StateMachineManager::getIsFirstRun())
+        {
+            // Write log message
+            Log::println(LogType::LOG_TYPE_LOG, "Loop", "Parse backup order");
+
+            // Parse the backup order
             OrderManager::parse(backupOrder);
 
             // Change the program state to the next state
-            StateMachineManager::changeState(ProgramStateDeliverOrder);
+            StateMachineManager::changeState(ProgramState::ProgramStateDeliverOrder);
         }
         break;
 
@@ -232,7 +242,7 @@ void loop()
             MqttManager::sendDeliveryDone();
 
             // Change the program state to the next state
-            StateMachineManager::changeState(ProgramStateFinished);
+            StateMachineManager::changeState(ProgramState::ProgramStateFinished);
         }
 
         break;
@@ -249,7 +259,7 @@ void loop()
         break;
 
     default:
-        StateMachineManager::changeState(ProgramStateError);
+        StateMachineManager::changeState(ProgramState::ProgramStateError);
         break;
     }
 
