@@ -8,6 +8,7 @@ enum ProgramState
     ProgramStateUndefined,
     ProgramStateInit,
     ProgramStateRecieveOrder,
+    ProgramStateRecieveBackupOrder,
     ProgramStateDeliverOrder,
     ProgramStateFinished,
     ProgramStateError
