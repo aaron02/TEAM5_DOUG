@@ -91,22 +91,16 @@ i2cTOF::i2cTOF()
 {
   if (MP.begin() == false)
   {
-    Serial.println("Could not connect to TCA9548 multiplexer.");
+    sLogger.debug("Could not connect to TCA9548 multiplexer.");
   }
 
-  Serial.println("\nScan the channels of the multiplexer for searchAddress.\n");
+  sLogger.debug("Scan the channels of the multiplexer for searchAddress.");
   for (int chan = 0; chan < 8; chan++)
   {
     MP.selectChannel(chan);
     bool b = MP.isConnected(address);
-    Serial.print("CHAN: ");
-    Serial.print(chan);
-    Serial.print("\t");
-    Serial.print( b ? "found!" : "x");
+    sLogger.debug("Channel %i found Sensor %i", chan, b ? 1 : 0);
   }
-  Serial.println();
-
-  Serial.println("done...");
 }
 
 i2cTOF::~i2cTOF()

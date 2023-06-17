@@ -27,5 +27,5 @@ protected:
     int16_t distances[4] = {0, 0, 0, 0};
 
     // Debug
-    bool debug = false;
+    bool debug = true;
 };
