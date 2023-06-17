@@ -25,6 +25,7 @@ ADNS_CTRL* adnsController = nullptr;
 PDB* pdb = nullptr;
 Greifer* greifer = nullptr;
 Communication* com = nullptr;
+i2cTOF* tofSensors = nullptr;
 
 void MainThread(uint32_t difftime)
 {
@@ -44,6 +45,8 @@ void MainThread(uint32_t difftime)
     CALL_UPDATE(greifer, Update(difftime));
     // Communication to Controller
     CALL_UPDATE(com, Update(difftime));
+
+    CALL_UPDATE(tofSensors, Update(difftime));
 
     // Started but not ready yet
     if (status == Status::Initialization)
@@ -120,6 +123,7 @@ void setup()
     adnsController = new ADNS_CTRL();
     gyro = new Gyro();
     pdb = new PDB();
+    tofSensors = new i2cTOF();
     //
 
     // Odometry + Navigation

@@ -51,7 +51,7 @@ void Antrieb::setSpeed(float fSpeed)
     // Only for Debug use, activating this Line Stops the Motors from Working, this extends the Program Cycle.
     //sLogger.info("Antrieb %s set to Speed %f (%f)", sAntriebName.c_str(), fSpeed, fDemandedSpeed);
 
-    //if (stepper->speed() < fDemandedSpeed || stepper->speed() > fDemandedSpeed)
+    if (stepper->speed() < fDemandedSpeed || stepper->speed() > fDemandedSpeed)
         stepper->setSpeed(fDemandedSpeed);
 }
 

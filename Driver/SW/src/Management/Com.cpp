@@ -199,7 +199,8 @@ void Communication::handleCustomerAccepted(JsonDocument& doc)
     void Communication::sendBatteryState()
     {
         int32_t voltagePct = static_cast<int32_t>(mPower->GetVoltagePct());
-        sLogger.debug("sendBatteryState Voltage Pct = %u", voltagePct);
+        if (debug)
+            sLogger.debug("sendBatteryState Voltage Pct = %u", voltagePct);
         
 
         DynamicJsonDocument doc(1024);
@@ -212,7 +213,8 @@ void Communication::handleCustomerAccepted(JsonDocument& doc)
     {
         int32_t x = static_cast<int32_t>(mOdometry->GetPosition()->getX());
         int32_t y = static_cast<int32_t>(mOdometry->GetPosition()->getY());
-        sLogger.debug("sendCurrentPosition x = %u y = %u", x, y);
+        if (debug)
+            sLogger.debug("sendCurrentPosition x = %i y = %i", x, y);
 
         DynamicJsonDocument doc(1024);
         doc["Command"] = "SendCurrentPosition";
@@ -224,7 +226,8 @@ void Communication::handleCustomerAccepted(JsonDocument& doc)
     void Communication::sendDrivingState()
     {
         uint8_t drivingState = mNavigation->getDrivingState();
-        sLogger.debug("sendDrivingState State = %u", drivingState);
+        if (debug)
+            sLogger.debug("sendDrivingState State = %u", drivingState);
 
         DynamicJsonDocument doc(1024);
         doc["Command"] = "SendDrivingState";
@@ -235,7 +238,8 @@ void Communication::handleCustomerAccepted(JsonDocument& doc)
     void Communication::sendArmState()
     {
         uint8_t armState = mGreifer->getArmStatus();
-        sLogger.debug("sendArmState State = %u", armState);
+        if (debug)
+            sLogger.debug("sendArmState State = %u", armState);
 
         DynamicJsonDocument doc(1024);
         doc["Command"] = "SendArmState";
