@@ -56,10 +56,12 @@ void MainThread(uint32_t difftime)
             status = Status::Started;
             // Start Location
             adnsController->reset_xy_dist();
-            odometry->setStartLocation(Vector2D(0, -800), gyro->getGyroAngle(YAW));
-            nav->setSollPosition(0, -800);
 
-            //nav->setSollPosition(100, -800);
+            float startAngle = 0.0f;
+            Vector2D* m_StartPosition = tofSensors->getInitialPosition(startAngle);
+            odometry->setStartLocation(Vector2D(0, -800), gyro->getGyroAngle(YAW));
+            //odometry->setStartLocation(*m_StartPosition, gyro->getGyroAngle(YAW) + startAngle);             //odometry->setStartLocation(Vector2D(0, -800), gyro->getGyroAngle(YAW));
+            nav->setSollPosition(0, -800);
 
             sLogger.debug("Controller Started and Ready");
         }

@@ -128,7 +128,7 @@ void i2cTOF::Update(uint64_t difftime)
         if (timer <= 0)
         {
             timer = 1 * TimeVar::Seconds;
-            sLogger.debug("Distance 1 %i, Distance 2 %i, Distance 3 %i, Distance 4 %i", getDistanceFromSensor(0), getDistanceFromSensor(1), getDistanceFromSensor(2), getDistanceFromSensor(3));
+            sLogger.debug("Distance Back %i, Distance Front %i, Distance Back_Left %i, Distance Front_Left %i", getDistanceFromSensor(0), getDistanceFromSensor(1), getDistanceFromSensor(2), getDistanceFromSensor(3));
         }
         else
             timer -= difftime;
@@ -147,7 +147,7 @@ void i2cTOF::readSensorAtChannel(int channel)
         int cnt  = 0;
         while (cnt < 50) 
         {
-            delay(1);
+            delay(10);
             val = read_byte_data_at(VL53L0X_REG_RESULT_RANGE_STATUS);
             if (val & 0x01) break;
             cnt++;
@@ -161,7 +161,31 @@ void i2cTOF::readSensorAtChannel(int channel)
             byte DeviceRangeStatusInternal = ((gbuf[0] & 0x78) >> 3);
 
             if (DeviceRangeStatusInternal == 11)
-                distances[channel]             = makeuint16(gbuf[11], gbuf[10]);
+            {
+                uint16_t korrekturFaktor = 0.0f;
+
+                switch (channel)
+                {
+                    case POS_Back:
+                    {
+                        korrekturFaktor = -15;
+                    } break;
+                    case POS_Front:
+                    {
+                        korrekturFaktor = -15;
+                    } break;
+                    case POS_Front_Left:
+                    {
+                        korrekturFaktor = -35;
+                    } break;
+                    case POS_Back_Left:
+                    {
+                        korrekturFaktor = -15;
+                    } break;
+                }
+
+                distances[channel]             = makeuint16(gbuf[11], gbuf[10]) + korrekturFaktor;
+            }
             else
                 distances[channel]             = 1000;
 
@@ -169,4 +193,37 @@ void i2cTOF::readSensorAtChannel(int channel)
             //sLogger.debug("Range Status %i at Channel %i", DeviceRangeStatusInternal, channel);
         }
     }
+}
+
+Vector2D* i2cTOF::getInitialPosition(float &angle)
+{
+    float TopWall_Y = -500.0f;
+    float LeftWall_X = -350.0f;
+
+    float calculatedX = 0.0f;
+    float calculatedY = 0.0f;
+
+    float distanceToLeftWall = 0.0f;
+    float distanceToTopWall = 0.0f;
+    float angleToWall;
+
+    float sensor1 = float(getDistanceFromSensor(POS_Front_Left));
+    float sensor2 = float(getDistanceFromSensor(POS_Back_Left));
+
+    //sLogger.debug("Sensor 1 = %f Sensor 2 = %f", sensor1, sensor2);
+
+    distanceToLeftWall = float(getDistanceFromSensor(POS_Back));
+
+    float cosTheta = (pow(sensor1, 2) + pow(sensor2, 2) - pow(10.5, 2)) / (2 * sensor1 * sensor2);
+    distanceToTopWall = sqrt(pow(sensor1, 2) + pow(sensor2, 2) - 2 * sensor1 * sensor2 * cosTheta);
+    angleToWall = acos(cosTheta) * 180.0 / PI;
+
+    //sLogger.debug("distance= %f ", distanceToTopWall);
+
+    calculatedX = distanceToLeftWall + LeftWall_X;
+    calculatedY = distanceToTopWall + TopWall_Y;
+    angle = angleToWall;
+
+    sLogger.debug("Start Position x = %f y = %f angle %f", calculatedX, calculatedY, angle);
+    return new Vector2D(calculatedX, calculatedY);
 }

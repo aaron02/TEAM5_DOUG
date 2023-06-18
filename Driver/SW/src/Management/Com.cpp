@@ -163,7 +163,7 @@ void Communication::handlePickPackage(JsonDocument& doc)
 
 void Communication::handlePlacePackage(JsonDocument& doc)
 {
-    uint32_t lagerIndex = doc["Data"]["LagerIndex"];
+    uint32_t lagerIndex = doc["Data"]["RoboterIndex"];
     bool autonom = doc["Data"]["Autonom"];
 
     if (debug)

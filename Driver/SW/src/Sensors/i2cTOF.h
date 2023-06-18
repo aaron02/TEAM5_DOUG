@@ -6,6 +6,16 @@ Copyright (c) 2023-2023 AÜP TEAM 5 HIGH5DYNAMICS
 
 #include "Lib/Defnies.h"
 
+enum Sensors
+{
+    POS_Back = 0,
+    POS_Front,
+    POS_Back_Left,
+    POS_Front_Left
+};
+
+class Vector2D;
+
 class i2cTOF : public Updateable
 {
 public:
@@ -17,6 +27,8 @@ public:
 
     uint16_t getDistanceFromSensor(int index) { return distances[index]; }
 
+    Vector2D* getInitialPosition(float &angle);
+
 private:
 
 protected:
@@ -27,5 +39,5 @@ protected:
     int16_t distances[4] = {0, 0, 0, 0};
 
     // Debug
-    bool debug = true;
+    bool debug = false;
 };
