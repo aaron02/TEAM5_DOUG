@@ -1,6 +1,7 @@
 #pragma once
 
-#include "MqttManager.h"
+#include <Arduino.h>
+#include <string>
 
 /// @brief The different log types
 enum class LogType
@@ -23,5 +24,5 @@ public:
     /// @param type The type of the log message
     /// @param sender The sender of the message (e.g. the class name)
     /// @param message The message to print
-    static void println(LogType type, std:: string sender, std::string message);
+    static void println(LogType type, std::string sender, std::string message);
 };
