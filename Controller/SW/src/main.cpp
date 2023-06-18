@@ -36,6 +36,7 @@ const std::string MQTT_ID = "Dough";
 const int MQTT_PORT = 1883;
 const uint16_t MQTT_MAX_BUFFER_SIZE = 10000;
 const unsigned long MQTT_TIMEOUT = 10000;
+const unsigned long MQTT_UPDATE_INTERVAL_MS = 1000;
 
 void setup()
 {
@@ -79,9 +80,6 @@ void loop()
             }
         }
 
-        // Unsuscribe from all topics
-        MqttManager::unsubscribeAllTopics();
-
         // Change the program state to the next state
         StateMachineManager::changeState(ProgramState::ProgramStateRecieveOrder);
         break;
@@ -89,6 +87,9 @@ void loop()
     case ProgramState::ProgramStateRecieveOrder:
         if (StateMachineManager::getIsFirstRun())
         {
+            // Write log message
+            Log::println(LogType::LOG_TYPE_LOG, "Loop", "Request order");
+
             // Request a new order
             MqttManager::requestOrder();
         }
@@ -131,8 +132,18 @@ void loop()
         {
             // Send update to the server
             MqttManager::sendCurrentDeliveryId(OrderManager::getdeliveryId());
+        }
+
+        // Send uptade to the server in a fixed interval
+        static unsigned long lastUpdate = 0;
+        if (millis() - lastUpdate > MQTT_UPDATE_INTERVAL_MS)
+        {
+            // Send update to the server
             MqttManager::sendCurrentBatteryState(RobotManager::getBatteryState());
             MqttManager::sendCurrentPosition(RobotManager::getCurrentPosition());
+
+            // Update the last update time
+            lastUpdate = millis();
         }
 
         // Ceck if the current delivery step has not started yet
@@ -190,9 +201,6 @@ void loop()
                     RobotManager::startPlacePackage(OrderManager::getStorageLocationRobotByProductId(OrderManager::getCurrentDeliveryStep().productIdToPlace));
                 }
             }
-
-            // Send update to the server
-            MqttManager::sendCurrentPosition(RobotManager::getCurrentPosition());
         }
 
         // Check if the current delivery step is picking
@@ -214,9 +222,6 @@ void loop()
                 {
                     // Set the current delivery step to finished
                     OrderManager::getCurrentDeliveryStep().state = DeliveryStepState::DELIVERY_STEP_STATE_FINISHED;
-
-                    // Send update to the server
-                    MqttManager::sendCurrentPosition(RobotManager::getCurrentPosition());
                 }
             }
         }
@@ -229,9 +234,6 @@ void loop()
             {
                 // Set the current delivery step to finished
                 OrderManager::getCurrentDeliveryStep().state = DeliveryStepState::DELIVERY_STEP_STATE_FINISHED;
-
-                // Send update to the server
-                MqttManager::sendCurrentPosition(RobotManager::getCurrentPosition());
             }
         }
 

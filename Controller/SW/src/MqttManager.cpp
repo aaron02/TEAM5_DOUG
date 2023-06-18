@@ -64,6 +64,9 @@ bool MqttManager::initialize(std::string WifiSsid, std::string WifiPassword, uns
     // Set MQTT buffer size
     mqttClient.setBufferSize(mqttMaxBufferSize);
 
+    // Unsubscribe from all topics
+    unsubscribeAllTopics();
+
     return true;
 }
 
