@@ -26,7 +26,6 @@ bool MqttManager::initialize(std::string WifiSsid, std::string WifiPassword, uns
         // Write log message
         Log::println(LogType::LOG_TYPE_ERROR, "MqttManager", "Wifi connection failed");
 
-        // Return false if wifi connection is not established
         return false;
     }
 
@@ -54,7 +53,6 @@ bool MqttManager::initialize(std::string WifiSsid, std::string WifiPassword, uns
         // Write log message
         Log::println(LogType::LOG_TYPE_ERROR, "MqttManager", "MQTT connection failed");
 
-        // Return false if MQTT connection is not established
         return false;
     }
 
@@ -100,7 +98,7 @@ void MqttManager::sendCurrentDeliveryStep(std::string currentDeliveryId, int cur
 
 void MqttManager::sendCurrentBatteryState(int currentBatteryState)
 {
-    publishMessage("Robots/" + getRobotUuid() + "/From/Status/BatteryChargePct", currentBatteryState);
+    publishMessage("Robots/" + getRobotUuid() + "/From/Status/BatteryChargePct", std::to_string(currentBatteryState));
 }
 
 void MqttManager::sendDeliveryDone()

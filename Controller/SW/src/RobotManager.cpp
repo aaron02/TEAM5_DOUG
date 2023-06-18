@@ -131,6 +131,11 @@ void RobotManager::processIncomingeMessages()
         DynamicJsonDocument jsonDoc(1024);
         deserializeJson(jsonDoc, Serial1);
 
+        // Write log message
+        std::string message;
+        serializeJson(jsonDoc, message);
+        Log::println(LogType::LOG_TYPE_LOG, "RobotManager", "Received message: " + message);
+
         // Check if the message contains the battery state
         if (jsonDoc["Command"] == "SendBatteryState")
         {

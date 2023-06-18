@@ -1,5 +1,6 @@
 #include "StateMachineManager.h"
 
+// Initialize static variables
 ProgramState StateMachineManager::currentProgramState = ProgramStateUndefined;
 bool StateMachineManager::isFirstRun = true;
 

@@ -13,6 +13,8 @@
 #include "MqttManager.h"
 #include "StateMachineManager.h"
 #include "BackupOrder.h"
+#include "AuthenticationManager.h"
+#include "AudioManager.h"
 
 // Log configuration
 const unsigned long LOG_BAUD_RATE = 115200;
@@ -37,6 +39,9 @@ const int MQTT_PORT = 1883;
 const uint16_t MQTT_MAX_BUFFER_SIZE = 10000;
 const unsigned long MQTT_TIMEOUT = 10000;
 const unsigned long MQTT_UPDATE_INTERVAL_MS = 1000;
+
+// Authentication configuration
+const unsigned long AUTHENTICATION_TIMEOUT_MS = 10000;
 
 void setup()
 {
@@ -72,6 +77,20 @@ void loop()
                 break;
             }
 
+            // Initialize the authentication manager
+            if (!AuthenticationManager::initialize())
+            {
+                StateMachineManager::changeState(ProgramState::ProgramStateError);
+                break;
+            }
+
+            // Initialize the audio manager
+            if (!AudioManager::initialize())
+            {
+                StateMachineManager::changeState(ProgramState::ProgramStateError);
+                break;
+            }
+
             // Initialize the MQTT manager
             if (!MqttManager::initialize(WIFI_SSID, WIFI_PASSWORD, WIFI_TIMEOUT, MQTT_IP, MQTT_PORT, MQTT_ID, MQTT_MAX_BUFFER_SIZE, MQTT_TIMEOUT))
             {
@@ -79,6 +98,9 @@ void loop()
                 break;
             }
         }
+
+        // Play the ready audio message
+        AudioManager::playMessage(AudioMessage::AUDIO_MESSAGE_ROBOT_READY);
 
         // Change the program state to the next state
         StateMachineManager::changeState(ProgramState::ProgramStateRecieveOrder);
@@ -188,11 +210,27 @@ void loop()
                     RobotManager::startPickPackage(OrderManager::getNextProductToPickUp().storageLocationRobot, OrderManager::getNextProductToPickUp().warehouseLocation);
                 }
 
-                // Check if the waypoint was of the type deposit or handover
-                else if (OrderManager::getCurrentDeliveryStep().waypointType == WaypointType::WAYPOINT_DEPOSIT || OrderManager::getCurrentDeliveryStep().waypointType == WaypointType::WAYPOINT_HANDOVER)
+                // Check if the waypoint was of the type handover
+                else if (OrderManager::getCurrentDeliveryStep().waypointType == WaypointType::WAYPOINT_HANDOVER)
                 {
                     // Write log message
-                    Log::println(LogType::LOG_TYPE_LOG, "Loop", "Arrived at deposit or handover");
+                    Log::println(LogType::LOG_TYPE_LOG, "Loop", "Arrived at handover");
+
+                    // Play the audio message to hold the card to the reader
+                    AudioManager::playMessage(AudioMessage::AUDIO_MESSAGE_HOLD_CARD_TO_READER);
+
+                    // Reset start time used for the timeout
+                    AuthenticationManager::resetStartTime();
+
+                    // Set the current delivery step to placing
+                    OrderManager::getCurrentDeliveryStep().state = DeliveryStepState::DELIVERY_STEP_STATE_AUTHENTICATING;
+                }
+
+                // Check if the waypoint was of the type deposit
+                else if (OrderManager::getCurrentDeliveryStep().waypointType == WaypointType::WAYPOINT_DEPOSIT)
+                {
+                    // Write log message
+                    Log::println(LogType::LOG_TYPE_LOG, "Loop", "Arrived at deposit");
 
                     // Set the current delivery step to placing
                     OrderManager::getCurrentDeliveryStep().state = DeliveryStepState::DELIVERY_STEP_STATE_PLACING;
@@ -222,6 +260,41 @@ void loop()
                 {
                     // Set the current delivery step to finished
                     OrderManager::getCurrentDeliveryStep().state = DeliveryStepState::DELIVERY_STEP_STATE_FINISHED;
+                }
+            }
+        }
+
+        // Check if the current delivery step is authenticating
+        if (OrderManager::getCurrentDeliveryStep().state == DeliveryStepState::DELIVERY_STEP_STATE_AUTHENTICATING)
+        {
+            // Check if the timeout has been reached
+            if (AuthenticationManager::isTimeoutReached(AUTHENTICATION_TIMEOUT_MS))
+            {
+                // Write log message
+                Log::println(LogType::LOG_TYPE_ERROR, "Loop", "Authentication timeout reached");
+
+                // Set the current delivery step to finished to resume with the next delivery step
+                OrderManager::getCurrentDeliveryStep().state = DeliveryStepState::DELIVERY_STEP_STATE_FINISHED;
+
+                // Play the audio message
+                AudioManager::playMessage(AudioMessage::AUDIO_MESSAGE_AUTHENTICATION_FAILED);
+            }
+            else
+            {
+                // Check if the card is authenticated
+                if (AuthenticationManager::authenticateUser(OrderManager::getCurrentDeliveryStep().authorizationKey))
+                {
+                    // Write log message
+                    Log::println(LogType::LOG_TYPE_LOG, "Loop", "Card authenticated");
+
+                    // Play the audio message
+                    AudioManager::playMessage(AudioMessage::AUDIO_MESSAGE_AUTHENTICATION_SUCCESSFUL);
+
+                    // Set the current delivery step to placing
+                    OrderManager::getCurrentDeliveryStep().state = DeliveryStepState::DELIVERY_STEP_STATE_PLACING;
+
+                    // Start placing the product
+                    RobotManager::startPlacePackage(OrderManager::getStorageLocationRobotByProductId(OrderManager::getCurrentDeliveryStep().productIdToPlace));
                 }
             }
         }
