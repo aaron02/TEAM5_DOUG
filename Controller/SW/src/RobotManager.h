@@ -82,4 +82,7 @@ private:
     /// @brief Send a command to the robot
     /// @param payload Payload in JSON format
     static void sendCommand(DynamicJsonDocument &payload);
+
+    /// @brief Request arm state
+    static void requestArmState();
 };

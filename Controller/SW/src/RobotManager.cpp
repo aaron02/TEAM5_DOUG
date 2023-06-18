@@ -39,6 +39,12 @@ bool RobotManager::initialize(unsigned long baudRate, unsigned long serialTimeou
     // Wait until arm state is ready
     while (armState != RobotArmState::RobotArmStateReady)
     {
+        // Request the arm state
+        requestArmState();
+
+        // Wait for 1s to prevent the serial connection from being flooded
+        delay(1000);
+
         // Prosess incoming messages
         processIncomingeMessages();
     }
@@ -262,4 +268,14 @@ void RobotManager::sendCommand(DynamicJsonDocument &payload)
 {
     // Serialize the JSON document and send it to the robot
     serializeJson(payload, Serial1);
+}
+
+void RobotManager::requestArmState()
+{
+    // Create the JSON command
+    DynamicJsonDocument jsonDoc(1024);
+    jsonDoc["Command"] = "GetArmState";
+
+    // Send the command to the robot
+    sendCommand(jsonDoc);
 }
