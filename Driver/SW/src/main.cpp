@@ -59,8 +59,9 @@ void MainThread(uint32_t difftime)
 
             float startAngle = 0.0f;
             Vector2D* m_StartPosition = tofSensors->getInitialPosition(startAngle);
+            //odometry->setStartLocation(Vector2D(0, 0), gyro->getGyroAngle(YAW));
             odometry->setStartLocation(Vector2D(0, -800), gyro->getGyroAngle(YAW));
-            //odometry->setStartLocation(*m_StartPosition, gyro->getGyroAngle(YAW) + startAngle);             //odometry->setStartLocation(Vector2D(0, -800), gyro->getGyroAngle(YAW));
+            //odometry->setStartLocation(*m_StartPosition, gyro->getGyroAngle(YAW) + startAngle);
             nav->setSollPosition(0, -800);
 
             sLogger.debug("Controller Started and Ready");

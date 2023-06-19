@@ -130,11 +130,11 @@ float Navigation::calculateSpeed(float distance)
     float speed = (distance / maxDistance) * maxSpeed * -1;
 
     // Niemels unter 0.15
-    if (speed != 0 && (speed < 0.15 && speed > 0))
-        speed = 0.15;
+    if (speed != 0 && (speed < 0.05 && speed > 0))
+        speed = 0.05;
 
-    if (speed != 0 && (speed > -0.15 && speed < 0))
-        speed = -0.15;
+    if (speed != 0 && (speed > -0.05 && speed < 0))
+        speed = -0.05;
 
     // Begrenze die Geschwindigkeit innerhalb des zulässigen Bereichs
     if (speed > maxSpeed) 

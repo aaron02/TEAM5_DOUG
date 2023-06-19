@@ -34,7 +34,7 @@ void Odometry::Update(uint64_t difftime)
     // Update Sensor evry 10 ms
     if (sensorUpdate <= 0)
     {
-        CalculatePosition(adnsController->getXDistance(), adnsController->getYDistance() * -1);
+        CalculatePosition(adnsController->getYDistance() * -1, adnsController->getXDistance() * -1);
         adnsController->ResetXYDistance();
         sensorUpdate = 10 * TimeVar::Millis;;
     }
