@@ -46,7 +46,7 @@ void MainThread(uint32_t difftime)
     // Communication to Controller
     CALL_UPDATE(com, Update(difftime));
 
-    CALL_UPDATE(tofSensors, Update(difftime));
+    //CALL_UPDATE(tofSensors, Update(difftime));
 
     // Started but not ready yet
     if (status == Status::Initialization)

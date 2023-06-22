@@ -64,7 +64,7 @@ void Navigation::Update(uint64_t difftime)
             }
             else
             {
-                if (yDifference > 1.5 || yDifference < -1.5)
+                if ((yDifference > 5.5 || yDifference < -5.5 ))
                 {
                     setDrivingState(DRIVE_STATE_BUSY);
 
@@ -79,7 +79,7 @@ void Navigation::Update(uint64_t difftime)
                 }
                 else
                 {
-                    if (xDifference > 0.5 || xDifference < -0.5)
+                    if (xDifference > 5.5 || xDifference < -5.5)
                     {
                         setDrivingState(DRIVE_STATE_BUSY);
 
