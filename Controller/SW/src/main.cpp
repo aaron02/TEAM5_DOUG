@@ -25,15 +25,15 @@ const unsigned long ROBOT_BAUD_RATE = 115200;
 const unsigned long ROBOT_TIMEOUT = 10000;
 
 // WiFi credentials
-// const std::string WIFI_SSID = "High5Dynamics";
-// const std::string WIFI_PASSWORD = "H1gh5Dyn4m1cs!";
-const std::string WIFI_SSID = "McDonalds";
-const std::string WIFI_PASSWORD = "burgerking";
+const std::string WIFI_SSID = "High5Dynamics";
+const std::string WIFI_PASSWORD = "H1gh5Dyn4m1cs!";
+// const std::string WIFI_SSID = "McDonalds";
+// const std::string WIFI_PASSWORD = "burgerking";
 const unsigned long WIFI_TIMEOUT = 10000;
 
 // MQTT configuration
-// const IPAddress MQTT_IP(10, 1, 0, 1);
-const IPAddress MQTT_IP(91, 121, 93, 94);
+const IPAddress MQTT_IP(10, 1, 0, 1);
+// const IPAddress MQTT_IP(91, 121, 93, 94);
 const std::string MQTT_ID = "Dough";
 const int MQTT_PORT = 1883;
 const uint16_t MQTT_MAX_BUFFER_SIZE = 10000;
@@ -116,8 +116,14 @@ void loop()
             MqttManager::requestOrder();
         }
 
-        // Temporary delay to test the backup order
-        delay(5000);
+        // Wait for 10s and keep the MQTT connection alive
+        Log::println(LogType::LOG_TYPE_LOG, "Loop", "Wait for order");
+        for (int i = 0; i < 10000; i++)
+        {
+            MqttManager::keepAlive();
+            delay(1);
+        }
+        Log::println(LogType::LOG_TYPE_LOG, "Loop", "Check if order is recieved");
 
         // Check if there is a new order
         if (MqttManager::hasOrder())

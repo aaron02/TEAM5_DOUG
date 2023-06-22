@@ -13,7 +13,7 @@ bool AuthenticationManager::initialize()
 
 bool AuthenticationManager::authenticateUser(std::string authentikationKey)
 {
-    delay(1000);
+    delay(5000);
     return true;
 }
 

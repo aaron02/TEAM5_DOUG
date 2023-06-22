@@ -114,7 +114,7 @@ void MqttManager::sendCurrentPosition(Coordinates currentPosition)
     jsonDoc["y"] = currentPosition.y;
 
     // Publish message
-    publishMessage("Robots/" + getRobotUuid() + "/From/Status/currentPosition", jsonDoc);
+    publishMessage("Robots/" + getRobotUuid() + "/From/Status/CurrentPosition", jsonDoc);
 }
 
 void MqttManager::requestOrder()

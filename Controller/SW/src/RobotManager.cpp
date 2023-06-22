@@ -39,12 +39,6 @@ bool RobotManager::initialize(unsigned long baudRate, unsigned long serialTimeou
     // Wait until arm state is ready
     while (armState != RobotArmState::RobotArmStateReady)
     {
-        // Request the arm state
-        requestArmState();
-
-        // Wait for 1s to prevent the serial connection from being flooded
-        delay(1000);
-
         // Prosess incoming messages
         processIncomingeMessages();
     }
