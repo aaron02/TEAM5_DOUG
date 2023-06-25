@@ -22,6 +22,7 @@ public:
     
     // Set our Start Position
     void setStartLocation(Vector2D startPosition, double startHeading);
+    void setLocation(Vector2D startPosition);
 
     // Normalize Radians
     double normalizeRadians(double angle);

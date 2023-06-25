@@ -28,6 +28,10 @@ void Odometry::setStartLocation(Vector2D startPosition, double startHeading)
     dHeading = normalizeRadians(dHeading + dStartHeading);
 }
 
+void Odometry::setLocation(Vector2D startPosition)
+{
+    position->changeCoords(startPosition.getX(), startPosition.getY());
+}
 
 void Odometry::Update(uint64_t difftime)
 {

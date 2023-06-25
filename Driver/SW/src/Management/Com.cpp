@@ -41,6 +41,13 @@ void Communication::loadHandlers()
 
 void Communication::Update(uint64_t difftime)
 {
+
+    if (digitalRead(32))
+    {
+        // When Switch is pressed set position reached
+        mOdometry->setLocation(*mNavigation->getSollPosition());
+    }
+
     if (Serial1.available())
     {
         DynamicJsonDocument doc(1024);
