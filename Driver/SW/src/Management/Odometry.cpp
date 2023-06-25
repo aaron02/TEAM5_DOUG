@@ -62,15 +62,21 @@ void Odometry::Update(uint64_t difftime)
     }
 }
 
+float precision( float f, int places )
+{
+    float n = std::pow(10.0f, places );
+    return std::round(f * n) / n ;
+}
+
 void Odometry::CalculatePosition(double x, double y)
 {
     // counts per inch -> 1 inch = 2.54 cm / 2540
     dDeltax = x / 8200.0f * 25.4f;
     dDeltay = y / 8200.0f * 25.4f;
 
-
     // Gyro Runden
-    float gyroRounded = float( (round(gyro->getGyroAngle(GYRO_AXIS::YAW) * 10.0f)) / 10.0f );
+    float gyroData = gyro->getGyroAngle(GYRO_AXIS::YAW);
+    float gyroRounded = precision(gyroData, 1);
 
     double dGyroAngle = radians(gyroRounded + degrees(dStartHeading) + dHeadingCorrection);
 
