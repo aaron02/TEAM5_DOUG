@@ -68,7 +68,11 @@ void Odometry::CalculatePosition(double x, double y)
     dDeltax = x / 8200.0f * 25.4f;
     dDeltay = y / 8200.0f * 25.4f;
 
-    double dGyroAngle = radians(gyro->getGyroAngle(GYRO_AXIS::YAW) + degrees(dStartHeading) + dHeadingCorrection);
+
+    // Gyro Runden
+    float gyroRounded = float( (round(gyro->getGyroAngle(GYRO_AXIS::YAW) * 10.0f)) / 10.0f );
+
+    double dGyroAngle = radians(gyroRounded + degrees(dStartHeading) + dHeadingCorrection);
 
     dHeading = normalizeRadians(dGyroAngle);
 
