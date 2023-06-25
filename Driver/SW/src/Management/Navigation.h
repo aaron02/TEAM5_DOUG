@@ -74,4 +74,10 @@ protected:
     // Geschwindigkeitsbereich
     const float maxSpeed = 1.0;  // Maximale Geschwindigkeit
     const float minSpeed = -1.0; // Minimale Geschwindigkeit
+
+    bool xFinished = false;
+    bool yFinished = false;
+
+    bool xFirst = false;
+    bool yFirst = false;
 };
