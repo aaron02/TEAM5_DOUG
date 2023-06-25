@@ -73,9 +73,6 @@ void Navigation::Update(uint64_t difftime)
 
             if (xFinished && yFinished)
             {
-                xFirst = false;
-                yFirst = false;
-
                 // Position Erreicht
                 if (debug)
                     sLogger.debug("Position Erreicht");
@@ -86,45 +83,54 @@ void Navigation::Update(uint64_t difftime)
             /////////////////////////////////////////////////////////////////////////////
 
             // Drive First Whats Further
-            if ((xDifference > 200 || xFinished != true) && yFirst != true)
+            if (xFirst)
             {
-                xFirst = true;
-
-                if (xDifference > 2.5 || xDifference < -2.5)
+                if (xFinished != true)
                 {
-                    setDrivingState(DRIVE_STATE_BUSY);
+                    if (xDifference > 2.5 || xDifference < -2.5)
+                    {
+                        setDrivingState(DRIVE_STATE_BUSY);
 
-                    // Fahre X Richtung
-                    fSpeedX = calculateSpeed(xDifference);
-                    fSpeedY = 0.0f;
+                        // Fahre X Richtung
+                        fSpeedX = calculateSpeed(xDifference);
+                        fSpeedY = 0.0f;
 
-                    if (debug)
-                        sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
+                        if (debug)
+                            sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
 
-                    m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getHeading());
+                        m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getHeading());
+                    }
+                    else
+                    {
+                        xFirst = false;
+                        yFirst = true;
+                    }
                 }
-                else
-                    xFirst = false;
             }
-            else if ((yDifference > 200 || yFinished != true) && xFirst != true)
+            
+            if (yFirst)
             {
-                yFirst = true;
-
-                if (yDifference > 2.5 || yDifference < -2.5 )
+                if (yFinished != true)
                 {
-                    setDrivingState(DRIVE_STATE_BUSY);
+                    if (yDifference > 2.5 || yDifference < -2.5 )
+                    {
+                        setDrivingState(DRIVE_STATE_BUSY);
 
-                    // Fahre zuerst Y Richtung
-                    fSpeedX = 0.0f;
-                    fSpeedY = calculateSpeed(yDifference) * -1;
+                        // Fahre zuerst Y Richtung
+                        fSpeedX = 0.0f;
+                        fSpeedY = calculateSpeed(yDifference) * -1;
 
-                    if (debug)
-                        sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
+                        if (debug)
+                            sLogger.debug("xSpeed = %f, ySpeed = %f", fSpeedX, fSpeedY);
 
-                    m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getHeading());
+                        m_Drive->Drive(fSpeedX, fSpeedY, 0.0f, m_Odometry->getHeading());
+                    }
+                    else
+                    {
+                        yFirst = false;
+                        xFirst = true;
+                    }
                 }
-                else
-                    yFirst = false;
             }
 
             /*
@@ -227,6 +233,23 @@ void Navigation::Update(uint64_t difftime)
 void Navigation::setSollPosition(float x, float y)
 {
     mSollPosition->changeCoords(x, y);
+
+    Vector2D* mPosition = m_Odometry->GetPosition();
+
+    float xDifference = mPosition->getX() - x;
+    float yDifference = mPosition->getY() - y;
+
+    if (xDifference > 200 && yDifference < 200)
+    {
+        xFirst = true;
+        yFirst = false;
+    }
+    else
+    {
+        xFirst = false;
+        yFirst = true;
+    }
+
     setDrivingState(DRIVE_STATE_BUSY);
 }
 
