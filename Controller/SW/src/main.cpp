@@ -42,12 +42,6 @@ const unsigned long MQTT_UPDATE_INTERVAL_MS = 1000;
 // Authentication configuration
 const unsigned long AUTHENTICATION_TIMEOUT_MS = 10000;
 
-// LED Pins
-const int PIN_WIFI_LED = 10;
-const int PIN_MQTT_LED = 9;
-const int PIN_STATUS_LED = 12;
-const int PIN_ERROR_LED = 11;
-
 void setup()
 {
     // Initialize the state machine
