@@ -32,6 +32,9 @@ bool MqttManager::initialize(std::string WifiSsid, std::string WifiPassword, uns
     // Write log message
     Log::println(LogType::LOG_TYPE_LOG, "MqttManager", "Wifi connection established");
 
+    // Set wifi led
+    LedManager::setLedState(Led::LED_WIFI, true);
+
     // Write log message
     Log::println(LogType::LOG_TYPE_LOG, "MqttManager", "Connect to MQTT server with a timeout");
 
@@ -58,6 +61,9 @@ bool MqttManager::initialize(std::string WifiSsid, std::string WifiPassword, uns
 
     // Write log message
     Log::println(LogType::LOG_TYPE_LOG, "MqttManager", "MQTT connection established");
+
+    // Set MQTT led
+    LedManager::setLedState(Led::LED_MQTT, true);
 
     // Set MQTT buffer size
     mqttClient.setBufferSize(mqttMaxBufferSize);

@@ -9,6 +9,7 @@
 #include "Coordinates.h"
 #include "MqttMessage.h"
 #include "OrderManager.h"
+#include "LedManager.h"
 
 // The different Request types from the application
 enum MqttApplicationRequest

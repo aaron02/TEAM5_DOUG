@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <MqttManager.h>
 #include <ArduinoJson.h>
 #include <array>
 #include <HardwareSerial.h>
@@ -9,12 +8,12 @@
 #include "OrderManager.h"
 #include "Coordinates.h"
 #include "Product.h"
-#include "Log.h"
 #include "MqttManager.h"
 #include "StateMachineManager.h"
 #include "BackupOrder.h"
 #include "AuthenticationManager.h"
 #include "AudioManager.h"
+#include "LedManager.h"
 
 // Log configuration
 const unsigned long LOG_BAUD_RATE = 115200;
@@ -43,6 +42,12 @@ const unsigned long MQTT_UPDATE_INTERVAL_MS = 1000;
 // Authentication configuration
 const unsigned long AUTHENTICATION_TIMEOUT_MS = 10000;
 
+// LED Pins
+const int PIN_WIFI_LED = 10;
+const int PIN_MQTT_LED = 9;
+const int PIN_STATUS_LED = 12;
+const int PIN_ERROR_LED = 11;
+
 void setup()
 {
     // Initialize the state machine
@@ -63,6 +68,9 @@ void loop()
     case ProgramState::ProgramStateInit:
         if (StateMachineManager::getIsFirstRun())
         {
+            // Initialize the leds
+            LedManager::initialize();
+
             // Initialize the log
             if (!Log::initialize(LOG_BAUD_RATE, LOG_TIMEOUT))
             {
@@ -94,7 +102,7 @@ void loop()
             // Initialize the MQTT manager
             if (!MqttManager::initialize(WIFI_SSID, WIFI_PASSWORD, WIFI_TIMEOUT, MQTT_IP, MQTT_PORT, MQTT_ID, MQTT_MAX_BUFFER_SIZE, MQTT_TIMEOUT))
             {
-                StateMachineManager::changeState(ProgramState::ProgramStateError);
+                StateMachineManager::changeState(ProgramState::ProgramStateRecieveBackupOrder);
                 break;
             }
         }
@@ -118,7 +126,7 @@ void loop()
 
         // Wait for 10s and keep the MQTT connection alive
         Log::println(LogType::LOG_TYPE_LOG, "Loop", "Wait for order");
-        for (int i = 0; i < 10000; i++)
+        for (int i = 0; i < 5000; i++)
         {
             MqttManager::keepAlive();
             delay(1);
@@ -148,7 +156,7 @@ void loop()
             Log::println(LogType::LOG_TYPE_LOG, "Loop", "Parse backup order");
 
             // Parse the backup order
-            OrderManager::parse(backupOrder);
+            OrderManager::parse(BACKUP_ORDER);
 
             // Change the program state to the next state
             StateMachineManager::changeState(ProgramState::ProgramStateDeliverOrder);
@@ -313,6 +321,16 @@ void loop()
             {
                 // Set the current delivery step to finished
                 OrderManager::getCurrentDeliveryStep().state = DeliveryStepState::DELIVERY_STEP_STATE_FINISHED;
+
+                // Play audio message
+                if (OrderManager::getCurrentDeliveryStep().waypointType == WaypointType::WAYPOINT_HANDOVER)
+                {
+                    AudioManager::playMessage(AudioMessage::AUDIO_MESSAGE_DELIVERY_DONE_WITH_AUTHENTICATION);
+                }
+                else
+                {
+                    AudioManager::playMessage(AudioMessage::AUDIO_MESSAGE_DELIVERY_DONE_WITHOUT_AUTHENTICATION);
+                }
             }
         }
 
@@ -337,6 +355,9 @@ void loop()
     case ProgramState::ProgramStateError:
         // Write log message
         Log::println(LogType::LOG_TYPE_LOG, "Loop", "ERROR!!");
+
+        // Set error led
+        LedManager::setLedState(Led::LED_ERROR, true);
         break;
 
     default:
